@@ -62,7 +62,7 @@ public class StringCheckUpManager {
         return out.substring(0,out.length()-1);
     }
     public static String getImageUrl(String sorce){
-        sorce = sorce.substring(sorce.indexOf("img src=\"")+9,sorce.length());
+        sorce = sorce.substring(sorce.lastIndexOf("img src=\"")+9,sorce.length());
         return  sorce.substring(0,sorce.indexOf("\" alt"));
     }
     public static String IMDB_best_ever(String sorce){
