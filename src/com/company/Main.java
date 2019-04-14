@@ -14,11 +14,13 @@ public class Main {
         name = name.replaceAll(" ","+");
         try {
              sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.services/?s=" +name));
+             if (sorce!= null)
              moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
    } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("net problem");
         }
-        if(sorce != null){
+        if(sorce != null || moreDetails != null){
             String summery = StringCheckUpManager.getSummery(sorce);
             String IMDBrating = StringCheckUpManager.getIMDBscore(sorce);
             String genre = StringCheckUpManager.getGenre(sorce);

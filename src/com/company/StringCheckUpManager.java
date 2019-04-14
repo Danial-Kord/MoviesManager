@@ -9,6 +9,8 @@ public class StringCheckUpManager {
         return sorce;
     }
     public static String buildTarget(String sorce){
+        if(sorce.contains("نتیجه ای یافت نشد"))
+            return null;
         sorce = buildFirstString(sorce);
         int numberOfSearchResults = numberOfSearchAnswers(sorce);
         if(numberOfSearchResults >= 1){
