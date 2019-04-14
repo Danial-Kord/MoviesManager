@@ -9,10 +9,12 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String name;
         String sorce = null;
+        String moreDetails = null;
         name = scanner.nextLine();
         name = name.replaceAll(" ","+");
         try {
              sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.services/?s=" +name));
+             moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
    } catch (IOException e) {
             e.printStackTrace();
         }
@@ -20,8 +22,12 @@ public class Main {
             String summery = StringCheckUpManager.getSummery(sorce);
             String IMDBrating = StringCheckUpManager.getIMDBscore(sorce);
             String genre = StringCheckUpManager.getGenre(sorce);
+            String fullSummery = StringCheckUpManager.moreDetaildSummery(moreDetails);
             String imageUrl = StringCheckUpManager.getImageUrl(sorce);
-            System.out.println("IMDB : " + IMDBrating);
+            String IMDB_best = StringCheckUpManager.IMDB_best_ever(sorce);
+            System.out.println("IMDB score : " + IMDB_best);
+            System.out.println("full summery : " + fullSummery);
+            System.out.println("IMDB rating: " + IMDBrating);
             System.out.println("image URL : " + imageUrl);
             System.out.println(genre);
             System.out.println(summery);
