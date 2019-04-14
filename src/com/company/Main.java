@@ -25,6 +25,8 @@ public class Main {
             String fullSummery = StringCheckUpManager.moreDetaildSummery(moreDetails);
             String imageUrl = StringCheckUpManager.getImageUrl(sorce);
             String IMDB_best = StringCheckUpManager.IMDB_best_ever(sorce);
+            String actors = StringCheckUpManager.findingActors(moreDetails);
+            System.out.println("actors : " + actors);
             System.out.println("IMDB score : " + IMDB_best);
             System.out.println("full summery : " + fullSummery);
             System.out.println("IMDB rating: " + IMDBrating);

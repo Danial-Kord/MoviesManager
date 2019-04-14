@@ -1,5 +1,7 @@
 package com.company;
 
+import java.util.ArrayList;
+
 public class StringCheckUpManager {
     private static String buildFirstString(String sorce){
         sorce = sorce.substring(sorce.indexOf("</a></div></li></ul><div class=\"search-container\">"),
@@ -74,5 +76,22 @@ public class StringCheckUpManager {
         String key = "class=\"tab-pane fade in active\" id=\"tab_fa\"><p>";
         return sorce.substring(sorce.indexOf(key),sorce.indexOf("</p></div><div role=\"tabpanel\" class=\"tab-pane fade\"")).replace(key,"").
                 replace("</p></div><div role=\"tabpanel\" class=\"tab-pane fade\"","");
+    }
+    public static String findingActors (String sorce){
+        sorce = (sorce.substring(sorce.indexOf("<a href=\"/search?cast"),sorce.length()-1));
+        sorce = sorce.substring(0,sorce.indexOf("</bdi></div><div class=\"info\">"));
+        sorce = sorce.replace("</bdi></div><div class=\"info\">","");
+        String key = "<a href=\"/search?cast=";
+        while (sorce.contains(key)){
+            String key2 = sorce.substring(sorce.indexOf(key),(sorce.indexOf(key)+key.length()) + 9);//some thing that starts with key and countinous with key2 is repeted that should be delet
+            sorce = sorce.replace(key2," ");
+        }
+        while (sorce.contains("target=\"_blank\">")){
+            sorce = sorce.replace("target=\"_blank\">","");
+        }
+        while (sorce.contains("</a>")){
+            sorce = sorce.replace("</a>","");
+        }
+        return sorce.replace("\"","");
     }
 }
