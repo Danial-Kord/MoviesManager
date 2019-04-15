@@ -26,7 +26,7 @@ public class DirCleaner {
             for(File file:fileList)
             {
                 if(file.getName().endsWith(".mkv") || file.getName().endsWith(".mp4") || file.getName().endsWith(".mpeg") ||
-                        file.getName().endsWith(".mpeg2") || file.getName().endsWith(".avi")) {
+                        file.getName().endsWith(".mpeg2") || file.getName().endsWith(".avi") || file.getName().endsWith(".srt") || file.getName().endsWith(".ass")) {
                     if(!(dir.getAbsolutePath() + "\\" + file.getName()).equals(file.getAbsolutePath())) {
                         File destination = new File(dir.getAbsolutePath() + "\\" + file.getName());
                         if (file.renameTo(destination)) {
@@ -36,9 +36,11 @@ public class DirCleaner {
                 }
             }
         }
+        //sorting subtitles
         deletDirs(folder);
         return path;
     }
+
     private static ArrayList<File> getMovies(File dad,ArrayList<File>files){
         File[] fileList = dad.listFiles();
         for (File temp : fileList){
