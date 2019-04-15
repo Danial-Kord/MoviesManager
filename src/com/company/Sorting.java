@@ -116,7 +116,6 @@ public class Sorting {
             char[] nameArray = name.toLowerCase().toCharArray();
             for (int i=0;i<name.length();i++){
                 if(!subtitleName.toLowerCase().contains(""+nameArray[i])) {
-                    System.out.println(".............." + name+"   >>>>>>>>>>" + subtitleName);
                     return false;
                 }
             }
@@ -157,7 +156,7 @@ public class Sorting {
             }
             return f;
         }
-        private static String getYear (String in){
+        public static String getYear (String in){
             char[] temp = in.toCharArray();
             if (in.contains("20") || in.contains("19") || in.contains("21") || in.contains("22")) {
                 for (int i = 2; i < in.length() && i + 2 < in.length(); i++) {
