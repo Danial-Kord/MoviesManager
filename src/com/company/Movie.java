@@ -11,11 +11,14 @@ public class Movie {
     private String summery;
     private String actors;
     private String directors;
-
-    public Movie(String name, String year) {
+    private String path;
+    private String genre;
+    public Movie(String name, String year,String path) {
         this.name = name;
         this.year = year;
+        this.path = path;
     }
+
 
     public Movie(String name, String year, String IMDBscore, String IMDBrating, String fullSummery, String summery, String actors) {
         this.name = name;
@@ -51,12 +54,28 @@ public class Movie {
         return summery;
     }
 
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
     public String getActors() {
         return actors;
     }
 
     public String getDirectors() {
         return directors;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public void setName(String name) {
