@@ -1,8 +1,9 @@
 package com.company;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Movie {
+public class Movie implements Serializable {
     private String name;
     private String year;
     private String IMDBscore;
@@ -108,5 +109,16 @@ public class Movie {
 
     public void setDirectors(String directors) {
         this.directors = directors;
+    }
+    public void print(){
+        System.out.println(summery);
+        System.out.println(actors);
+        System.out.println(fullSummery);
+        System.out.println(IMDBrating);
+        System.out.println(IMDBscore);
+        System.out.println(year);
+        System.out.println(name);
+        System.out.println(path);
+        System.out.println(genre);
     }
 }

@@ -109,8 +109,8 @@ public class Sorting {
     private static boolean checkSameName(String name ,String subtitleName,ArrayList<String>input){
         String year = getYear(subtitleName).replace(" ","");
         subtitleName = subtitleName.substring(0, index(input, subtitleName));
-        if(getYear(name).replace(" ","").equals(year)){
-            name = name.substring(0,name.length()-4).replace(" ","");
+        if(getYear(name).replace(" ","").equals(year) || year.equals("") || getYear(name).equals("")) {
+            name = name.substring(0, index(input, name)).replace(" ","");
             subtitleName = subtitleName.replace(".","").replace("-","").replace("_","").replace("(","")
                     .replace(")","").replace(" ","");
             char[] nameArray = name.toLowerCase().toCharArray();

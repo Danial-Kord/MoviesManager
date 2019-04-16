@@ -4,38 +4,55 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class InformationManagment {
-    public static ArrayList<Movie> getMovies(String path){
+public class InformationManagement {
+    private ArrayList<Movie> getMovies(String path) {
         File folder = new File(path);
         if (folder.isDirectory()) {
             File[] files = folder.listFiles();
-            ArrayList<Movie>movies = new ArrayList<Movie>();
+            ArrayList<Movie> movies = new ArrayList<Movie>();
             for (File file : files) {
-                if(file.isDirectory())
-                    movies.add(new Movie(file.getName(),Sorting.getYear(file.getName()),file.getAbsolutePath()));
+                if (file.isDirectory())
+                        movies.add(new Movie(file.getName(), Sorting.getYear(file.getName()), file.getAbsolutePath()));
             }
+            System.out.println(movies.size());
             return movies;
-        }
-        else {
+        } else {
             System.out.println("wrong path");
             return null;
         }
     }
-    public void addInformation(String path){
+
+    public void addInformation(String path,Information information) {
         Sorting.userInput(path);
-        ArrayList<Movie> movies = getMovies(path);
-        for (Movie movie : movies) {
+        if(!information.samePath(path)) {
+            System.out.println(".....?");
+            information.addPath(path);
+            information.addMovies(getMovies(path));
+            for (Movie movie : information.getMovies()) {
+                System.out.println("why");
                 movie = searchResults(movie);
+            }
+        }
+        else {
+            for (Movie movie : information.getMovies()) {
+                movie.print();
+            }
         }
     }
-    private Movie searchResults(Movie movie){
+
+    private Movie searchResults(Movie movie) {
+        System.out.println("search time");
+        if (movie.getYear().equals("")) {
+            System.out.println("year none");
+            return movie;
+        }
         String name;
         String sorce = null;
         String moreDetails = null;
-        name = movie.getName().replaceAll(" ","+");
+        name = movie.getName().replaceAll(" ", "+");
         try {
-            sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.services/?s=" +name));
-            if (sorce!= null)
+            sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.services/?s=" + name));
+            if (sorce != null)
                 moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
         } catch (IOException e) {
             e.printStackTrace();
@@ -53,11 +70,9 @@ public class InformationManagment {
             } else {
                 System.out.println("no connection! or ridi ba searchet :|");
             }
-        }
-        catch (IndexOutOfBoundsException | NumberFormatException e){
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
             System.out.println("site formating has been changed!");
         }
         return movie;
-    }
     }
 }
