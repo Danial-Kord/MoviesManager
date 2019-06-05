@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class StringCheckUpManager {
     private static String buildFirstString(String sorce)throws IndexOutOfBoundsException , NumberFormatException{
-        sorce = sorce.substring(sorce.indexOf("</a></div></li></ul><div class=\"search-container\">"),
-                sorce.indexOf("</i></div></footer></article></section></div><footer class=\"footer\"><div class=\"container\"><div class=\"buttons\">"));
+        sorce = sorce.substring(sorce.indexOf("<!-- Search -->"),
+                sorce.indexOf("<!-- //Container --></div>"));
         return sorce;
     }
     public static String buildTarget(String sorce){
@@ -32,10 +32,10 @@ public class StringCheckUpManager {
         lastIMDBratingStringIndex += IMDBtextFinding.length();
         return sorce.substring(lastIMDBratingStringIndex ,lastIMDBratingStringIndex+4);
     }
-    public static String getMoreDetails(String sorce)throws IndexOutOfBoundsException{
-        String key = "</select></div></aside><article class=\"post\"><div class=\"figure\">";
-        return sorce.substring(sorce.indexOf(key),sorce.indexOf("#p")).replace(key,"").replace("<a href=\"","");
-    }
+//    public static String getMoreDetails(String sorce)throws IndexOutOfBoundsException{
+//        String key = "</select></div></aside><article class=\"post\"><div class=\"figure\">";
+//        return sorce.substring(sorce.indexOf(key),sorce.indexOf("#p")).replace(key,"").replace("<a href=\"","");
+//    }
     public static String getGenre(String sorce)throws IndexOutOfBoundsException{
         String out = "ژانر : ";
         if(sorce.contains("هیجان انگیز"))

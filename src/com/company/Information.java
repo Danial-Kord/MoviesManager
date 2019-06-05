@@ -38,7 +38,7 @@ public class Information implements Serializable {
     }
     public void buildShortCuts(){
         for (String categoryNames : categoriesTyps) {
-            File file = new File(categoryNames);
+            File file = new File(categoriesPath + "\\"+categoryNames);
             file.mkdir();
         }
         for (Movie movie : movies){

@@ -12,8 +12,9 @@ public class Main {
         Information information = InfoSaver.read();
     InformationManagement informationManagment = new InformationManagement();
     informationManagment.addInformation(scanner.nextLine(),information);
+    informationManagment.checkNewMovies(information);
     information.buildShortCuts();
-    InfoSaver.save(information);
+//    InfoSaver.save(information);
 //        Sorting.userInput(scanner.nextLine());
     }
 }

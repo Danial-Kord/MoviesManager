@@ -5,14 +5,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class InformationManagement {
-    private ArrayList<Movie> getMovies(String path) {
+    private ArrayList<Movie> getMovies(String path,Information information) {
         File folder = new File(path);
         if (folder.isDirectory()) {
             File[] files = folder.listFiles();
             ArrayList<Movie> movies = new ArrayList<Movie>();
             for (File file : files) {
-                if (file.isDirectory())
+                if (file.isDirectory()) {
+                    boolean flag=false;
+                    for (int i = 0; i < information.getMovies().size();i++) {
+                        if(information.getMovies().get(i).getName() ==file.getName() && information.getMovies().get(i).getYear() == Sorting.getYear(file.getName()) && movies.get(i).getPath() == file.getAbsolutePath()){
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if(!flag)
                         movies.add(new Movie(file.getName(), Sorting.getYear(file.getName()), file.getAbsolutePath()));
+                }
             }
             System.out.println(movies.size());
             return movies;
@@ -22,11 +31,21 @@ public class InformationManagement {
         }
     }
 
+    public void checkNewMovies(Information information){
+        for (String path : information.getPaths()) {
+            information.addMovies(getMovies(path,information));
+            for (Movie movie : information.getMovies()) {
+                System.out.println(movie.getName());
+                System.out.println(movie.getYear());
+                movie = searchResults(movie);
+            }
+        }
+    }
     public void addInformation(String path,Information information) {
         Sorting.userInput(path);
         if(!information.samePath(path)) {
             information.addPath(path);
-            information.addMovies(getMovies(path));
+            information.addMovies(getMovies(path,information));
             for (Movie movie : information.getMovies()) {
                 System.out.println(movie.getName());
                 System.out.println(movie.getYear());
@@ -49,9 +68,10 @@ public class InformationManagement {
         String moreDetails = null;
         name = movie.getName().replaceAll(" ", "+");
         try {
-            sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.services/?s=" + name));
-            if (sorce != null)
-                moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
+            sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.name/?s=" + name));
+            System.out.println("Dadadada");
+//            if (sorce != null)
+//                moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("net problem");
