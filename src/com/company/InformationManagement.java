@@ -25,11 +25,11 @@ public class InformationManagement {
     public void addInformation(String path,Information information) {
         Sorting.userInput(path);
         if(!information.samePath(path)) {
-            System.out.println(".....?");
             information.addPath(path);
             information.addMovies(getMovies(path));
             for (Movie movie : information.getMovies()) {
-                System.out.println("why");
+                System.out.println(movie.getName());
+                System.out.println(movie.getYear());
                 movie = searchResults(movie);
             }
         }
@@ -41,9 +41,7 @@ public class InformationManagement {
     }
 
     private Movie searchResults(Movie movie) {
-        System.out.println("search time");
         if (movie.getYear().equals("")) {
-            System.out.println("year none");
             return movie;
         }
         String name;

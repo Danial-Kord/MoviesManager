@@ -2,6 +2,7 @@ package com.company;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Movie implements Serializable {
     private String name;
@@ -14,14 +15,17 @@ public class Movie implements Serializable {
     private String directors;
     private String path;
     private String genre;
+    private HashSet<String>favorite;//choose some categories for your movie that you want to add that shortcut in there.
     public Movie(String name, String year,String path) {
         this.name = name;
         this.year = year;
         this.path = path;
+        favorite = new HashSet<String>();
     }
 
 
     public Movie(String name, String year, String IMDBscore, String IMDBrating, String fullSummery, String summery, String actors) {
+        favorite = new HashSet<String>();
         this.name = name;
         this.year = year;
         this.IMDBscore = IMDBscore;
@@ -29,6 +33,13 @@ public class Movie implements Serializable {
         this.fullSummery = fullSummery;
         this.summery = summery;
         this.actors = actors;
+    }
+    public void addCategory(String path){
+        favorite.add(path);
+    }
+
+    public HashSet<String> getFavorites() {
+        return favorite;
     }
 
     public String getName() {
@@ -89,6 +100,8 @@ public class Movie implements Serializable {
 
     public void setIMDBscore(String IMDBscore) {
         this.IMDBscore = IMDBscore;
+        if(IMDBscore != null)
+            favorite.add("Best 250 IMDB");
     }
 
     public void setIMDBrating(String IMDBrating) {

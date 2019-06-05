@@ -139,12 +139,12 @@ public class Sorting {
         }
         private static int index (ArrayList < String > in, String file){
             int f = file.length();
-            for (int i = 0; i < file.length(); i++) {
+            for (int i = 2; i < file.length(); i++) {
                 boolean flag = false;
                 if (i > 0) {
                     String temp = file.toLowerCase();
                     for (int j = 0; j < in.size(); j++) {
-                        if (temp.substring(0, i).endsWith(in.get(j))) {
+                        if (temp.substring(2, i).endsWith(in.get(j))) {
                             f = i - in.get(j).length();
                             flag = true;
                             break;
