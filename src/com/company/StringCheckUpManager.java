@@ -4,12 +4,13 @@ import java.util.ArrayList;
 
 public class StringCheckUpManager {
     private static String buildFirstString(String sorce)throws IndexOutOfBoundsException , NumberFormatException{
-        sorce = sorce.substring(sorce.indexOf("<!-- Search -->"),
-                sorce.indexOf("<!-- //Container --></div>"));
+
+        sorce = sorce.  substring(sorce.indexOf("<!-- Search -->"),
+                sorce.lastIndexOf("<!-- //Search -->"));
         return sorce;
     }
     public static String buildTarget(String sorce){
-        if(sorce.contains("نتیجه ای یافت نشد"))
+        if(sorce.contains("نتیجه ای یافت نشد") || !sorce.contains("نتیجه یافت شد"))
             return null;
         sorce = buildFirstString(sorce);
         int numberOfSearchResults = numberOfSearchAnswers(sorce);
@@ -41,31 +42,32 @@ public class StringCheckUpManager {
         return temp.replace("<a href=\"","").replace("#p","");
     }
     public static String getGenre(String sorce)throws IndexOutOfBoundsException{
-        String out = "ژانر : ";
+        String out = ",";
         if(sorce.contains("هیجان انگیز"))
-            out += "هیجان انگیز ";
+            out += "Exciting,";
         if(sorce.contains("درام"))
-            out += "درام ";
+            out += "Drama,";
         if(sorce.contains("ترسناک"))
-            out += "ترسناک ";
+            out += "Horror,";
         if(sorce.contains("کمدی"))
-            out += "کمدی ";
+            out += "Comedy,";
         if(sorce.contains("اکشن"))
-            out += "اکشن ";
+            out += "Action,";
         if(sorce.contains("عاشقانه"))
-            out += "عاشقانه ";
+            out += "Romance,";
         if(sorce.contains("جنایی"))
-            out += "جنایی ";
+            out += "Criminal,";
         if(sorce.contains("ماجراجویی"))
-            out += "ماجراحویی ";
+            out += "Adventure,";
+
         //TODO
-        if(sorce.contains("ماجراجویی"))
-            out += "ماجراحویی ";
-        if(sorce.contains("ماجراجویی"))
-            out += "ماجراحویی ";
-        if(sorce.contains("ماجراجویی"))
-            out += "ماجراحویی ";
-        return out.substring(0,out.length()-1);
+//        if(sorce.contains("ماجراجویی"))
+//            out += "ماجراحویی ";
+//        if(sorce.contains("ماجراجویی"))
+//            out += "ماجراحویی ";
+//        if(sorce.contains("ماجراجویی"))
+//            out += "ماجراحویی ";
+        return out;
     }
     public static String getImageUrl(String sorce) throws IndexOutOfBoundsException {
         sorce = sorce.substring(sorce.lastIndexOf("img src=\"")+9,sorce.length());

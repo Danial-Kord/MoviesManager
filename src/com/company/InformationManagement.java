@@ -33,8 +33,9 @@ public class InformationManagement {
 
     public void checkNewMovies(Information information){
         for (String path : information.getPaths()) {
-            information.addMovies(getMovies(path,information));
-            for (Movie movie : information.getMovies()) {
+            ArrayList<Movie> movies = getMovies(path,information);
+            information.addMovies(movies);
+            for (Movie movie : movies) {
                 System.out.println(movie.getName());
                 System.out.println(movie.getYear());
                 movie = searchResults(movie);
@@ -50,12 +51,16 @@ public class InformationManagement {
                 System.out.println(movie.getName());
                 System.out.println(movie.getYear());
                 movie = searchResults(movie);
+                for (String favorite : movie.getFavorites()) {
+                    System.out.println("<<<<"+favorite);
+                    information.addCategoryType(favorite);
+                }
             }
         }
         else {
-            for (Movie movie : information.getMovies()) {
-                movie.print();
-            }
+//            for (Movie movie : information.getMovies()) {
+//                movie.print();
+//            }
         }
     }
 
@@ -65,10 +70,10 @@ public class InformationManagement {
         }
         String name;
         String sorce = null;
-        String moreDetails = null;
+        String moreDetails = ":)";
         name = movie.getName().replaceAll(" ", "+");
         try {
-            sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.name/?s=" + name));
+            sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.digital/?s=" + name));
             System.out.println("Dadadada");
 //            if (sorce != null)
 //                moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
@@ -78,13 +83,18 @@ public class InformationManagement {
         }
         try {
             if (sorce != null || moreDetails != null) {
-                movie.setSummery(StringCheckUpManager.getSummery(sorce));
-                movie.setIMDBrating(StringCheckUpManager.getIMDBscore(sorce));
-                movie.setGenre(StringCheckUpManager.getGenre(sorce));
-                movie.setFullSummery(StringCheckUpManager.moreDetaildSummery(moreDetails));
+                if(sorce!=null) {
+                    movie.setSummery(StringCheckUpManager.getSummery(sorce));
+                    movie.setIMDBrating(StringCheckUpManager.getIMDBscore(sorce));
+                    movie.setGenre(StringCheckUpManager.getGenre(sorce));
 //                String imageUrl = StringCheckUpManager.getImageUrl(sorce);//TODO image
-                movie.setIMDBscore(StringCheckUpManager.IMDB_best_ever(sorce));
-                movie.setActors(StringCheckUpManager.findingActors(moreDetails));
+                    movie.setIMDBscore(StringCheckUpManager.IMDB_best_ever(sorce));
+
+                }
+                else {
+//                movie.setActors(StringCheckUpManager.findingActors(moreDetails));
+//                movie.setFullSummery(StringCheckUpManager.moreDetaildSummery(moreDetails));
+                }
             } else {
                 System.out.println("no connection! or ridi ba searchet :|");
             }

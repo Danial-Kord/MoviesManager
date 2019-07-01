@@ -68,6 +68,11 @@ public class Movie implements Serializable {
 
     public void setGenre(String genre) {
         this.genre = genre;
+        String[]regex = genre.split(",");
+        for (String temp : regex) {
+            if(temp!= null&& temp!= "")
+            addCategory(temp);
+        }
     }
 
     public String getGenre() {

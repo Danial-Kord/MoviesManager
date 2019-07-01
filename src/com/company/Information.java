@@ -14,7 +14,7 @@ public class Information implements Serializable {
     private  ArrayList<String> paths ;
     private  ArrayList<Boolean>thisPathIsdone ;//TODO
     public static final String path =  System.getProperty("user.home");
-    public static String categoriesPath;
+    public static String categoriesPath = path+"\\categories";
     public HashSet<String>categoriesTyps;
     public Information() {
         categoriesTyps = new HashSet<String>();
@@ -43,12 +43,18 @@ public class Information implements Serializable {
         }
         for (Movie movie : movies){
             if(movie.getFavorites().size()!=0) {
-                for (String target : movie.getFavorites())
+                for (String target : movie.getFavorites()) {
+                    if(target.equals(""))
+                        continue;
                     try {
-                        ShellLink.createLink(movie.getPath(), Information.categoriesPath+"\\"+target+"\\"+movie.getName());
+                        if ((Information.categoriesPath + "\\" + target).equals(Information.categoriesPath))
+                            ShellLink.createLink(movie.getPath(), Information.categoriesPath + "\\" + "all" + "\\" + movie.getName() + ".lnk");
+                        else
+                            ShellLink.createLink(movie.getPath(), Information.categoriesPath + "\\" + target + "\\" + movie.getName() + ".lnk");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }
             }
         }
     }
