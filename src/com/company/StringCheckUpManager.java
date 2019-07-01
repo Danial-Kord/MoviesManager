@@ -23,19 +23,23 @@ public class StringCheckUpManager {
         return Integer.parseInt(sorce.substring(0,sorce.indexOf("نتیجه یافت شد")).substring(sorce.indexOf("<bdi>")+5,sorce.lastIndexOf("</bdi>")));
     }
     public static String getSummery(String sorce)throws IndexOutOfBoundsException{
-        return sorce.substring(sorce.lastIndexOf("خلاصه داستان"),sorce.indexOf("</p></div></div><div class=\"post-info\">"))
-                .replace("</h6><p>","").replace("&hellip;","...");
+        return sorce.substring(sorce.indexOf("خلاصه داستان"),sorce.substring(sorce.indexOf("خلاصه داستان"))
+                .indexOf("</p>")+sorce.indexOf("خلاصه داستان"))
+                .replace("خلاصه داستان:","").replace("</h6>","").replace("<p>","").replace("&hellip;","...");
+
+
+
     }
     public static String getIMDBscore(String sorce)throws IndexOutOfBoundsException{
-        String IMDBtextFinding = "<span><i class=\"fa fa-star\"></i>";
-        int lastIMDBratingStringIndex = sorce.lastIndexOf(IMDBtextFinding);
-        lastIMDBratingStringIndex += IMDBtextFinding.length();
-        return sorce.substring(lastIMDBratingStringIndex ,lastIMDBratingStringIndex+4);
+
+        return sorce.substring(sorce.indexOf("<span><i class=\"fa fa-star\"></i>") ,sorce.indexOf("<span><i class=\"fa fa-star\"></i>") +sorce.substring(sorce.indexOf("<span><i class=\"fa fa-star\"></i>")).indexOf("</span>"))
+                .replace("<span><i class=\"fa fa-star\"></i>","");
     }
-//    public static String getMoreDetails(String sorce)throws IndexOutOfBoundsException{
-//        String key = "</select></div></aside><article class=\"post\"><div class=\"figure\">";
-//        return sorce.substring(sorce.indexOf(key),sorce.indexOf("#p")).replace(key,"").replace("<a href=\"","");
-//    }
+    public static String getMoreDetails(String sorce)throws IndexOutOfBoundsException{
+        String temp =  sorce.substring(0,sorce.indexOf("\" class=\"post-more\">"));
+        temp = temp.substring(temp.lastIndexOf("<a href=\""));
+        return temp.replace("<a href=\"","").replace("#p","");
+    }
     public static String getGenre(String sorce)throws IndexOutOfBoundsException{
         String out = "ژانر : ";
         if(sorce.contains("هیجان انگیز"))
@@ -68,17 +72,13 @@ public class StringCheckUpManager {
         return  sorce.substring(0,sorce.indexOf("\" alt"));
     }
     public static String IMDB_best_ever(String sorce)throws IndexOutOfBoundsException{
-        String key = "imdb-top-rated-old-style\">";
-        if(sorce.contains(key)){
-            return sorce.substring(sorce.indexOf(key) + key.length(),sorce.indexOf("IMDb</div>")).replace("</div>","");
-        }
-        return null;
+        return sorce.substring(sorce.indexOf("<div class=\"imdb-top-rated-old-style\">") ,sorce.indexOf("<div class=\"imdb-top-rated-old-style\">") +sorce.substring(sorce.indexOf("<div class=\"imdb-top-rated-old-style\">")).indexOf("</div> "))
+                .replace("<div class=\"imdb-top-rated-old-style\">","");
     }
     public static String moreDetaildSummery(String sorce)throws IndexOutOfBoundsException{
-        String key = "class=\"tab-pane fade in active\" id=\"tab_fa\"><p>";
-        return sorce.substring(sorce.indexOf(key),sorce.indexOf("</p></div><div role=\"tabpanel\" class=\"tab-pane fade\"")).replace(key,"").
-                replace("</p></div><div role=\"tabpanel\" class=\"tab-pane fade\"","");
-    }
+        System.out.println(sorce);
+        return sorce.substring(sorce.indexOf("<!-- Post -->"),sorce.indexOf("<div class=\"clearfix\"></div>"));
+   }
     public static String findingActors (String sorce)throws IndexOutOfBoundsException{
         sorce = (sorce.substring(sorce.indexOf("<a href=\"/search?cast"),sorce.length()-1));
         sorce = sorce.substring(0,sorce.indexOf("</bdi></div><div class=\"info\">"));
