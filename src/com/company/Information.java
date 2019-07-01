@@ -47,9 +47,6 @@ public class Information implements Serializable {
                     if(target.equals(""))
                         continue;
                     try {
-                        if ((Information.categoriesPath + "\\" + target).equals(Information.categoriesPath))
-                            ShellLink.createLink(movie.getPath(), Information.categoriesPath + "\\" + "all" + "\\" + movie.getName() + ".lnk");
-                        else
                             ShellLink.createLink(movie.getPath(), Information.categoriesPath + "\\" + target + "\\" + movie.getName() + ".lnk");
                     } catch (IOException e) {
                         e.printStackTrace();
