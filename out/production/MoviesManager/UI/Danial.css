@@ -1,5 +1,5 @@
 .root{
-    -fx-background-color: white;
+    /*-fx-background-color: black;*/
     /*-fx-start-margin: 5px 5px 5px 5px;*/
     /*-fx-end-margin: 5px 5px 5px 5px;*/
     /*-fx-hgap: 5px;*/
@@ -7,10 +7,14 @@
 
 }
 #logo{
-    -fx-padding: 0px 5px 0px 0px;
+
+    -fx-padding: -30px 5px 0px 0px;
     -fx-start-margin: 0px 0px 0px 0px;
-    margin:0px 0px 0px 0px;
+    -fx-end-margin: 0px 0px 0px 0px;
+    /*-fx-gap-start-and-end: 0px;*/
+    /*-fx-background-color: red;*/
 }
 .menu-bar{
-    margin:0px 0px 0px 0px;
+    /*margin:0px 0px 0px 0px;*/
+    /*-fx-padding: 0px 1200px 0px 0px;*/
 }

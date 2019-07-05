@@ -56,8 +56,8 @@ public class Gui extends Application {
         FileMenu.getItems().addAll(filemenu1,filemenu2,filemenu3);
         menubar.getMenus().addAll(FileMenu,EditMenu);
         //set menu position
-        BorderPane top = new BorderPane();
-        top.setTop(menubar);
+       BorderPane top = new BorderPane();
+       top.setTop(menubar);
 
         //image logo
         FileInputStream input= null;
@@ -69,9 +69,12 @@ public class Gui extends Application {
         Image image = new Image(input);
         ImageView imageview=new ImageView(image);
         imageview.setFitWidth(300);
-        imageview.setFitHeight(200);
+        imageview.setFitHeight(120);
         Label my_label=new Label("",imageview);
+        my_label.maxHeight(imageview.getFitHeight()+5);
+        my_label.minHeight(image.getHeight()+5);
         my_label.setId("logo");
+
         top.setId("top");
         top.setRight(my_label);
 
