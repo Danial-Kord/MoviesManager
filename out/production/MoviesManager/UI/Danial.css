@@ -1,9 +1,16 @@
 .root{
-    -fx-start-margin: 5px 5px 5px 5px;
-    -fx-end-margin: 5px 5px 5px 5px;
-    -fx-hgap: 5px;
-    -fx-vgap: 5px;
+    -fx-background-color: white;
+    /*-fx-start-margin: 5px 5px 5px 5px;*/
+    /*-fx-end-margin: 5px 5px 5px 5px;*/
+    /*-fx-hgap: 5px;*/
+    /*-fx-vgap: 5px;*/
 
 }
-.button{
+#logo{
+    -fx-padding: 0px 5px 0px 0px;
+    -fx-start-margin: 0px 0px 0px 0px;
+    margin:0px 0px 0px 0px;
+}
+.menu-bar{
+    margin:0px 0px 0px 0px;
 }
