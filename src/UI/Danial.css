@@ -1,0 +1,9 @@
+.root{
+    -fx-start-margin: 5px 5px 5px 5px;
+    -fx-end-margin: 5px 5px 5px 5px;
+    -fx-hgap: 5px;
+    -fx-vgap: 5px;
+
+}
+.button{
+}
