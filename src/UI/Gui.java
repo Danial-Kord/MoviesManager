@@ -40,6 +40,7 @@ public class Gui extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        root.getStylesheets().add("UI/Danial.css");
         SplitPane splitPane = (SplitPane)root.getChildren().get(0);
         AnchorPane anchorPane = (AnchorPane)splitPane.getItems().get(0);
         menuBar = (MenuBar)anchorPane.getChildren().get(0);

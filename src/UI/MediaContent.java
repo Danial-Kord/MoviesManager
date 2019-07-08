@@ -2,12 +2,15 @@ package UI;
 
 import com.company.Movie;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -35,6 +38,7 @@ public class MediaContent {
         Image image1 = new Image(input);
          image =new ImageView(image1);
          setImageSize(300,500);
+         setEventHandler();
     }
     public void setImageSize(double width,double height){
         image.setFitHeight(height);
@@ -63,5 +67,19 @@ public class MediaContent {
 
     public void setImage(ImageView image) {
         this.image = image;
+    }
+    private void setEventHandler(){
+        EventHandler<MouseEvent>eventHandler = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_ENTERED))
+                image.setId("shouldBeDark");
+                else {
+                    image.setId("shouldBeLight");
+                }
+            }
+        };
+        image.addEventHandler(MouseEvent.MOUSE_EXITED,eventHandler);
+        image.addEventHandler(MouseEvent.MOUSE_ENTERED,eventHandler);
     }
 }
