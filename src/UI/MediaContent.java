@@ -80,7 +80,11 @@ public class MediaContent {
         EventHandler<MouseEvent>eventHandler = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_ENTERED)) {
+                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_ENTERED)||
+                        (mouseEvent.getX() > image.getX() && mouseEvent.getX()<image.getX()+image.getFitWidth()
+                                && mouseEvent.getY() > image.getY()&& mouseEvent.getY()<image.getY()+image.getFitHeight()
+                        ))
+                 {
                     image.setId("shouldBeDark");
                     summery.setVisible(true);
                 }
