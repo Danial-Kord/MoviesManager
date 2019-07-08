@@ -37,14 +37,22 @@ public class MediaContent {
         }
         Image image1 = new Image(input);
          image =new ImageView(image1);
+         summery.setVisible(false);
          setImageSize(300,500);
+         setTextSize(image.getFitWidth(),image.getFitHeight());
          setEventHandler();
     }
     public void setImageSize(double width,double height){
         image.setFitHeight(height);
         image.setFitWidth(width);
     }
-
+    public void setTextSize(double width,double height){
+//        summery.prefHeight(height);
+//        summery.maxHeight(height);
+//        summery.minWidth(width);
+//        summery.prefWidth(width);
+        summery.setWrappingWidth(width - width/10);
+    }
     public Movie getMovie() {
         return movie;
     }
@@ -72,13 +80,17 @@ public class MediaContent {
         EventHandler<MouseEvent>eventHandler = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_ENTERED))
-                image.setId("shouldBeDark");
+                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_ENTERED)) {
+                    image.setId("shouldBeDark");
+                    summery.setVisible(true);
+                }
                 else {
                     image.setId("shouldBeLight");
+                    summery.setVisible(false);
                 }
             }
         };
+
         image.addEventHandler(MouseEvent.MOUSE_EXITED,eventHandler);
         image.addEventHandler(MouseEvent.MOUSE_ENTERED,eventHandler);
     }

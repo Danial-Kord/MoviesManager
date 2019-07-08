@@ -77,11 +77,18 @@ public class Gui extends Application {
 
 
         for (int i=0;i<10;i++) {
+            StackPane stackPane = new StackPane();
             Movie movie = new Movie("ali", "taghi", "dsada");
-            movie.setSummery("faafasfaaaaaaaaa");
+            movie.setSummery("faafasfaaaaaaafssddddfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaa");
             movie.setImagePath("src\\Desert.jpg");
             MediaContent mediaContent = new MediaContent(movie);
-            mainPane.getChildren().add(mediaContent.getImage());
+            stackPane.getChildren().add(mediaContent.getImage());
+            stackPane.getChildren().add(mediaContent.getSummery());
+//            mediaContent.getSummery().setX(mediaContent.getImage().getX());
+//            mediaContent.getSummery().setY(mediaContent.getImage().getY());
+//            mediaContent.getSummery().setLayoutX(mediaContent.getImage().getLayoutX());
+//            mediaContent.getSummery().setLayoutY(mediaContent.getImage().getLayoutY());
+            mainPane.getChildren().add(stackPane);
         }
 
 
