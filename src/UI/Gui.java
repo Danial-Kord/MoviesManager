@@ -1,27 +1,32 @@
 package UI;
 
+import com.company.Movie;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
-
+import javafx.scene.control.ScrollBar;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Gui extends Application {
     MenuBar menuBar;
     ToolBar serach;
     ToolBar findFavorite;
     TabPane tabPane;
-    FlowPane mainPane;
+    StackPane mainPane;
     BorderPane root;
     public static void main(String[] args) {
         launch(args);
@@ -35,9 +40,6 @@ public class Gui extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 1200, 600));
-
         SplitPane splitPane = (SplitPane)root.getChildren().get(0);
         AnchorPane anchorPane = (AnchorPane)splitPane.getItems().get(0);
         menuBar = (MenuBar)anchorPane.getChildren().get(0);
@@ -45,9 +47,47 @@ public class Gui extends Application {
         findFavorite = (ToolBar)anchorPane.getChildren().get(3);
         tabPane = (TabPane) root.getChildren().get(1);
         Node mainNode =  tabPane.getTabs().get(0).getContent();
-        mainPane = (FlowPane)(mainNode);
-
+        mainPane = (StackPane) (mainNode);
+        primaryStage.setTitle("Movie Manager");
+        primaryStage.setScene(new Scene(root, 1200, 600));
         primaryStage.show();
+
+
+
+        final FlowPane mainPane= new FlowPane();
+        mainPane.setPadding(new Insets(5, 5, 5, 5));
+        mainPane.setVgap(5);
+        mainPane.setHgap(5);
+        mainPane.setAlignment(Pos.CENTER);
+
+        final ScrollPane scroll = new ScrollPane();
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Horizontal scroll bar
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Vertical scroll bar
+        scroll.setContent(mainPane);
+        scroll.viewportBoundsProperty().addListener(new ChangeListener<Bounds>() {
+            @Override
+            public void changed(ObservableValue<? extends Bounds> ov, Bounds oldBounds, Bounds bounds) {
+                mainPane.setPrefWidth(bounds.getWidth());
+                mainPane.setPrefHeight(bounds.getHeight());
+            }
+        });
+        this.mainPane.getChildren().addAll(scroll);
+
+
+
+        for (int i=0;i<10;i++) {
+            Movie movie = new Movie("ali", "taghi", "dsada");
+            movie.setSummery("faafasfaaaaaaaaa");
+            movie.setImagePath("src\\Desert.jpg");
+            MediaContent mediaContent = new MediaContent(movie);
+            mainPane.getChildren().add(mediaContent.getImage());
+        }
+
+
+
+
+
+
 //
 //        //menu
 //        MenuBar menubar = new MenuBar();

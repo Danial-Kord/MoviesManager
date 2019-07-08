@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.media.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="558.0" prefWidth="701.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <SplitPane orientation="VERTICAL" prefHeight="113.0" prefWidth="701.0" BorderPane.alignment="CENTER">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="235.0" prefWidth="699.0">
+               <children>
+                  <MenuBar layoutX="-7.0" layoutY="-2.0" prefHeight="25.0" prefWidth="2000.0">
+                    <menus>
+                      <Menu mnemonicParsing="false" text="File">
+                        <items>
+                          <MenuItem mnemonicParsing="false" text="Exit" />
+                              <MenuItem mnemonicParsing="false" text="Save" />
+                        </items>
+                      </Menu>
+                      <Menu mnemonicParsing="false" text="Help">
+                        <items>
+                          <MenuItem mnemonicParsing="false" text="About" />
+                        </items>
+                      </Menu>
+                    </menus>
+                  </MenuBar>
+
+                  <Label layoutX="-1.0" layoutY="23.0" prefHeight="92.0" prefWidth="701.0" />
+                  <ToolBar layoutY="65.0" prefHeight="40.0" prefWidth="2000.0">
+                     <items>
+                        <TextField promptText="Search here..." style="-fx-background-radius: 25;" />
+                        <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0" style="-fx-background-radius: 15;" text="ok">
+                        </Button>
+                     </items>
+                  </ToolBar>
+                  <ToolBar layoutX="435.0" layoutY="65.0" prefHeight="40.0" prefWidth="2000.0">
+                     <items>
+                        <MenuButton mnemonicParsing="false" style="-fx-border-style: none;" text="Categories">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="Action 1" />
+                            <MenuItem mnemonicParsing="false" text="Action 2" />
+                          </items>
+                        </MenuButton>
+                        <MenuButton depthTest="DISABLE" mnemonicParsing="false" style="-fx-border-width: 10px 0px 1px 1px;" text="250 IMDB">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="Action 1" />
+                            <MenuItem mnemonicParsing="false" text="Action 2" />
+                          </items>
+            
+                        </MenuButton>
+                        <MenuButton depthTest="DISABLE" mnemonicParsing="false" text="genres">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="Comedy" />
+                            <MenuItem mnemonicParsing="false" text="Action" />
+                              <MenuItem mnemonicParsing="false" text="Adventure" />
+                              <MenuItem mnemonicParsing="false" text="Horror" />
+                          </items>
+                        </MenuButton>
+                     </items>
+                  </ToolBar>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </top>
+   <center>
+      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab text="Home">
+               <content>
+                  <StackPane prefHeight="150.0" prefWidth="200.0" />
+               </content>
+            </Tab>
+            <Tab text="add">
+               <content>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0" />
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+</BorderPane>
