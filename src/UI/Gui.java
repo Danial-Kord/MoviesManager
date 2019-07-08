@@ -2,45 +2,52 @@ package UI;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.scene.Parent;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
 
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 
 public class Gui extends Application {
-
+    MenuBar menuBar;
+    ToolBar serach;
+    ToolBar findFavorite;
+    TabPane tabPane;
+    FlowPane mainPane;
+    BorderPane root;
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
-        BorderPane root = null;
+         root = null;
         try {
             root = FXMLLoader.load(getClass().getResource("MovieManager.fxml"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         primaryStage.setTitle("Hello World");
-//
         primaryStage.setScene(new Scene(root, 1200, 600));
+
+        SplitPane splitPane = (SplitPane)root.getChildren().get(0);
+        AnchorPane anchorPane = (AnchorPane)splitPane.getItems().get(0);
+        menuBar = (MenuBar)anchorPane.getChildren().get(0);
+        serach = (ToolBar)anchorPane.getChildren().get(2);
+        findFavorite = (ToolBar)anchorPane.getChildren().get(3);
+        tabPane = (TabPane) root.getChildren().get(1);
+        Node mainNode =  tabPane.getTabs().get(0).getContent();
+        mainPane = (FlowPane)(mainNode);
+
+        primaryStage.show();
 //
 //        //menu
 //        MenuBar menubar = new MenuBar();
@@ -81,7 +88,6 @@ public class Gui extends Application {
 //
 //        root.setTop(top);
 
-        primaryStage.show();
 //        root.getStylesheets().add("UI/Danial.css");
     }
 }
