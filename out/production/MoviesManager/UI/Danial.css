@@ -11,10 +11,18 @@
     -fx-padding: -30px 5px 0px 0px;
     -fx-start-margin: 0px 0px 0px 0px;
     -fx-end-margin: 0px 0px 0px 0px;
+
     /*-fx-gap-start-and-end: 0px;*/
     /*-fx-background-color: red;*/
 }
 .menu-bar{
     /*margin:0px 0px 0px 0px;*/
     /*-fx-padding: 0px 1200px 0px 0px;*/
+}
+.label{
+    -fx-border-style: solid;
+    -fx-border-insets: 5;
+    -fx-border-width: 0px 0px 1px 0px;
+    -fx-border-color: grey;
+
 }

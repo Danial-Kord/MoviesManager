@@ -31,57 +31,57 @@ public class Gui extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        BorderPane root = new BorderPane();
-//        try {
-//            root = FXMLLoader.load(getClass().getResource("danial.fxml"));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-        primaryStage.setTitle("Hello World");
-
-        primaryStage.setScene(new Scene(root, 1200, 600));
-
-        //menu
-        MenuBar menubar = new MenuBar();
-        Menu FileMenu = new Menu("File");
-        MenuItem filemenu1=new MenuItem("new");
-        MenuItem filemenu2=new MenuItem("Save");
-        MenuItem filemenu3=new MenuItem("Exit");
-        Menu EditMenu=new Menu("Edit");
-        MenuItem EditMenu1=new MenuItem("Cut");
-        MenuItem EditMenu2=new MenuItem("Copy");
-        MenuItem EditMenu3=new MenuItem("Paste");
-        EditMenu.getItems().addAll(EditMenu1,EditMenu2,EditMenu3);
-        FileMenu.getItems().addAll(filemenu1,filemenu2,filemenu3);
-        menubar.getMenus().addAll(FileMenu,EditMenu);
-        //set menu position
-       BorderPane top = new BorderPane();
-       top.setTop(menubar);
-
-        //image logo
-        FileInputStream input= null;
+        BorderPane root = null;
         try {
-            input = new FileInputStream("D:\\Danial\\Projects\\InteliJ Idea\\MoviesManager\\src\\pics\\danialArts.png");
-        } catch (FileNotFoundException e) {
+            root = FXMLLoader.load(getClass().getResource("MovieManager.fxml"));
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        Image image = new Image(input);
-        ImageView imageview=new ImageView(image);
-        imageview.setFitWidth(300);
-        imageview.setFitHeight(120);
-        Label my_label=new Label("",imageview);
-        my_label.maxHeight(imageview.getFitHeight()+5);
-        my_label.minHeight(image.getHeight()+5);
-        my_label.setId("logo");
 
-        top.setId("top");
-        top.setRight(my_label);
-
-
-        root.setTop(top);
+        primaryStage.setTitle("Hello World");
+//
+        primaryStage.setScene(new Scene(root, 1200, 600));
+//
+//        //menu
+//        MenuBar menubar = new MenuBar();
+//        Menu FileMenu = new Menu("File");
+//        MenuItem filemenu1=new MenuItem("new");
+//        MenuItem filemenu2=new MenuItem("Save");
+//        MenuItem filemenu3=new MenuItem("Exit");
+//        Menu EditMenu=new Menu("Edit");
+//        MenuItem EditMenu1=new MenuItem("Cut");
+//        MenuItem EditMenu2=new MenuItem("Copy");
+//        MenuItem EditMenu3=new MenuItem("Paste");
+//        EditMenu.getItems().addAll(EditMenu1,EditMenu2,EditMenu3);
+//        FileMenu.getItems().addAll(filemenu1,filemenu2,filemenu3);
+//        menubar.getMenus().addAll(FileMenu,EditMenu);
+//        //set menu position
+//       BorderPane top = new BorderPane();
+//       top.setTop(menubar);
+//
+//        //image logo
+//        FileInputStream input= null;
+//        try {
+//            input = new FileInputStream("D:\\Danial\\Projects\\InteliJ Idea\\MoviesManager\\src\\pics\\danialArts.png");
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        Image image = new Image(input);
+//        ImageView imageview=new ImageView(image);
+//        imageview.setFitWidth(300);
+//        imageview.setFitHeight(120);
+//        Label my_label=new Label("",imageview);
+//        my_label.maxHeight(imageview.getFitHeight()+5);
+//        my_label.minHeight(image.getHeight()+5);
+//        my_label.setId("logo");
+//
+//        top.setId("top");
+//        top.setRight(my_label);
+//
+//
+//        root.setTop(top);
 
         primaryStage.show();
-        root.getStylesheets().add("UI/Danial.css");
+//        root.getStylesheets().add("UI/Danial.css");
     }
 }
