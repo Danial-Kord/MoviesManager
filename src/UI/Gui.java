@@ -1,9 +1,12 @@
 package UI;
 
+import com.company.Information;
 import com.company.Movie;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -12,6 +15,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
@@ -29,10 +35,17 @@ public class Gui extends Application {
     StackPane mainPane;
     BorderPane root;
     TabManager tabManager;
+
+    private Information information;
     public static void main(String[] args) {
         launch(args);
     }
 
+//    public Gui(Information information){
+//        this.information = information;
+//       // start(new Stage());
+////        main();
+//    }
     @Override
     public void start(Stage primaryStage) {
          root = null;
@@ -169,5 +182,36 @@ public class Gui extends Application {
 //            mediaContent.getSummery().setLayoutX(mediaContent.getImage().getLayoutX());
 //            mediaContent.getSummery().setLayoutY(mediaContent.getImage().getLayoutY());
         }
+    }
+    public void setSerachHandler(){
+        TextField searchBox = (TextField) serach.getItems().get(0);
+        Button ok = (Button) serach.getItems().get(1);
+
+        EventHandler<MouseEvent>mouseEvent = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                searchForResults();
+            }
+        };
+        EventHandler<KeyEvent>keyEventEventHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                if(keyEvent.getCode().equals(KeyCode.ENTER)){
+                    searchForResults();
+                }
+            }
+        };
+        searchBox.addEventHandler(KeyEvent.ANY,keyEventEventHandler);
+        ok.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
+    }
+    public void searchForResults(){
+//        ArrayList<String>searachParams = new ArrayList<String>();
+//        TextField searchBox = (TextField) serach.getItems().get(0);
+//        searachParams.add(searchBox.getText());
+//        for (int i=0;i<findFavorite.getItems().size();i++){
+//            MenuButton menuButton = (MenuButton)findFavorite.getItems().get(i);
+//        searachParams.add(menuButton.getText());
+//        }
+
     }
 }

@@ -45,17 +45,10 @@
                      <items>
                         <MenuButton mnemonicParsing="false" style="-fx-border-style: none;" text="Categories">
                           <items>
-                            <MenuItem mnemonicParsing="false" text="Action 1" />
-                            <MenuItem mnemonicParsing="false" text="Action 2" />
+                            <MenuItem mnemonicParsing="false" text="+" />
                           </items>
                         </MenuButton>
-                        <MenuButton depthTest="DISABLE" mnemonicParsing="false" style="-fx-border-width: 10px 0px 1px 1px;" text="250 IMDB">
-                          <items>
-                            <MenuItem mnemonicParsing="false" text="Action 1" />
-                            <MenuItem mnemonicParsing="false" text="Action 2" />
-                          </items>
-            
-                        </MenuButton>
+                        <MenuButton depthTest="DISABLE" mnemonicParsing="false" style="-fx-border-width: 10px 0px 1px 1px;" text="250 IMDB" />
                         <MenuButton depthTest="DISABLE" mnemonicParsing="false" text="genres">
                           <items>
                             <MenuItem mnemonicParsing="false" text="Comedy" />
