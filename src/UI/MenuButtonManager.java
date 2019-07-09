@@ -1,5 +1,6 @@
 package UI;
 
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -9,31 +10,34 @@ import java.util.ArrayList;
 
 public class MenuButtonManager {
     private MenuButton menuButton;
-    private String selected;
+    private String selected=null;
     public MenuButtonManager(MenuButton menuButton){
         this.menuButton = menuButton;
-        setLestiner();
+        setListener();
     }
 
-    public void setLestiner(){
+    public void setListener(){
 
-        EventHandler<MouseEvent>mouseEventEventHandler = new EventHandler<MouseEvent>() {
+        EventHandler<Event>mouseEventEventHandler = new EventHandler<Event>() {
             @Override
-            public void handle(MouseEvent mouseEvent) {
-                selected = ((MenuItem) mouseEvent.getSource()).getText();
+            public void handle(Event event) {
+                selected = ((MenuItem) event.getSource()).getText();
                 if (selected.equals("add new")) {
 
                 } else {
-                    System.out.println(selected);
                     menuButton.setText(selected);
+
                 }
             }
         };
-        ArrayList<MenuItem>menuItems = new ArrayList<MenuItem>();
+        System.out.println(menuButton.getText());
         for (int i=0;i<menuButton.getItems().size();i++){
-            menuItems.add((MenuItem)menuButton.getItems().get(i));
-            menuItems.get(i).addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
-
+            menuButton.getItems().get(i).addEventHandler(Event.ANY,mouseEventEventHandler);
         }
+
+    }
+
+    public String getSelected() {
+        return selected;
     }
 }

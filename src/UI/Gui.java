@@ -35,7 +35,8 @@ public class Gui extends Application {
     StackPane mainPane;
     BorderPane root;
     TabManager tabManager;
-
+    private MenuButtonManager categories;
+    private MenuButtonManager generes;
     private Information information;
     public static void main(String[] args) {
         launch(args);
@@ -65,7 +66,10 @@ public class Gui extends Application {
         tabManager = new TabManager(tabPane);
         Node mainNode =  tabPane.getTabs().get(0).getContent();
         mainPane = (StackPane) (mainNode);
+        categories = new MenuButtonManager((MenuButton)findFavorite.getItems().get(1));
+        generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(2));
 
+        setSerachHandler();
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 1200, 600));
         primaryStage.show();
@@ -205,13 +209,27 @@ public class Gui extends Application {
         ok.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
     }
     public void searchForResults(){
-//        ArrayList<String>searachParams = new ArrayList<String>();
-//        TextField searchBox = (TextField) serach.getItems().get(0);
-//        searachParams.add(searchBox.getText());
-//        for (int i=0;i<findFavorite.getItems().size();i++){
-//            MenuButton menuButton = (MenuButton)findFavorite.getItems().get(i);
-//        searachParams.add(menuButton.getText());
-//        }
+        ArrayList<String>searchParams = new ArrayList<String>();
+        TextField searchBox = (TextField) serach.getItems().get(0);
+        searchParams.add(searchBox.getText());
+        if(categories.getSelected()!=null)
+        searchParams.add(categories.getSelected());
+        if(generes.getSelected()!=null)
+            searchParams.add(generes.getSelected());
 
+        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
+        for (int i=0;i<information.getMovies().size();i++){
+            for (int j=0;j<searchParams.size();j++){
+                if(information.getMovies().get(i).getName().contains(searchParams.get(j))||
+                        information.getMovies().get(i).getGenre().contains(searchParams.get(j))
+
+                        ){
+                    MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+                    mediaContents.add(mediaContent);
+                    break;
+                }
+            }
+        }
+        System.out.println("done");
     }
 }

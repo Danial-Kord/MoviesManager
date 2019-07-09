@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.input.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.*?>
@@ -43,12 +44,12 @@
                   </ToolBar>
                   <ToolBar layoutX="435.0" layoutY="65.0" prefHeight="40.0" prefWidth="2000.0">
                      <items>
+                        <Button mnemonicParsing="false" text="250IMDB" />
                         <MenuButton mnemonicParsing="false" style="-fx-border-style: none;" text="Categories">
                           <items>
-                            <MenuItem mnemonicParsing="false" text="+" />
+                            <MenuItem mnemonicParsing="false" text="add new" />
                           </items>
                         </MenuButton>
-                        <MenuButton depthTest="DISABLE" mnemonicParsing="false" style="-fx-border-width: 10px 0px 1px 1px;" text="250 IMDB" />
                         <MenuButton depthTest="DISABLE" mnemonicParsing="false" text="genres">
                           <items>
                             <MenuItem mnemonicParsing="false" text="Comedy" />
