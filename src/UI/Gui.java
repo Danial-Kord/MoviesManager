@@ -20,6 +20,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.MediaView;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.control.ScrollBar;
 
@@ -55,6 +56,7 @@ public class Gui extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         root.getStylesheets().add("UI/Danial.css");
 
         SplitPane splitPane = (SplitPane)root.getChildren().get(0);
@@ -66,9 +68,12 @@ public class Gui extends Application {
         tabManager = new TabManager(tabPane);
         Node mainNode =  tabPane.getTabs().get(0).getContent();
         mainPane = (StackPane) (mainNode);
-        categories = new MenuButtonManager((MenuButton)findFavorite.getItems().get(1));
-        generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(2));
-
+        categories = new MenuButtonManager((MenuButton)findFavorite.getItems().get(1),information);
+        generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(2),information);
+        StackPane stackPane = (StackPane) tabPane.getTabs().get(1).getContent();
+        ListView<Text> textListView = new ListView<Text>();
+        stackPane.getChildren().add(textListView);
+        textListView.getItems().add(new Text("dsadadadad"));
         setSerachHandler();
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 1200, 600));

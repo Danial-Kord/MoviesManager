@@ -60,7 +60,7 @@
                         </MenuButton>
                      </items>
                   </ToolBar>
-                  <Text layoutX="226.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome" textAlignment="CENTER" wrappingWidth="208.13671875" />
+                  <Text layoutX="226.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome" textAlignment="CENTER" wrappingWidth="263.13671875" />
                </children>
             </AnchorPane>
         </items>
