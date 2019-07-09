@@ -47,15 +47,19 @@
                         <Button mnemonicParsing="false" text="250IMDB" />
                         <MenuButton mnemonicParsing="false" style="-fx-border-style: none;" text="Categories">
                           <items>
+                              <MenuItem mnemonicParsing="false" text="none" />
                             <MenuItem mnemonicParsing="false" text="add new" />
                           </items>
                         </MenuButton>
                         <MenuButton depthTest="DISABLE" mnemonicParsing="false" text="genres">
                           <items>
+                              <MenuItem mnemonicParsing="false" text="all" />
                             <MenuItem mnemonicParsing="false" text="Comedy" />
                             <MenuItem mnemonicParsing="false" text="Action" />
                               <MenuItem mnemonicParsing="false" text="Adventure" />
                               <MenuItem mnemonicParsing="false" text="Horror" />
+                              <MenuItem mnemonicParsing="false" text="Musical" />
+                              <MenuItem mnemonicParsing="false" text="Family" />
                           </items>
                         </MenuButton>
                      </items>

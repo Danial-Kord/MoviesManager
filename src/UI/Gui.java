@@ -36,6 +36,7 @@ public class Gui extends Application {
     StackPane mainPane;
     BorderPane root;
     TabManager tabManager;
+    private Button find250IMDB;
     private MenuButtonManager categories;
     private MenuButtonManager generes;
     private Information information;
@@ -70,6 +71,7 @@ public class Gui extends Application {
         mainPane = (StackPane) (mainNode);
         categories = new MenuButtonManager((MenuButton)findFavorite.getItems().get(1),information);
         generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(2),information);
+        find250IMDB = (Button) findFavorite.getItems().get(0);
         StackPane stackPane = (StackPane) tabPane.getTabs().get(1).getContent();
         ListView<Text> textListView = new ListView<Text>();
         stackPane.getChildren().add(textListView);
@@ -199,7 +201,11 @@ public class Gui extends Application {
         EventHandler<MouseEvent>mouseEvent = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                searchForResults();
+                Button button = (Button)mouseEvent.getSource();
+                if(button.equals(find250IMDB))
+                    find250IMDB();
+                else
+                   searchForResults();
             }
         };
         EventHandler<KeyEvent>keyEventEventHandler = new EventHandler<KeyEvent>() {
@@ -212,6 +218,7 @@ public class Gui extends Application {
         };
         searchBox.addEventHandler(KeyEvent.ANY,keyEventEventHandler);
         ok.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
+        find250IMDB.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
     }
     public void searchForResults(){
         ArrayList<String>searchParams = new ArrayList<String>();
@@ -226,8 +233,8 @@ public class Gui extends Application {
         for (int i=0;i<information.getMovies().size();i++){
             for (int j=0;j<searchParams.size();j++){
                 if(information.getMovies().get(i).getName().contains(searchParams.get(j))||
-                        information.getMovies().get(i).getGenre().contains(searchParams.get(j))
-
+                        information.getMovies().get(i).getGenre().contains(searchParams.get(j))||
+                        searchParams.get(j).equals("all")
                         ){
                     MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
                     mediaContents.add(mediaContent);
@@ -236,5 +243,17 @@ public class Gui extends Application {
             }
         }
         System.out.println("done");
+        setActivePaneContent(mediaContents);
+    }
+    public void find250IMDB(){
+        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
+        for (int i=0;i<information.getMovies().size();i++){
+                if(information.getMovies().get(i).getIMDBscore()!="" || information.getMovies().get(i).getIMDBscore()!=null){
+                    MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+                    mediaContents.add(mediaContent);
+                    break;
+                }
+        }
+        setActivePaneContent(mediaContents);
     }
 }
