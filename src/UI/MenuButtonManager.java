@@ -21,7 +21,9 @@ public class MenuButtonManager {
     private String selected=null;
     private Stage stage  = null;
     private ListView<TextField>toolBarListView;
+    private Information information;
     public MenuButtonManager(MenuButton menuButton ,Information information){
+        this.information = information;
         this.menuButton = menuButton;
         if(menuButton.getText().equals("Categories")){
             addNewItem(false);
@@ -31,12 +33,16 @@ public class MenuButtonManager {
                 textField.setEditable(false);
                 textFieldHandler(textField);
                 toolBarListView.getItems().add(textField);
+                menuButton.getItems().get(menuButton.getItems().size()-1).setText(item);
+                menuButton.getItems().add(new MenuItem("add new"));
             }
         }
-        setListener();
+        for (int i=0;i<menuButton.getItems().size();i++){
+            setListener(menuButton.getItems().get(i));
+        }
     }
 
-    public void setListener(){
+    public void setListener(MenuItem menuItem){
 
         EventHandler<Event>mouseEventEventHandler = new EventHandler<Event>() {
             @Override
@@ -51,10 +57,7 @@ public class MenuButtonManager {
             }
         };
         System.out.println(menuButton.getText());
-        for (int i=0;i<menuButton.getItems().size();i++){
-            menuButton.getItems().get(i).addEventHandler(Event.ANY,mouseEventEventHandler);
-        }
-
+        menuItem.addEventHandler(Event.ANY,mouseEventEventHandler);
     }
 
     public String getSelected() {
@@ -87,23 +90,42 @@ public class MenuButtonManager {
         EventHandler<MouseEvent>mouseEvent = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
+                int size = information.categoriesTyps.size();
+                if(searchBox.getText().equals(""))
+                    return;
+                information.addCategoryType(searchBox.getText());
+                if(information.categoriesTyps.size() == size)
+                    return;
                 TextField textField = new TextField(searchBox.getText());
                 textFieldHandler(textField);
                 toolBarListView.getItems().add(textField);
+                menuButton.getItems().get(menuButton.getItems().size()-1).setText(searchBox.getText());
+                menuButton.getItems().add(new MenuItem("add new"));
+                setListener(menuButton.getItems().get(menuButton.getItems().size()-1));
+
             }
         };
         EventHandler<KeyEvent>keyEventEventHandler = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
                 if(keyEvent.getCode().equals(KeyCode.ENTER)){
+                    int size = information.categoriesTyps.size();
+                    if(searchBox.getText().equals(""))
+                        return;
+                    information.addCategoryType(searchBox.getText());
+                    if(information.categoriesTyps.size() == size)
+                        return;
                     TextField textField = new TextField(searchBox.getText());
-                    textField.setEditable(false);
                     textFieldHandler(textField);
                     toolBarListView.getItems().add(textField);
+                    menuButton.getItems().get(menuButton.getItems().size()-1).setText(searchBox.getText());
+                    menuButton.getItems().add(new MenuItem("add new"));
+                    setListener(menuButton.getItems().get(menuButton.getItems().size()-1));
+
                 }
             }
         };
-        searchBox.addEventHandler(KeyEvent.ANY,keyEventEventHandler);
+        searchBox.addEventHandler(KeyEvent.KEY_PRESSED,keyEventEventHandler);
         ok.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
         if(show)
         stage.show();
