@@ -28,6 +28,7 @@ public class Gui extends Application {
     TabPane tabPane;
     StackPane mainPane;
     BorderPane root;
+    TabManager tabManager;
     public static void main(String[] args) {
         launch(args);
     }
@@ -41,56 +42,52 @@ public class Gui extends Application {
             e.printStackTrace();
         }
         root.getStylesheets().add("UI/Danial.css");
+
         SplitPane splitPane = (SplitPane)root.getChildren().get(0);
         AnchorPane anchorPane = (AnchorPane)splitPane.getItems().get(0);
         menuBar = (MenuBar)anchorPane.getChildren().get(0);
         serach = (ToolBar)anchorPane.getChildren().get(2);
         findFavorite = (ToolBar)anchorPane.getChildren().get(3);
         tabPane = (TabPane) root.getChildren().get(1);
+        tabManager = new TabManager(tabPane);
         Node mainNode =  tabPane.getTabs().get(0).getContent();
         mainPane = (StackPane) (mainNode);
+
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 1200, 600));
         primaryStage.show();
 
 
 
-        final FlowPane mainPane= new FlowPane();
-        mainPane.setPadding(new Insets(5, 5, 5, 5));
-        mainPane.setVgap(5);
-        mainPane.setHgap(5);
-        mainPane.setAlignment(Pos.CENTER);
+//        final FlowPane mainPane= new FlowPane();
+//        mainPane.setPadding(new Insets(5, 5, 5, 5));
+//        mainPane.setVgap(5);
+//        mainPane.setHgap(5);
+//        mainPane.setAlignment(Pos.CENTER);
+//
+//        final ScrollPane scroll = new ScrollPane();
+//        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Horizontal scroll bar
+//        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Vertical scroll bar
+//        scroll.setContent(mainPane);
+//        scroll.viewportBoundsProperty().addListener(new ChangeListener<Bounds>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Bounds> ov, Bounds oldBounds, Bounds bounds) {
+//                mainPane.setPrefWidth(bounds.getWidth());
+//                mainPane.setPrefHeight(bounds.getHeight());
+//            }
+//        });
+//        this.mainPane.getChildren().addAll(scroll);
 
-        final ScrollPane scroll = new ScrollPane();
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Horizontal scroll bar
-        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Vertical scroll bar
-        scroll.setContent(mainPane);
-        scroll.viewportBoundsProperty().addListener(new ChangeListener<Bounds>() {
-            @Override
-            public void changed(ObservableValue<? extends Bounds> ov, Bounds oldBounds, Bounds bounds) {
-                mainPane.setPrefWidth(bounds.getWidth());
-                mainPane.setPrefHeight(bounds.getHeight());
-            }
-        });
-        this.mainPane.getChildren().addAll(scroll);
 
-
-
+        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
         for (int i=0;i<10;i++) {
-            StackPane stackPane = new StackPane();
             Movie movie = new Movie("ali", "taghi", "dsada");
             movie.setSummery("faafasfaaaaaaafssddddfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaa");
             movie.setImagePath("src\\Desert.jpg");
             MediaContent mediaContent = new MediaContent(movie);
-            stackPane.getChildren().add(mediaContent.getImage());
-            stackPane.getChildren().add(mediaContent.getSummery());
-//            mediaContent.getSummery().setX(mediaContent.getImage().getX());
-//            mediaContent.getSummery().setY(mediaContent.getImage().getY());
-//            mediaContent.getSummery().setLayoutX(mediaContent.getImage().getLayoutX());
-//            mediaContent.getSummery().setLayoutY(mediaContent.getImage().getLayoutY());
-            mainPane.getChildren().add(stackPane);
+            mediaContents.add(mediaContent);
         }
-
+        setActivePaneContent(mediaContents);
 
 
 
@@ -137,5 +134,40 @@ public class Gui extends Application {
 //        root.setTop(top);
 
 //        root.getStylesheets().add("UI/Danial.css");
+    }
+    public void setActivePaneContent(ArrayList<MediaContent>mediaContents){
+        Tab activeTab = tabPane.getTabs().get(0);
+        for (Tab tab : tabPane.getTabs()) {
+            if(tab.getId().equals("activeTab")) {
+                activeTab = tab;
+                break;
+            }
+        }
+        StackPane stackPane = (StackPane)activeTab.getContent();
+        final FlowPane flowPane= new FlowPane();
+        flowPane.setPadding(new Insets(5, 5, 5, 5));
+        flowPane.setVgap(5);
+        flowPane.setHgap(5);
+        flowPane.setAlignment(Pos.CENTER);
+
+        final ScrollPane scroll = new ScrollPane();
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Horizontal scroll bar
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Vertical scroll bar
+        scroll.setContent(flowPane);
+        scroll.viewportBoundsProperty().addListener(new ChangeListener<Bounds>() {
+            @Override
+            public void changed(ObservableValue<? extends Bounds> ov, Bounds oldBounds, Bounds bounds) {
+                flowPane.setPrefWidth(bounds.getWidth());
+                flowPane.setPrefHeight(bounds.getHeight());
+            }
+        });
+        stackPane.getChildren().addAll(scroll);
+        for (int i=0;i<mediaContents.size();i++){
+            flowPane.getChildren().add(mediaContents.get(i).getStackPane());
+//            mediaContent.getSummery().setX(mediaContent.getImage().getX());
+//            mediaContent.getSummery().setY(mediaContent.getImage().getY());
+//            mediaContent.getSummery().setLayoutX(mediaContent.getImage().getLayoutX());
+//            mediaContent.getSummery().setLayoutY(mediaContent.getImage().getLayoutY());
+        }
     }
 }

@@ -11,10 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.media.MediaView;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -24,11 +21,13 @@ import java.io.FileNotFoundException;
 
 public class MediaContent {
     private Movie movie;
+    private StackPane stackPane;
     private Text summery;
     private ImageView image;
     public MediaContent(Movie movie){
         this.movie = movie;
         summery = new Text(movie.getSummery());
+
         FileInputStream input= null;
         try {
             input = new FileInputStream(movie.getImagePath());
@@ -40,7 +39,11 @@ public class MediaContent {
          summery.setVisible(false);
          setImageSize(300,500);
          setTextSize(image.getFitWidth(),image.getFitHeight());
-         setEventHandler();
+        stackPane = new StackPane();
+        stackPane.getChildren().add(image);
+        stackPane.getChildren().add(summery);
+        setEventHandler();
+
     }
     public void setImageSize(double width,double height){
         image.setFitHeight(height);
@@ -53,6 +56,11 @@ public class MediaContent {
 //        summery.prefWidth(width);
         summery.setWrappingWidth(width - width/10);
     }
+
+    public StackPane getStackPane() {
+        return stackPane;
+    }
+
     public Movie getMovie() {
         return movie;
     }
@@ -80,10 +88,11 @@ public class MediaContent {
         EventHandler<MouseEvent>eventHandler = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_ENTERED)||
-                        (mouseEvent.getX() > image.getX() && mouseEvent.getX()<image.getX()+image.getFitWidth()
-                                && mouseEvent.getY() > image.getY()&& mouseEvent.getY()<image.getY()+image.getFitHeight()
-                        ))
+                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_ENTERED)
+
+//                       || (mouseEvent.getX() > image.getX() && mouseEvent.getX()<image.getX()+image.getFitWidth()
+//                                && mouseEvent.getY() > image.getY()&& mouseEvent.getY()<image.getY()+image.getFitHeight())
+                                )
                  {
                     image.setId("shouldBeDark");
                     summery.setVisible(true);
@@ -95,7 +104,7 @@ public class MediaContent {
             }
         };
 
-        image.addEventHandler(MouseEvent.MOUSE_EXITED,eventHandler);
-        image.addEventHandler(MouseEvent.MOUSE_ENTERED,eventHandler);
+        stackPane.addEventHandler(MouseEvent.MOUSE_EXITED,eventHandler);
+        stackPane.addEventHandler(MouseEvent.MOUSE_ENTERED,eventHandler);
     }
 }

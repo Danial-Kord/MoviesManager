@@ -80,9 +80,9 @@
                   <StackPane prefHeight="150.0" prefWidth="200.0" />
                </content>
             </Tab>
-            <Tab text="add">
+            <Tab text="+">
                <content>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0" />
+                  <StackPane prefHeight="150.0" prefWidth="200.0" />
                </content>
             </Tab>
         </tabs>
