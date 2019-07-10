@@ -40,6 +40,7 @@ public class Gui extends Application {
     private MenuButtonManager categories;
     private MenuButtonManager generes;
     private Information information;
+    private Setting setting;
     public static void main(String[] args) {
         launch(args);
     }
@@ -77,6 +78,8 @@ public class Gui extends Application {
         stackPane.getChildren().add(textListView);
         textListView.getItems().add(new Text("dsadadadad"));
         setSerachHandler();
+        setting = new Setting();
+        setMenuBarHandler();
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 1200, 600));
         primaryStage.show();
@@ -256,5 +259,23 @@ public class Gui extends Application {
                 }
         }
         setActivePaneContent(mediaContents);
+    }
+    public void setMenuBarHandler(){
+         Menu fileMenu = menuBar.getMenus().get(0);
+        final MenuItem setting1 = fileMenu.getItems().get(0);
+
+        EventHandler<Event>eventHandler = new EventHandler<Event>() {
+            @Override
+            public void handle(Event mouseEvent) {
+                if(mouseEvent.getSource().equals(setting1)){
+                    setting.setVisibale(true);
+                }
+                else if(true){
+
+                }
+            }
+        };
+        setting1.addEventHandler(Event.ANY,eventHandler);
+
     }
 }
