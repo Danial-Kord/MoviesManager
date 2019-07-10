@@ -34,7 +34,7 @@ public class Gui extends Application {
     ToolBar findFavorite;
     TabPane tabPane;
     StackPane mainPane;
-    BorderPane root;
+    public static BorderPane root;
     TabManager tabManager;
     private Button find250IMDB;
     private MenuButtonManager categories;
@@ -167,6 +167,7 @@ public class Gui extends Application {
                 break;
             }
         }
+
         StackPane stackPane = (StackPane)activeTab.getContent();
         final FlowPane flowPane= new FlowPane();
         flowPane.setPadding(new Insets(5, 5, 5, 5));
