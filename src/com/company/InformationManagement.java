@@ -1,6 +1,17 @@
 package com.company;
 
+import UI.Gui;
+import UI.MediaContent;
 import UI.ProgressPane;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,15 +34,20 @@ public class InformationManagement {
                         System.out.println(i);
                         System.out.println("name : "+information.getMovies().get(i).getName());
                         System.out.println("name : "+Sorting.findName(file));
-                        if(information.getMovies().get(i).getName().equals(Sorting.findName(file))
-                                && information.getMovies().get(i).getYear().equals(Sorting.getYear(file.getName()))
-                                && movies.get(i).getPath().equals(file.getAbsolutePath())){
-                            flag = true;
-                            break;
+//                        try {
+
+                            if (information.getMovies().get(i).getName().equals(Sorting.findName(file))
+                                    && information.getMovies().get(i).getYear().equals(Sorting.getYear(file.getName()))
+                                    && movies.get(i).getPath().equals(file.getAbsolutePath())) {
+                                flag = true;
+                                break;
+                            }
                         }
-                    }
+//                        catch (IndexOutOfBoundsException e)
+//                        {}
+//                    }
                     if(!flag)
-                        movies.add(new Movie(file.getName(), Sorting.getYear(file.getName()), file.getAbsolutePath()));
+                        movies.add(new Movie(Sorting.findName(file), Sorting.getYear(file.getName()), file.getAbsolutePath()));
                 }
             }
             System.out.println("why : "+movies.size());
@@ -42,7 +58,7 @@ public class InformationManagement {
         }
     }
 
-    public void checkNewMovies(Information information){
+    public void checkNewMovies(final Information information, final Gui gui, final ArrayList<MediaContent>mediaContents){
         for (int i=0;i<information.getPaths().size();i++) {
             String path = information.getPaths().get(i);
             if(!information.isPathExist(path)) {
@@ -52,37 +68,109 @@ public class InformationManagement {
             }
             System.out.println("path numbers" + information.getPaths().size());
 
-            ArrayList<Movie> movies = getMovies(path,information);
+            final ArrayList<Movie> movies = getMovies(path,information);
             information.addMovies(movies);
-            for (Movie movie : movies) {
-                System.out.println(movie.getName());
-                System.out.println(movie.getYear());
-                movie = FindInfoFromNet.searchResults(movie);
-            }
+
+
+             ProgressPane pBar = new ProgressPane(movies.size());
+             final ProgressBar progressBar = pBar.getProgressBar();
+            Task<Parent> yourTaskName = new Task<Parent>() {
+                @Override
+                public Parent call() {
+                    int i=0;
+                    for (Movie movie : movies) {
+                        System.out.println("is here");
+                        System.out.println(movie.getName());
+                        System.out.println(movie.getYear());
+                        movie = FindInfoFromNet.searchResults(movie);
+                        System.out.println("wtf");
+
+                        updateProgress(i,movies.size());
+                        i++;
+                        mediaContents.add(new MediaContent(movie));
+//                        i++;
+//                        if(i == 5) {
+//                            gui.setActivePaneContent(mediaContents, 0);
+//                            i = 0;
+//                        }
+                    }
+                    System.out.println("end of process");
+                    return null;
+                }
+
+                @Override
+                protected void updateProgress(double v, double v1) {
+
+                }
+            };
+
+            yourTaskName.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                @Override
+                public void handle(WorkerStateEvent event) {
+                    Gui.root.setDisable(false);
+                    gui.setActivePaneContent(mediaContents,0);
+                    InfoSaver.save(information);
+                    System.out.println("absoulotly finished");
+                }
+            });
+            pBar.getProgressBar().progressProperty().bind(yourTaskName.progressProperty());
+            Thread loadingThread = new Thread(yourTaskName);
+            loadingThread.start();
+
+
+
+
+
+//            final ProgressPane progressPane =  new ProgressPane(information.getMovies().size());
+//            Platform.runLater(new Runnable() {
+//                @Override
+//                public void run() {
+//
+//                    int i=0;
+//                    for (Movie movie : movies) {
+//                        System.out.println("is here");
+//                        System.out.println(movie.getName());
+//                        System.out.println(movie.getYear());
+//                        movie = FindInfoFromNet.searchResults(movie);
+////                        progressPane.increase();
+//                        mediaContents.add(new MediaContent(movie));
+//                        i++;
+////                        if(i == 5) {
+////                            gui.setActivePaneContent(mediaContents, 0);
+////                            i = 0;
+////                        }
+//                    }
+//
+//                    Gui.root.setDisable(false);
+//                    gui.setActivePaneContent(mediaContents,0);
+//                    InfoSaver.save(information);
+//                }
+//            });
         }
     }
-    public void addInformation(String path,Information information) {
+    public void addInformation(String path, final Information information) {
 //        Sorting.userInput(path);
         if(!information.samePath(path)) {
             information.addPath(path);
             information.addMovies(getMovies(path,information));
-                ProgressPane progressPane =  new ProgressPane(information.getMovies().size());
-//                new Thread(){
-//                    @Override
-//                    public void run() {
-//
-//                    }
-//                };
-            for (Movie movie : information.getMovies()) {
-                System.out.println(movie.getName());
-                System.out.println(movie.getYear());
-                movie = FindInfoFromNet.searchResults(movie);
-                for (String favorite : movie.getFavorites()) {
-                    System.out.println("<<<<"+favorite);
-                    information.addCategoryType(favorite);
-                }
-                progressPane.increase();
-            }
+                final ProgressPane progressPane =  new ProgressPane(information.getMovies().size());
+                Thread thread = new Thread(){
+                    @Override
+                    public void run() {
+                        for (Movie movie : information.getMovies()) {
+                            System.out.println("is there");
+                            System.out.println(movie.getName());
+                            System.out.println(movie.getYear());
+                            movie = FindInfoFromNet.searchResults(movie);
+                            for (String favorite : movie.getFavorites()) {
+                                System.out.println("<<<<"+favorite);
+                                information.addCategoryType(favorite);
+                            }
+                            progressPane.increase();
+                        }
+                    }
+                };
+                thread.start();
         }
         else {
 //            for (Movie movie : information.getMovies()) {

@@ -11,6 +11,8 @@ public class FindInfoFromNet {
         String sorce = null;
         String moreDetails = ":)";
         name = movie.getName().replaceAll(" ", "+");
+        name+="+"+movie.getYear();
+        System.out.println(name);
         try {
             sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.digital/?s=" + name));
             System.out.println("Dadadada");

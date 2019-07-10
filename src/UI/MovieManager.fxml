@@ -61,6 +61,7 @@
                               <MenuItem mnemonicParsing="false" text="Horror" />
                               <MenuItem mnemonicParsing="false" text="Musical" />
                               <MenuItem mnemonicParsing="false" text="Family" />
+                              <MenuItem mnemonicParsing="false" text="none" />
                           </items>
                         </MenuButton>
                      </items>

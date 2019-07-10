@@ -26,7 +26,8 @@ public class MediaContent {
     private ImageView image;
     public MediaContent(Movie movie){
         this.movie = movie;
-        summery = new Text(movie.getYear());
+        summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n"+movie.getPath()+"\n"+movie.getGenre()+"\n"+
+                movie.getSummery());
 
         FileInputStream input= null;
         try {

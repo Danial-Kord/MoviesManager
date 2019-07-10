@@ -105,15 +105,15 @@ public class Setting {
         information.addPath(choosePath);
         Gui.root.setDisable(true);
         informationManagement.addInformation(choosePath,information);
-        informationManagement.checkNewMovies(information);
+        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
+//        for (int i=0;i<information.getMovies().size();i++) {
+//            mediaContents.add(new MediaContent(information.getMovies().get(i)));
+//        }
+        informationManagement.checkNewMovies(information,gui,mediaContents);
         System.out.println(choosePath);
         InfoSaver.save(information);
-        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
-        for (int i=0;i<information.getMovies().size();i++) {
-            mediaContents.add(new MediaContent(information.getMovies().get(i)));
-        }
-        gui.setActivePaneContent(mediaContents,0);
-        Gui.root.setDisable(false);
+        stage.close();
+
     }
     public void setVisibale(boolean in){
         if(in)

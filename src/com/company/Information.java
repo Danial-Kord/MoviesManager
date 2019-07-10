@@ -74,7 +74,7 @@ public class Information implements Serializable {
     }
     public  boolean samePath(String path){
         for (String s : this.paths) {
-            if(s.equals(path))//TODO
+            if(s.equals(path) || path.contains(s))//TODO
                 return true;
         }
         return false;

@@ -2,8 +2,11 @@ package UI;
 
 import com.company.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -57,14 +61,32 @@ public class Gui extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-//        ProgressPane progressPane = new ProgressPane(25);
 
+
+
+
+//        final ProgressPane progressPane = new ProgressPane(10000);
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                double i=0;
+//                while (i<10000){
+//                    try {
+//                        wait(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                    i+=1;
+//                    progressPane.increase();
+//                }
+//            }
+//        });
         Sorting.buildConditions();
         information = InfoSaver.read();
         System.out.println(information.getMovies().size());
         informationManagement = new InformationManagement();
 //    informationManagment.addInformation("",information);
-        informationManagement.checkNewMovies(information);
+        informationManagement.checkNewMovies(information,this,new ArrayList<MediaContent>());
 //        information.buildShortCuts();
         InfoSaver.save(information);
 //        Sorting.userInput(scanner.nextLine());
@@ -126,10 +148,7 @@ public class Gui extends Application {
         ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
         System.out.println(information.getMovies().size());
         for (int i=0;i<information.getMovies().size();i++) {
-            Movie movie = new Movie(information.getMovies().get(i).getName(), information.getMovies().get(i).getYear(), information.getMovies().get(i).getPath());
-            movie.setSummery(information.getMovies().get(i).getYear());
-            movie.setImagePath("src\\Desert.jpg");
-            MediaContent mediaContent = new MediaContent(movie);
+            MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
             mediaContents.add(mediaContent);
         }
         setActivePaneContent(mediaContents);
@@ -246,25 +265,56 @@ public class Gui extends Application {
     public void searchForResults(){
         ArrayList<String>searchParams = new ArrayList<String>();
         TextField searchBox = (TextField) serach.getItems().get(0);
+        String name = searchBox.getText();
+        String favorite="";
+        String gener = "";
         searchParams.add(searchBox.getText());
-        if(categories.getSelected()!=null)
-        searchParams.add(categories.getSelected());
-        if(generes.getSelected()!=null)
+        if(categories.getSelected()!=null) {
+            searchParams.add(categories.getSelected());
+            favorite = categories.getSelected();
+        }
+        if(generes.getSelected()!=null) {
             searchParams.add(generes.getSelected());
+            gener = generes.getSelected();
+        }
+
 
         ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
-        for (int i=0;i<information.getMovies().size();i++){
-            for (int j=0;j<searchParams.size();j++){
-                if(information.getMovies().get(i).getName().contains(searchParams.get(j))||
-                        information.getMovies().get(i).getGenre().contains(searchParams.get(j))||
-                        searchParams.get(j).equals("all")
-                        ){
+//        for (int i=0;i<information.getMovies().size();i++){
+//            for (int j=0;j<searchParams.size();j++){
+//                if(searchParams.get(j).equals(""))
+//                    continue;
+//                System.out.println("...."+searchParams.get(j));
+//                if(information.getMovies().get(i).getName().contains(searchParams.get(j))||
+//                        information.getMovies().get(i).getGenre().contains(searchParams.get(j))||
+//                        searchParams.get(j).equals("all")
+//                        ){
+//                    MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+//                    mediaContents.add(mediaContent);
+//                    break;
+//                }
+//            }
+            for (int i=0;i<information.getMovies().size();i++){
+                if(!gener.equals("") && information.getMovies().get(i).getGenre()!=null && !gener.equals("none"))
+                if(information.getMovies().get(i).getGenre().toLowerCase().contains(gener.toLowerCase())||gener.equals("all")){
                     MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
                     mediaContents.add(mediaContent);
-                    break;
+                    continue;
+                }
+                if(!favorite.equals("")){
+                    if(information.categoriesTyps.contains(gener.toLowerCase())){//TODO
+                        MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+                        mediaContents.add(mediaContent);
+                        continue;
+                    }
+                    if(!name.equals(""))
+                    if(information.getMovies().get(i).getName().toLowerCase().contains(name.toLowerCase())){
+                        MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+                        mediaContents.add(mediaContent);
+                        continue;
+                    }
                 }
             }
-        }
         System.out.println("done");
         setActivePaneContent(mediaContents);
     }
