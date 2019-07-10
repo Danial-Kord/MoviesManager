@@ -8,40 +8,42 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Sorting {
-
+    public static ArrayList<String>stringConditions= new ArrayList<String>();
     public static void userInput(String path) {
-        ArrayList<String> in = new ArrayList<String>();
-        in.add("256");
-        in.add("264");
-        in.add("255");
-        in.add("480");
-        in.add("20");
-        in.add("19");
-        in.add("21");
-        in.add("22");
-        in.add("1080");
-        in.add("720");
-        in.add(".mkv");
-        in.add(".mp4");
-        in.add(".mpeg");
-        in.add(".mpeg2");
-        in.add("bluray");
-        in.add("hdrip");
-        in.add("hdcam");
-        in.add("hdtv");
-        in.add("4k");
-        in.add("web");
-        in.add(".avi");
-        userInput(path, in);
+        buildConditions();
+        userInput(path, stringConditions);
     }
+    public static void buildConditions(){
 
+        stringConditions.add("256");
+        stringConditions.add("264");
+        stringConditions.add("255");
+        stringConditions.add("480");
+        stringConditions.add("20");
+        stringConditions.add("19");
+        stringConditions.add("21");
+        stringConditions.add("22");
+        stringConditions.add("1080");
+        stringConditions.add("720");
+        stringConditions.add(".mkv");
+        stringConditions.add(".mp4");
+        stringConditions.add(".mpeg");
+        stringConditions.add(".mpeg2");
+        stringConditions.add("bluray");
+        stringConditions.add("hdrip");
+        stringConditions.add("hdcam");
+        stringConditions.add("hdtv");
+        stringConditions.add("4k");
+        stringConditions.add("web");
+        stringConditions.add(".avi");
+    }
     public static void userInput(String path, ArrayList<String> in) {
         DirCleaner.buildNewFolder(path);
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the file path: ");
         String dirPath = path; // Takes the directory path as the user input
         ArrayList<String> input = in;
-
+        stringConditions = in;
         File folder = new File(dirPath);
         if (folder.isDirectory()) {
             File[] fileList = folder.listFiles();
@@ -57,18 +59,7 @@ public class Sorting {
                 if (file.getName().endsWith(".mkv") || file.getName().endsWith(".mp4") || file.getName().endsWith(".mpeg") ||
                         file.getName().endsWith(".mpeg2") || file.getName().endsWith(".avi")) {
                     String year = getYear(file.getName());
-                    String temp1 = file.getName().substring(0, index(input, file.getName()));
-                    char[] temp2 = temp1.toCharArray();
-                    String temp = "";
-                    for (int i = 0; i < temp2.length; i++) {
-                        if (i != temp2.length - 1) {//for buildinf=g dir currectly
-                            if (temp2[i] == '.' || temp2[i] == '-' || temp2[i] == '_' || temp2[i] == ')' || temp2[i] == '(' || temp2[i] == '*') {
-                                temp += ' ';
-                            } else {
-                                temp += temp2[i];
-                            }
-                        }
-                    }
+                    String temp = findName(file);
                     temp += " " + year;
                     while (temp.endsWith(" ")) {
                         temp = temp.substring(0, temp.length() - 1);
@@ -167,5 +158,24 @@ public class Sorting {
                 }
             }
             return "";
+        }
+        public static String findName(File file) {
+            if (file.getName().endsWith(".mkv") || file.getName().endsWith(".mp4") || file.getName().endsWith(".mpeg") ||
+                    file.getName().endsWith(".mpeg2") || file.getName().endsWith(".avi")) {
+                String temp1 = file.getName().substring(0, index(stringConditions, file.getName()));
+                char[] temp2 = temp1.toCharArray();
+                String temp = "";
+                for (int i = 0; i < temp2.length; i++) {
+                    if (i != temp2.length - 1) {//for buildinf=g dir currectly
+                        if (temp2[i] == '.' || temp2[i] == '-' || temp2[i] == '_' || temp2[i] == ')' || temp2[i] == '(' || temp2[i] == '*') {
+                            temp += ' ';
+                        } else {
+                            temp += temp2[i];
+                        }
+                    }
+                }
+                return temp;
+            }
+            return null;
         }
     }

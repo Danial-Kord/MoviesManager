@@ -1,7 +1,6 @@
 package UI;
 
-import com.company.Information;
-import com.company.Movie;
+import com.company.*;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -27,6 +26,7 @@ import javafx.scene.control.ScrollBar;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Gui extends Application {
     MenuBar menuBar;
@@ -36,6 +36,7 @@ public class Gui extends Application {
     StackPane mainPane;
     public static BorderPane root;
     TabManager tabManager;
+    private InformationManagement informationManagement;
     private Button find250IMDB;
     private MenuButtonManager categories;
     private MenuButtonManager generes;
@@ -45,13 +46,22 @@ public class Gui extends Application {
         launch(args);
     }
 
-//    public Gui(Information information){
+//    public Gui(Information information,InformationManagement informationManagement){
 //        this.information = information;
-//       // start(new Stage());
-////        main();
+//        this.informationManagement = informationManagement;
+//        start(new Stage());
 //    }
     @Override
     public void start(Stage primaryStage) {
+        Sorting.buildConditions();
+        information = InfoSaver.read();
+        System.out.println(information.getMovies().size());
+        informationManagement = new InformationManagement();
+//    informationManagment.addInformation("",information);
+        informationManagement.checkNewMovies(information);
+//        information.buildShortCuts();
+        InfoSaver.save(information);
+//        Sorting.userInput(scanner.nextLine());
          root = null;
         try {
             root = FXMLLoader.load(getClass().getResource("MovieManager.fxml"));
@@ -78,8 +88,9 @@ public class Gui extends Application {
         stackPane.getChildren().add(textListView);
         textListView.getItems().add(new Text("dsadadadad"));
         setSerachHandler();
-        setting = new Setting();
+        setting = new Setting(information,informationManagement);
         setMenuBarHandler();
+
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 1200, 600));
         primaryStage.show();
@@ -107,9 +118,10 @@ public class Gui extends Application {
 
 
         ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
-        for (int i=0;i<10;i++) {
-            Movie movie = new Movie("ali", "taghi", "dsada");
-            movie.setSummery("faafasfaaaaaaafssddddfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaa");
+        System.out.println(information.getMovies().size());
+        for (int i=0;i<information.getMovies().size();i++) {
+            Movie movie = new Movie(information.getMovies().get(i).getName(), information.getMovies().get(i).getYear(), information.getMovies().get(i).getPath());
+            movie.setSummery(information.getMovies().get(i).getSummery());
             movie.setImagePath("src\\Desert.jpg");
             MediaContent mediaContent = new MediaContent(movie);
             mediaContents.add(mediaContent);
@@ -263,19 +275,25 @@ public class Gui extends Application {
     public void setMenuBarHandler(){
          Menu fileMenu = menuBar.getMenus().get(0);
         final MenuItem setting1 = fileMenu.getItems().get(0);
-
+        final MenuItem save = fileMenu.getItems().get(1);
+        final MenuItem exit = fileMenu.getItems().get(2);
         EventHandler<Event>eventHandler = new EventHandler<Event>() {
             @Override
             public void handle(Event mouseEvent) {
                 if(mouseEvent.getSource().equals(setting1)){
                     setting.setVisibale(true);
                 }
-                else if(true){
+                else if(mouseEvent.getSource().equals(save)){
+                    InfoSaver.save(information);
+                }
+                else if(mouseEvent.getSource().equals(exit)){
 
                 }
             }
         };
         setting1.addEventHandler(Event.ANY,eventHandler);
-
+        save.addEventHandler(Event.ANY,eventHandler);
+        exit.addEventHandler(Event.ANY,eventHandler);
+        //TODO
     }
 }

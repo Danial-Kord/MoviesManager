@@ -6,15 +6,21 @@ import java.util.ArrayList;
 
 public class InformationManagement {
     private ArrayList<Movie> getMovies(String path,Information information) {
+
+        System.out.println("movie numbers" + information.getMovies().size());
+
         File folder = new File(path);
         if (folder.isDirectory()) {
             File[] files = folder.listFiles();
             ArrayList<Movie> movies = new ArrayList<Movie>();
             for (File file : files) {
-                if (file.isDirectory()) {
+                if (!file.isDirectory()) {
                     boolean flag=false;
                     for (int i = 0; i < information.getMovies().size();i++) {
-                        if(information.getMovies().get(i).getName() ==file.getName() && information.getMovies().get(i).getYear() == Sorting.getYear(file.getName()) && movies.get(i).getPath() == file.getAbsolutePath()){
+                        System.out.println(i);
+                        if(information.getMovies().get(i).getName().equals(Sorting.findName(file))
+                                && information.getMovies().get(i).getYear().equals(Sorting.getYear(file.getName()))
+                                && movies.get(i).getPath().equals(file.getAbsolutePath())){
                             flag = true;
                             break;
                         }
@@ -23,7 +29,7 @@ public class InformationManagement {
                         movies.add(new Movie(file.getName(), Sorting.getYear(file.getName()), file.getAbsolutePath()));
                 }
             }
-            System.out.println(movies.size());
+            System.out.println("why : "+movies.size());
             return movies;
         } else {
             System.out.println("wrong path");
@@ -33,6 +39,7 @@ public class InformationManagement {
 
     public void checkNewMovies(Information information){
         for (String path : information.getPaths()) {
+            System.out.println("path numbers" + information.getPaths().size());
             ArrayList<Movie> movies = getMovies(path,information);
             information.addMovies(movies);
             for (Movie movie : movies) {

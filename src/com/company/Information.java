@@ -56,6 +56,7 @@ public class Information implements Serializable {
         }
     }
     public  void addPath(String path){
+        if(!samePath(path))
         paths.add(path);
     }
     public  void setMovies(ArrayList<Movie> movies) {
