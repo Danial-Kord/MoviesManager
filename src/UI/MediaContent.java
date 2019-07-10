@@ -26,11 +26,12 @@ public class MediaContent {
     private ImageView image;
     public MediaContent(Movie movie){
         this.movie = movie;
-        summery = new Text(movie.getSummery());
+        summery = new Text(movie.getYear());
 
         FileInputStream input= null;
         try {
-            input = new FileInputStream(movie.getImagePath());
+//            input = new FileInputStream(movie.getImagePath());
+            input = new FileInputStream("src\\Desert.jpg");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

@@ -56,8 +56,7 @@ public class Sorting {
             // Lists only files since we have applied file filter
             for (File file : fileList) {
                 if(!file.isDirectory())
-                if (file.getName().endsWith(".mkv") || file.getName().endsWith(".mp4") || file.getName().endsWith(".mpeg") ||
-                        file.getName().endsWith(".mpeg2") || file.getName().endsWith(".avi")) {
+                if (isMovie(file)) {
                     String year = getYear(file.getName());
                     String temp = findName(file);
                     temp += " " + year;
@@ -159,9 +158,15 @@ public class Sorting {
             }
             return "";
         }
+        public static boolean isMovie(File file){
+                if(file.getName().toLowerCase().endsWith(".mkv") || file.getName().toLowerCase().endsWith(".mp4")
+                        || file.getName().toLowerCase().endsWith(".mpeg") ||
+                        file.getName().toLowerCase().endsWith(".mpeg2") || file.getName().toLowerCase().endsWith(".avi"))
+                    return true;
+                return false;
+        }
         public static String findName(File file) {
-            if (file.getName().endsWith(".mkv") || file.getName().endsWith(".mp4") || file.getName().endsWith(".mpeg") ||
-                    file.getName().endsWith(".mpeg2") || file.getName().endsWith(".avi")) {
+            if (isMovie(file)) {
                 String temp1 = file.getName().substring(0, index(stringConditions, file.getName()));
                 char[] temp2 = temp1.toCharArray();
                 String temp = "";

@@ -51,8 +51,14 @@ public class Gui extends Application {
 //        this.informationManagement = informationManagement;
 //        start(new Stage());
 //    }
+    public void nothing(){
+        while (true){}
+    }
     @Override
     public void start(Stage primaryStage) {
+
+//        ProgressPane progressPane = new ProgressPane(25);
+
         Sorting.buildConditions();
         information = InfoSaver.read();
         System.out.println(information.getMovies().size());
@@ -88,7 +94,7 @@ public class Gui extends Application {
         stackPane.getChildren().add(textListView);
         textListView.getItems().add(new Text("dsadadadad"));
         setSerachHandler();
-        setting = new Setting(information,informationManagement);
+        setting = new Setting(information,informationManagement,this);
         setMenuBarHandler();
 
         primaryStage.setTitle("Movie Manager");
@@ -121,7 +127,7 @@ public class Gui extends Application {
         System.out.println(information.getMovies().size());
         for (int i=0;i<information.getMovies().size();i++) {
             Movie movie = new Movie(information.getMovies().get(i).getName(), information.getMovies().get(i).getYear(), information.getMovies().get(i).getPath());
-            movie.setSummery(information.getMovies().get(i).getSummery());
+            movie.setSummery(information.getMovies().get(i).getYear());
             movie.setImagePath("src\\Desert.jpg");
             MediaContent mediaContent = new MediaContent(movie);
             mediaContents.add(mediaContent);
@@ -174,17 +180,10 @@ public class Gui extends Application {
 
 //        root.getStylesheets().add("UI/Danial.css");
     }
-    public void setActivePaneContent(ArrayList<MediaContent>mediaContents){
-        Tab activeTab = tabPane.getTabs().get(0);
-        for (Tab tab : tabPane.getTabs()) {
-            if(tab.getId().equals("activeTab")) {
-                activeTab = tab;
-                break;
-            }
-        }
-
-        StackPane stackPane = (StackPane)activeTab.getContent();
-        final FlowPane flowPane= new FlowPane();
+    public void setActivePaneContent(ArrayList<MediaContent>mediaContents,int tab) {
+        Tab activeTab = tabPane.getTabs().get(tab);
+        StackPane stackPane = (StackPane) activeTab.getContent();
+        final FlowPane flowPane = new FlowPane();
         flowPane.setPadding(new Insets(5, 5, 5, 5));
         flowPane.setVgap(5);
         flowPane.setHgap(5);
@@ -202,7 +201,7 @@ public class Gui extends Application {
             }
         });
         stackPane.getChildren().addAll(scroll);
-        for (int i=0;i<mediaContents.size();i++){
+        for (int i = 0; i < mediaContents.size(); i++) {
             flowPane.getChildren().add(mediaContents.get(i).getStackPane());
 //            mediaContent.getSummery().setX(mediaContent.getImage().getX());
 //            mediaContent.getSummery().setY(mediaContent.getImage().getY());
@@ -210,6 +209,14 @@ public class Gui extends Application {
 //            mediaContent.getSummery().setLayoutY(mediaContent.getImage().getLayoutY());
         }
     }
+    public void setActivePaneContent(ArrayList<MediaContent>mediaContents) {
+
+        for (int i=0;i<tabPane.getTabs().size();i++)
+            if (tabPane.getTabs().get(i).getId().equals("activeTab")) {
+                setActivePaneContent(mediaContents,i);
+                break;
+            }
+        }
     public void setSerachHandler(){
         TextField searchBox = (TextField) serach.getItems().get(0);
         Button ok = (Button) serach.getItems().get(1);

@@ -36,6 +36,12 @@ public class Information implements Serializable {
     public void addCategoryType(String in){
         categoriesTyps.add(in);
     }
+    public boolean isPathExist(String path){
+        File file = new File(path);
+        if(file.exists())
+            return true;
+        return false;
+    }
     public void buildShortCuts(){
         for (String categoryNames : categoriesTyps) {
             File file = new File(categoriesPath + "\\"+categoryNames);

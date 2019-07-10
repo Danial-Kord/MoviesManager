@@ -41,7 +41,7 @@ public class DirCleaner {
         return path;
     }
 
-    private static ArrayList<File> getMovies(File dad,ArrayList<File>files){
+    public static ArrayList<File> getMovies(File dad,ArrayList<File>files){
         File[] fileList = dad.listFiles();
         for (File temp : fileList){
             if(temp.isDirectory()){
@@ -58,8 +58,7 @@ public class DirCleaner {
             File[] files = folder.listFiles();
             for (File file : files) {
                 if (file.isDirectory()) {
-                    if (file.delete())
-                        continue;
+                    if (file.delete()){}
                     else{
                         deletDirs(file);
                     }

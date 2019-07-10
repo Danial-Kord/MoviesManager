@@ -28,7 +28,9 @@ public class Setting {
     private TextField pathFinder;
     private Information information;
     private InformationManagement informationManagement;
-    public Setting(Information information , InformationManagement informationManagement){
+    private Gui gui;
+    public Setting(Information information , InformationManagement informationManagement,Gui gui){
+        this.gui = gui;
         this.information = information;
         this.informationManagement = informationManagement;
         stage = new Stage();
@@ -101,10 +103,17 @@ public class Setting {
         pathListView.getItems().add(listTextField);
         TextFieldManager.textFieldHandler(listTextField,pathListView);
         information.addPath(choosePath);
+        Gui.root.setDisable(true);
         informationManagement.addInformation(choosePath,information);
+        informationManagement.checkNewMovies(information);
         System.out.println(choosePath);
         InfoSaver.save(information);
-
+        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
+        for (int i=0;i<information.getMovies().size();i++) {
+            mediaContents.add(new MediaContent(information.getMovies().get(i)));
+        }
+        gui.setActivePaneContent(mediaContents,0);
+        Gui.root.setDisable(false);
     }
     public void setVisibale(boolean in){
         if(in)
