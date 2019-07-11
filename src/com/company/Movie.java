@@ -2,6 +2,7 @@ package com.company;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 
 public class Movie implements Serializable {
@@ -16,11 +17,14 @@ public class Movie implements Serializable {
     private String path;
     private String genre;
     private String imagePath;
+    private String folderPath;
+    private boolean isUpdatedFromNet = false;
+    private Date lastUpdate = null;
     private HashSet<String>favorite;//choose some categories for your movie that you want to add that shortcut in there.
     public Movie(String name, String year,String path) {
         this.name = name;
         this.year = year;
-        this.path = path;
+        setPath(path);
         favorite = new HashSet<String>();
     }
 
@@ -45,6 +49,14 @@ public class Movie implements Serializable {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public void setUpdatetFromNet(boolean updatetFromNet) {
+        isUpdatedFromNet = updatetFromNet;
     }
 
     public String getName() {
@@ -98,6 +110,8 @@ public class Movie implements Serializable {
 
     public void setPath(String path) {
         this.path = path;
+        folderPath = path.substring(0,path.lastIndexOf("\\"));
+
     }
 
     public String getPath() {
@@ -118,6 +132,10 @@ public class Movie implements Serializable {
             favorite.add("Best 250 IMDB");
     }
 
+    public String getFolderPath() {
+        return folderPath;
+    }
+
     public void setIMDBrating(String IMDBrating) {
         this.IMDBrating = IMDBrating;
     }
@@ -132,6 +150,10 @@ public class Movie implements Serializable {
 
     public void setActors(String actors) {
         this.actors = actors;
+    }
+
+    public boolean isUpdatedFromNet() {
+        return isUpdatedFromNet;
     }
 
     public void setDirectors(String directors) {

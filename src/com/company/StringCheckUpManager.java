@@ -70,8 +70,13 @@ public class StringCheckUpManager {
         return out;
     }
     public static String getImageUrl(String sorce) throws IndexOutOfBoundsException {
-        sorce = sorce.substring(sorce.lastIndexOf("img src=\"")+9,sorce.length());
-        return  sorce.substring(0,sorce.indexOf("\" alt"));
+        String sorce1 =
+//                "view-source:"+
+                        sorce.substring(sorce.lastIndexOf("img src=\"")).replace("img src=\"","");
+        sorce1 = sorce1.substring(0,sorce1.lastIndexOf(".jpg"))+".jpg";
+//        sorce1.replace(" ","_");
+//        sorce1 = sorce1.substring(0,sorce1.lastIndexOf("\" alt=\""));
+        return  sorce1;
     }
     public static String IMDB_best_ever(String sorce)throws IndexOutOfBoundsException{
         return sorce.substring(sorce.indexOf("<div class=\"imdb-top-rated-old-style\">") ,sorce.indexOf("<div class=\"imdb-top-rated-old-style\">") +sorce.substring(sorce.indexOf("<div class=\"imdb-top-rated-old-style\">")).indexOf("</div> "))

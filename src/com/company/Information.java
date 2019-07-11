@@ -36,7 +36,11 @@ public class Information implements Serializable {
     public void addCategoryType(String in){
         categoriesTyps.add(in);
     }
-    public boolean isPathExist(String path){
+    public static boolean isPathExist(String path){
+        if(path==null)
+            return false;
+        if(path.equals(""))
+            return false;
         File file = new File(path);
         if(file.exists())
             return true;

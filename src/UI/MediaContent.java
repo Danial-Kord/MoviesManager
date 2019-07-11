@@ -1,11 +1,15 @@
 package UI;
 
+import com.company.Information;
 import com.company.Movie;
-import javafx.application.Application;
+import com.company.Sorting;
+import com.sun.glass.ui.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import java.util.ListResourceBundle;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -13,41 +17,77 @@ import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.MediaView;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import sun.security.util.Resources_fr;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class MediaContent {
     private Movie movie;
     private StackPane stackPane;
     private Text summery;
     private ImageView image;
-    public MediaContent(Movie movie){
+    private Font font;
+    private ProgressIndicator progressIndicator;
+    public MediaContent(final Movie movie){
         this.movie = movie;
-        summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n"+movie.getPath()+"\n"+movie.getGenre()+"\n"+
+        font = new Font("Times New Roman",12);
+        summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n"+movie.getGenre()+"\n"+
                 movie.getSummery());
 
         FileInputStream input= null;
         try {
-//            input = new FileInputStream(movie.getImagePath());
-            input = new FileInputStream("src\\Desert.jpg");
+            if(movie.isUpdatedFromNet() || Information.isPathExist(movie.getImagePath())) {
+                input = new FileInputStream(movie.getImagePath());
+            }
+            else
+            input = new FileInputStream("src\\IMDB.jpg");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        progressIndicator = new ProgressIndicator();
+        progressIndicator.setProgress(0);
+        progressIndicator.setPrefWidth(10);
+//        Application.invokeLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                progressIndicator.setVisible(true);
+//                double i=0;
+//                while (!movie.isUpdatedFromNet()){
+//                    i+=0.00000001;
+//                    progressIndicator.setProgress(i);
+//                    if(i>=1)
+//                        i=0;
+//
+//                }
+//                progressIndicator.setVisible(false);
+//
+//            }
+//        });
+
         Image image1 = new Image(input);
          image =new ImageView(image1);
          summery.setVisible(false);
-         setImageSize(300,500);
+         setImageSize(172,275);
          setTextSize(image.getFitWidth(),image.getFitHeight());
         stackPane = new StackPane();
         stackPane.getChildren().add(image);
         stackPane.getChildren().add(summery);
+//        stackPane.getChildren().add(progressIndicator);
         setEventHandler();
-
+        summery.setFont(font);
     }
-    public void setImageSize(double width,double height){
+
+    public ProgressIndicator getProgressIndicator() {
+        return progressIndicator;
+    }
+
+    public void setImageSize(double width, double height){
         image.setFitHeight(height);
         image.setFitWidth(width);
     }
@@ -96,17 +136,46 @@ public class MediaContent {
 //                                && mouseEvent.getY() > image.getY()&& mouseEvent.getY()<image.getY()+image.getFitHeight())
                                 )
                  {
+                     stackPane.setCursor(Cursor.HAND);
                     image.setId("shouldBeDark");
                     summery.setVisible(true);
                 }
                 else {
+                    stackPane.setCursor(Cursor.DEFAULT);
                     image.setId("shouldBeLight");
                     summery.setVisible(false);
+                }
+                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED)){
+                    new MediaPane(movie);
                 }
             }
         };
 
         stackPane.addEventHandler(MouseEvent.MOUSE_EXITED,eventHandler);
         stackPane.addEventHandler(MouseEvent.MOUSE_ENTERED,eventHandler);
+        stackPane.addEventHandler(MouseEvent.MOUSE_CLICKED,eventHandler);
+    }
+    public boolean updateInfo(Movie movie){
+        if(movie.getName().equals(this.movie.getName())&&
+            movie.getYear().equals(this.movie.getYear())
+                //TODO
+        ){
+//            this.movie = movie;
+            summery.setText(movie.getYear() +"\n"+movie.getName()+"\n"+movie.getGenre()+"\n"+
+                    movie.getSummery());
+            summery.setFont(font);
+            if(movie.isUpdatedFromNet()) {
+                FileInputStream input=null;
+                try {
+                    input = new FileInputStream(movie.getImagePath());
+                    if(input!=null)
+                    image.setImage(new Image(input));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }

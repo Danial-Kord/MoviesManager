@@ -103,13 +103,11 @@ public class Setting {
         pathListView.getItems().add(listTextField);
         TextFieldManager.textFieldHandler(listTextField,pathListView);
         information.addPath(choosePath);
-        Gui.root.setDisable(true);
         informationManagement.addInformation(choosePath,information);
-        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
 //        for (int i=0;i<information.getMovies().size();i++) {
 //            mediaContents.add(new MediaContent(information.getMovies().get(i)));
 //        }
-        informationManagement.checkNewMovies(information,gui,mediaContents);
+        informationManagement.checkNewMovies(information,gui);
         System.out.println(choosePath);
         InfoSaver.save(information);
         stage.close();

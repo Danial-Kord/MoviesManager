@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <ImageView fitHeight="236.0" fitWidth="200.0" layoutX="41.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fitHeight="25.0" fitWidth="24.0" layoutX="41.0" layoutY="284.0" pickOnBounds="true" preserveRatio="true" />
+      <TextArea editable="false" layoutX="277.0" layoutY="66.0" prefHeight="217.0" prefWidth="294.0" />
+      <SplitMenuButton layoutX="139.0" layoutY="284.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="SplitMenuButton">
+        <items>
+          <MenuItem mnemonicParsing="false" text="Action 1" />
+          <MenuItem mnemonicParsing="false" text="Action 2" />
+        </items>
+      </SplitMenuButton>
+   </children>
+</AnchorPane>

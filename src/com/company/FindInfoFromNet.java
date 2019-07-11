@@ -1,6 +1,14 @@
 package com.company;
 
-import java.io.IOException;
+
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 
 public class FindInfoFromNet {
     public static Movie searchResults(Movie movie) {
@@ -18,19 +26,28 @@ public class FindInfoFromNet {
             System.out.println("Dadadada");
 //            if (sorce != null)
 //                moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
-        } catch (IOException e) {
+        }
+        catch (UnknownHostException e){
+            System.out.println("offline");
+        }
+        catch (IOException e) {
             e.printStackTrace();
             System.out.println("net problem");
         }
+
         try {
             if (sorce != null || moreDetails != null) {
                 if(sorce!=null) {
                     movie.setSummery(StringCheckUpManager.getSummery(sorce));
                     movie.setIMDBrating(StringCheckUpManager.getIMDBscore(sorce));
                     movie.setGenre(StringCheckUpManager.getGenre(sorce));
-//                String imageUrl = StringCheckUpManager.getImageUrl(sorce);//TODO image
-                    movie.setIMDBscore(StringCheckUpManager.IMDB_best_ever(sorce));
+                    System.out.println("genere get");
+                    String imageUrl = StringCheckUpManager.getImageUrl(sorce);//TODO image
+                    System.out.println("image url get");
+                    saveImage(imageUrl,movie);
 
+                    movie.setIMDBscore(StringCheckUpManager.IMDB_best_ever(sorce));
+                    System.out.println("rating...");
                 }
                 else {
 //                movie.setActors(StringCheckUpManager.findingActors(moreDetails));
@@ -43,5 +60,85 @@ public class FindInfoFromNet {
             System.out.println("site formating has been changed!");
         }
         return movie;
+    }
+    private static void saveImage(String urlString,Movie movie){
+        System.out.println("writing image");
+        File file = new File(movie.getFolderPath()+"\\image.jpg");
+        String path = movie.getFolderPath()+"\\image.jpg";
+
+        if(file.exists()) {
+            movie.setImagePath(path);
+            movie.setUpdatetFromNet(true);
+            return;
+        }
+        System.out.println(path);
+
+        java.lang.System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+        HttpURLConnection httpCon=null;
+        try {
+            URL url = new URL(urlString);
+             httpCon = (HttpURLConnection) url.openConnection();
+            httpCon.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36");
+
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        InputStream in = null;
+        try {
+
+            in = new BufferedInputStream(httpCon.getInputStream());
+        }
+        catch (FileNotFoundException e){
+            System.out.println(urlString);//TODO
+            return;
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buf = new byte[1024];
+        int n = 0;
+        while (true)
+        {
+            try {
+                if (!(-1!=(n=in.read(buf)))) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            out.write(buf, 0, n);
+        }
+        try {
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] response = out.toByteArray();
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(path);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            fos.write(response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        movie.setImagePath(path);
+        movie.setUpdatetFromNet(true);
     }
 }

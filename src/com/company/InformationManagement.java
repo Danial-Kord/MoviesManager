@@ -34,7 +34,7 @@ public class InformationManagement {
                         System.out.println(i);
                         System.out.println("name : "+information.getMovies().get(i).getName());
                         System.out.println("name : "+Sorting.findName(file));
-//                        try {
+                        try {
 
                             if (information.getMovies().get(i).getName().equals(Sorting.findName(file))
                                     && information.getMovies().get(i).getYear().equals(Sorting.getYear(file.getName()))
@@ -43,9 +43,10 @@ public class InformationManagement {
                                 break;
                             }
                         }
-//                        catch (IndexOutOfBoundsException e)
-//                        {}
-//                    }
+                        catch (IndexOutOfBoundsException e)
+                        {
+                            flag = true;
+                        } }
                     if(!flag)
                         movies.add(new Movie(Sorting.findName(file), Sorting.getYear(file.getName()), file.getAbsolutePath()));
                 }
@@ -58,10 +59,10 @@ public class InformationManagement {
         }
     }
 
-    public void checkNewMovies(final Information information, final Gui gui, final ArrayList<MediaContent>mediaContents){
+    public void checkNewMovies(final Information information, final Gui gui){
         for (int i=0;i<information.getPaths().size();i++) {
             String path = information.getPaths().get(i);
-            if(!information.isPathExist(path)) {
+            if(!information.isPathExist(path) || path.equals("") || path==null) {
 //                information.getPaths().remove(information.getPaths().get(i));
 //                i--;
                 continue;
@@ -71,14 +72,16 @@ public class InformationManagement {
             final ArrayList<Movie> movies = getMovies(path,information);
             information.addMovies(movies);
 
-
-             ProgressPane pBar = new ProgressPane(movies.size());
-             final ProgressBar progressBar = pBar.getProgressBar();
+            gui.findAll();
+//             ProgressPane pBar = new ProgressPane(movies.size());
+//             final ProgressBar progressBar = pBar.getProgressBar();
             Task<Parent> yourTaskName = new Task<Parent>() {
                 @Override
                 public Parent call() {
                     int i=0;
-                    for (Movie movie : movies) {
+                    for (Movie movie : information.getMovies()) {//TODO changed movies
+                        if(movie.isUpdatedFromNet())
+                            continue;
                         System.out.println("is here");
                         System.out.println(movie.getName());
                         System.out.println(movie.getYear());
@@ -87,12 +90,9 @@ public class InformationManagement {
 
                         updateProgress(i,movies.size());
                         i++;
-                        mediaContents.add(new MediaContent(movie));
-//                        i++;
-//                        if(i == 5) {
-//                            gui.setActivePaneContent(mediaContents, 0);
-//                            i = 0;
-//                        }
+                        i++;
+                            gui.updateOrAddMediaContent(movie);
+                            i = 0;
                     }
                     System.out.println("end of process");
                     return null;
@@ -103,17 +103,22 @@ public class InformationManagement {
 
                 }
             };
-
+//
             yourTaskName.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent event) {
                     Gui.root.setDisable(false);
-                    gui.setActivePaneContent(mediaContents,0);
+//                    gui.setActivePaneContent(mediaContents,0);
+                    gui.getLoadingText().setVisible(false);
+                    gui.getProgressBar().setVisible(false);
+                    gui.findAll();
                     InfoSaver.save(information);
                     System.out.println("absoulotly finished");
                 }
             });
-            pBar.getProgressBar().progressProperty().bind(yourTaskName.progressProperty());
+            gui.getLoadingText().setVisible(true);
+            gui.getProgressBar().setVisible(true);
+            gui.getProgressBar().progressProperty().bind(yourTaskName.progressProperty());
             Thread loadingThread = new Thread(yourTaskName);
             loadingThread.start();
 
@@ -154,9 +159,9 @@ public class InformationManagement {
             information.addPath(path);
             information.addMovies(getMovies(path,information));
                 final ProgressPane progressPane =  new ProgressPane(information.getMovies().size());
-                Thread thread = new Thread(){
-                    @Override
-                    public void run() {
+//                Thread thread = new Thread(){
+//                    @Override
+//                    public void run() {
                         for (Movie movie : information.getMovies()) {
                             System.out.println("is there");
                             System.out.println(movie.getName());
@@ -168,9 +173,9 @@ public class InformationManagement {
                             }
                             progressPane.increase();
                         }
-                    }
-                };
-                thread.start();
+//                    }
+//                };
+//                thread.start();
         }
         else {
 //            for (Movie movie : information.getMovies()) {

@@ -6,10 +6,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 
 public class UrlManager
 {
-    public static String getURLSource(String url1) throws IOException
+    public static String getURLSource(String url1) throws IOException, UnknownHostException
     {
         java.lang.System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 
@@ -19,7 +20,7 @@ public class UrlManager
 //        httpCon.addRequestProperty("Connection", "keep-alive");
 //        httpCon.addRequestProperty("Cache-Control", "max-age=0");
 //        httpCon.addRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-//        httpCon.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36");
+        httpCon.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36");
 //        httpCon.addRequestProperty("Accept-Encoding", "gzip,deflate,sdch");
 //        httpCon.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
 //        httpCon.setInstanceFollowRedirects(false);
@@ -27,7 +28,7 @@ public class UrlManager
 //        httpCon.setUseCaches(true);
 //        httpCon.setRequestMethod("GET");
 
-        httpCon.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+//        httpCon.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
        String out = toString(httpCon.getInputStream());
         httpCon.disconnect();
         return out;

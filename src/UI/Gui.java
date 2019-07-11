@@ -46,6 +46,10 @@ public class Gui extends Application {
     private MenuButtonManager generes;
     private Information information;
     private Setting setting;
+    private  ProgressBar progressBar;
+    private StackPane loading;
+    private Text loadingText;
+    private ArrayList<MediaContent>allMediaContents;
     public static void main(String[] args) {
         launch(args);
     }
@@ -64,7 +68,7 @@ public class Gui extends Application {
 
 
 
-
+    allMediaContents = new ArrayList<MediaContent>();
 //        final ProgressPane progressPane = new ProgressPane(10000);
 //        Platform.runLater(new Runnable() {
 //            @Override
@@ -81,14 +85,7 @@ public class Gui extends Application {
 //                }
 //            }
 //        });
-        Sorting.buildConditions();
-        information = InfoSaver.read();
-        System.out.println(information.getMovies().size());
-        informationManagement = new InformationManagement();
-//    informationManagment.addInformation("",information);
-        informationManagement.checkNewMovies(information,this,new ArrayList<MediaContent>());
-//        information.buildShortCuts();
-        InfoSaver.save(information);
+
 //        Sorting.userInput(scanner.nextLine());
          root = null;
         try {
@@ -96,21 +93,41 @@ public class Gui extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        VBox vBox = (VBox)root.getTop();
+        menuBar = (MenuBar)vBox.getChildren().get(0);
+        HBox hBox = (HBox)vBox.getChildren().get(2);
+        serach = (ToolBar)hBox.getChildren().get(0);
+        findFavorite = (ToolBar)hBox.getChildren().get(1);
+        findFavorite.setOrientation(Orientation.HORIZONTAL);
+
+        loading = (StackPane)vBox.getChildren().get(1);
+        loadingText = (Text)loading.getChildren().get(0);
+        progressBar = (ProgressBar)loading.getChildren().get(1);
+        loading.setId("backGroundRepeat");
+        getLoadingText().setVisible(false);
+        getProgressBar().setVisible(false);
+
 
         root.getStylesheets().add("UI/Danial.css");
 
-        SplitPane splitPane = (SplitPane)root.getChildren().get(0);
-        AnchorPane anchorPane = (AnchorPane)splitPane.getItems().get(0);
-        menuBar = (MenuBar)anchorPane.getChildren().get(0);
-        serach = (ToolBar)anchorPane.getChildren().get(2);
-        findFavorite = (ToolBar)anchorPane.getChildren().get(3);
-        tabPane = (TabPane) root.getChildren().get(1);
+
+        tabPane = (TabPane) root.getCenter();
         tabManager = new TabManager(tabPane);
         Node mainNode =  tabPane.getTabs().get(0).getContent();
         mainPane = (StackPane) (mainNode);
         categories = new MenuButtonManager((MenuButton)findFavorite.getItems().get(1),information);
         generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(2),information);
         find250IMDB = (Button) findFavorite.getItems().get(0);
+
+        Sorting.buildConditions();
+        information = InfoSaver.read();
+//        System.out.println(information.getMovies().get(0).getGenre());
+        informationManagement = new InformationManagement();
+//    informationManagment.addInformation("",information);
+        informationManagement.checkNewMovies(information,this);
+//        information.buildShortCuts();
+        InfoSaver.save(information);
+
         StackPane stackPane = (StackPane) tabPane.getTabs().get(1).getContent();
         ListView<Text> textListView = new ListView<Text>();
         stackPane.getChildren().add(textListView);
@@ -119,8 +136,9 @@ public class Gui extends Application {
         setting = new Setting(information,informationManagement,this);
         setMenuBarHandler();
 
+
         primaryStage.setTitle("Movie Manager");
-        primaryStage.setScene(new Scene(root, 1200, 600));
+        primaryStage.setScene(new Scene(root, 850, 600));
         primaryStage.show();
 
 
@@ -145,13 +163,14 @@ public class Gui extends Application {
 //        this.mainPane.getChildren().addAll(scroll);
 
 
-        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
+//        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();//TODO
         System.out.println(information.getMovies().size());
         for (int i=0;i<information.getMovies().size();i++) {
-            MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
-            mediaContents.add(mediaContent);
+//            MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+//            allMediaContents.add(mediaContent);
+            updateOrAddMediaContent(information.getMovies().get(i));
         }
-        setActivePaneContent(mediaContents);
+        setActivePaneContent(allMediaContents);
 
 
 
@@ -198,6 +217,37 @@ public class Gui extends Application {
 //        root.setTop(top);
 
 //        root.getStylesheets().add("UI/Danial.css");
+    }
+
+    public Text getLoadingText() {
+        return loadingText;
+    }
+
+    public StackPane getLoading() {
+        return loading;
+    }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
+    }
+
+    public void findAll(){
+        for (int i=0;i<information.getMovies().size();i++){
+            updateOrAddMediaContent(information.getMovies().get(i));
+        }
+        setActivePaneContent(allMediaContents);
+    }
+    public void updateOrAddMediaContent(Movie movie){
+        boolean flag = true;
+        for (int i=0;i<allMediaContents.size();i++){
+            if(allMediaContents.get(i).updateInfo(movie)){
+                flag = false;
+                break;
+            }
+        }
+        if(flag){
+            allMediaContents.add(new MediaContent(movie));
+        }
     }
     public void setActivePaneContent(ArrayList<MediaContent>mediaContents,int tab) {
         Tab activeTab = tabPane.getTabs().get(tab);
@@ -294,22 +344,23 @@ public class Gui extends Application {
 //                    break;
 //                }
 //            }
-            for (int i=0;i<information.getMovies().size();i++){
-                if(!gener.equals("") && information.getMovies().get(i).getGenre()!=null && !gener.equals("none"))
-                if(information.getMovies().get(i).getGenre().toLowerCase().contains(gener.toLowerCase())||gener.equals("all")){
-                    MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+
+            for (int i=0;i<allMediaContents.size();i++){
+                if(!gener.equals("") && allMediaContents.get(i).getMovie().getGenre()!=null && !gener.equals("none"))
+                if(allMediaContents.get(i).getMovie().getGenre().toLowerCase().contains(gener.toLowerCase())||gener.equals("all")){
+                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie());
                     mediaContents.add(mediaContent);
                     continue;
                 }
                 if(!favorite.equals("")){
                     if(information.categoriesTyps.contains(gener.toLowerCase())){//TODO
-                        MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie());
                         mediaContents.add(mediaContent);
                         continue;
                     }
                     if(!name.equals(""))
-                    if(information.getMovies().get(i).getName().toLowerCase().contains(name.toLowerCase())){
-                        MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+                    if(allMediaContents.get(i).getMovie().getName().toLowerCase().contains(name.toLowerCase())){
+                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie());
                         mediaContents.add(mediaContent);
                         continue;
                     }
@@ -320,11 +371,10 @@ public class Gui extends Application {
     }
     public void find250IMDB(){
         ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
-        for (int i=0;i<information.getMovies().size();i++){
-                if(information.getMovies().get(i).getIMDBscore()!="" || information.getMovies().get(i).getIMDBscore()!=null){
-                    MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+        for (int i=0;i<allMediaContents.size();i++){
+                if(allMediaContents.get(i).getMovie().getIMDBscore()!="" || allMediaContents.get(i).getMovie().getIMDBscore()!=null){
+                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie());
                     mediaContents.add(mediaContent);
-                    break;
                 }
         }
         setActivePaneContent(mediaContents);

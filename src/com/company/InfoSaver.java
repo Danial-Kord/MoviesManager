@@ -15,6 +15,8 @@ public class InfoSaver {//TODO default
             try {
                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
                 objectOutputStream.writeObject(information);
+                objectOutputStream.flush();
+                objectOutputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -34,6 +36,7 @@ public class InfoSaver {//TODO default
                 try {
                     ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
                     information = (Information) (objectInputStream.readObject());
+                    objectInputStream.close();
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }

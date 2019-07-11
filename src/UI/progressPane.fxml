@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="160.0" prefWidth="328.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text fontSmoothingType="LCD" layoutX="8.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="in progress :" textAlignment="CENTER" />
+      <Text layoutX="81.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="232.13671875" />
+      <StackPane layoutX="8.0" layoutY="71.0" prefHeight="18.0" prefWidth="312.0">
+         <children>
+            <ProgressBar prefHeight="18.0" prefWidth="315.0" progress="0.0" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="LOADING..." />
+         </children>
+      </StackPane>
+      <Button layoutX="141.0" layoutY="103.0" mnemonicParsing="false" style="-fx-background-radius: 10;" text="OK" />
+   </children>
+</Pane>
