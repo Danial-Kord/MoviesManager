@@ -19,6 +19,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -57,6 +58,7 @@ public class Gui extends Application {
     private HBox hBox;
     private VBox vBox;
     private Tab lastTab;
+    private Gui gui;
     private ArrayList<MediaContent>allMediaContents;
     public static void main(String[] args) {
         launch(args);
@@ -74,7 +76,7 @@ public class Gui extends Application {
     public void start(Stage primaryStage) {
 
 
-
+    gui=this;
     stage = primaryStage;
     allMediaContents = new ArrayList<MediaContent>();
 //        final ProgressPane progressPane = new ProgressPane(10000);
@@ -147,7 +149,8 @@ public class Gui extends Application {
         setting = new Setting(information,informationManagement,this);
         setMenuBarHandler();
 
-
+//        stage.getIcons().add(new Image("file:icon.png"));
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 850, 600));
         primaryStage.show();
@@ -306,6 +309,7 @@ public class Gui extends Application {
                     break;
                 }
                 else {
+                    lastTab = tabPane.getTabs().get(i);
                     ArrayList<MediaContent>mediaContents1 = new ArrayList<MediaContent>();
                     for (int j=0;j<mediaContents.size();j++){
                         mediaContents1.add(new MediaContent(mediaContents.get(j).getMovie(),information));
@@ -421,20 +425,22 @@ public class Gui extends Application {
                     mediaContents.add(mediaContent);
                     continue;
                 }
-                if(!favorite.equals("")){
+                if(!favorite.equals("")) {
 
-                    if(allMediaContents.get(i).getMovie().getFavorites().contains(favorite)){//TODO
-                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
+                    if (allMediaContents.get(i).getMovie().getFavorites().contains(favorite)) {//TODO
+                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(), information);
                         mediaContents.add(mediaContent);
                         continue;
                     }
+                }
+//
                     if(!name.equals(""))
                     if(allMediaContents.get(i).getMovie().getName().toLowerCase().contains(name.toLowerCase())){
                         MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
                         mediaContents.add(mediaContent);
                         continue;
                     }
-                }
+
             }
         System.out.println("done");
         setActivePaneContent(mediaContents);
@@ -452,9 +458,10 @@ public class Gui extends Application {
     }
     public void setMenuBarHandler(){
          Menu fileMenu = menuBar.getMenus().get(0);
-        final MenuItem setting1 = fileMenu.getItems().get(0);
-        final MenuItem save = fileMenu.getItems().get(1);
-        final MenuItem exit = fileMenu.getItems().get(2);
+         final MenuItem update = fileMenu.getItems().get(0);
+        final MenuItem setting1 = fileMenu.getItems().get(1);
+        final MenuItem save = fileMenu.getItems().get(2);
+        final MenuItem exit = fileMenu.getItems().get(3);
         EventHandler<Event>eventHandler = new EventHandler<Event>() {
             @Override
             public void handle(Event mouseEvent) {
@@ -468,12 +475,15 @@ public class Gui extends Application {
                     InfoSaver.save(information);
                     stage.close();
                 }
+                else if(mouseEvent.getSource().equals(update)){
+                    informationManagement.checkNewMovies(information,gui);
+                }
             }
         };
         setting1.addEventHandler(Event.ANY,eventHandler);
         save.addEventHandler(Event.ANY,eventHandler);
         exit.addEventHandler(Event.ANY,eventHandler);
-        //TODO
+        update.addEventHandler(Event.ANY,eventHandler);
     }
     private void findLikes(){
         ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();

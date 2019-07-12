@@ -156,7 +156,7 @@ public class StringCheckUpManager {
     }
     public static String moreDetaildSummery(String sorce)throws IndexOutOfBoundsException{
         System.out.println(sorce);
-        return sorce.substring(sorce.indexOf("<!-- Post -->"),sorce.indexOf("<div class=\"clearfix\"></div>"));
+        return sorce.substring(sorce.indexOf("<!-- Post -->"),sorce.indexOf("<div class=\"clearfix\"></div>")).replace("IMDB","");
    }
     public static String findingActors (String sorce1)throws IndexOutOfBoundsException{
         String sorce="";
@@ -185,6 +185,7 @@ public class StringCheckUpManager {
     public static String getHours(String sorce)throws IndexOutOfBoundsException{
         String sorce1 = sorce.substring(sorce.indexOf("مدت زمان"));
         return sorce1.substring(sorce1.indexOf("</span> "),sorce1.indexOf("</div>")).replace("</span>","")
-                .replace("ساعت","h").replace("دقیقه","m").replace("و","&");
+                .replace("ساعت","h").replace("دقیقه","m").replaceAll(" ","")
+                .replace("و"," & ");
     }
 }

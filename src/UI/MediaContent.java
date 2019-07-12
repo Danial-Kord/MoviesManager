@@ -39,9 +39,11 @@ public class MediaContent {
         this.movie = movie;
         this.information = information;
         font = new Font("Times New Roman",12);
-        summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n"+movie.getGenre()+"\n"+
-                movie.getSummery());
 
+        summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n genres : "+movie.getGenre()+"\n"+
+              "directors : \n"+  movie.getDirectors()
+        );
+        summery.setId("bold");
         FileInputStream input= null;
         try {
             if(movie.isUpdatedFromNet() || Information.isPathExist(movie.getImagePath())) {
@@ -82,7 +84,7 @@ public class MediaContent {
         stackPane.getChildren().add(summery);
 //        stackPane.getChildren().add(progressIndicator);
         setEventHandler();
-        summery.setFont(font);
+        summery.setFont(this.font);
     }
 
     public ProgressIndicator getProgressIndicator() {
@@ -163,8 +165,9 @@ public class MediaContent {
                 //TODO
         ){
 //            this.movie = movie;
-            summery.setText(movie.getYear() +"\n"+movie.getName()+"\n"+movie.getGenre()+"\n"+
-                    movie.getSummery());
+            summery.setText(movie.getYear() +"\n"+movie.getName()+"\n genres : "+movie.getGenre()+"\n"+
+                    "directors : \n"+  movie.getDirectors()
+            );
             summery.setFont(font);
             if(movie.isUpdatedFromNet()) {
                 FileInputStream input=null;

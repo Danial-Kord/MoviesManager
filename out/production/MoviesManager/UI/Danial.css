@@ -27,7 +27,7 @@
 
 /*}*/
 #shouldBeDark{
-    -fx-opacity: 0.68;
+    -fx-opacity: 0.60;
 }
 #shouldBeLight{
     -fx-opacity: 1;
@@ -36,4 +36,7 @@
     -fx-background-image: url("design.jpg");
     -fx-background-size: 200px 100px;
     -fx-background-repeat: repeat;
+}
+#bold{
+    -fx-font-style: bold;
 }

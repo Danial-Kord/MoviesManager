@@ -7,6 +7,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
@@ -73,6 +74,9 @@ public class Setting {
                 }
             }
         });
+//        stage.getIcons().add(new Image("file:icon.png"));
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
+
     }
 
     private void setSettingPaneHandler(){
@@ -96,13 +100,25 @@ public class Setting {
             settingPane.setDisable(true);
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File selectedDirectory = directoryChooser.showDialog(new Stage());
-            choosePath = selectedDirectory.getAbsolutePath();
+            try {
+                choosePath = selectedDirectory.getAbsolutePath();
+            }
+            catch (NullPointerException e){
+                choosePath =null;
+            }
+        }
+        if(information.getPaths().size() == 0 && choosePath==null){
+            addPath();
+            return;
         }
         settingPane.setDisable(false);
-        TextField listTextField = new TextField(choosePath);
-        pathListView.getItems().add(listTextField);
-        TextFieldManager.textFieldHandler(listTextField,pathListView);
+        int size = information.getPaths().size();
         information.addPath(choosePath);
+        if(size != information.getPaths().size()){
+            TextField listTextField = new TextField(choosePath);
+            pathListView.getItems().add(listTextField);
+            TextFieldManager.textFieldHandler(listTextField,pathListView);
+        }
         informationManagement.addInformation(choosePath,information);
 //        for (int i=0;i<information.getMovies().size();i++) {
 //            mediaContents.add(new MediaContent(information.getMovies().get(i)));
@@ -110,6 +126,7 @@ public class Setting {
         informationManagement.checkNewMovies(information,gui);
         System.out.println(choosePath);
         InfoSaver.save(information);
+        if(information.getPaths().size()==1)
         stage.close();
 
     }

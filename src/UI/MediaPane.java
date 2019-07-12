@@ -153,7 +153,8 @@ public class MediaPane {
         generes.setText(movie.getGenre());
         generes.setWrapText(true);
 
-
+//        primaryStage.getIcons().add(new Image("file:icon.png"));
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 700, 400));
         primaryStage.setResizable(false);
