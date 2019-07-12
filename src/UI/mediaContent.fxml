@@ -9,7 +9,6 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="513.0" prefWidth="712.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <BorderPane layoutX="32.0" layoutY="78.0" prefHeight="275.0" prefWidth="183.0" style="-fx-border-style: solid;">
@@ -26,6 +25,7 @@
                               <Image url="@../1200px-Heart_corazón.svg.png" />
                            </image>
                         </ImageView>
+                        <Button mnemonicParsing="false" style="-fx-background-radius: 15 0 15 0;" text="open" />
                     </items>
                   </ToolBar>
                </left>
@@ -43,7 +43,7 @@
             </BorderPane>
          </bottom>
       </BorderPane>
-      <GridPane layoutX="295.0" layoutY="150.0" prefHeight="214.0" prefWidth="403.0" style="-fx-border-style: solid;">
+      <GridPane layoutX="295.0" layoutY="108.0" prefHeight="278.0" prefWidth="403.0" style="-fx-border-style: solid;">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="165.0" minWidth="10.0" prefWidth="69.0" />
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="341.0" minWidth="10.0" prefWidth="332.0" />
@@ -57,22 +57,22 @@
          <children>
             <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1">
                <children>
-                  <TextArea prefHeight="200.0" prefWidth="200.0" style="-fx-border-style: none;" />
+                  <TextArea editable="false" prefHeight="200.0" prefWidth="200.0" style="-fx-border-style: dashed;" />
                </children>
             </StackPane>
             <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <children>
-                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+                  <TextArea editable="false" prefHeight="200.0" prefWidth="200.0" style="-fx-border-style: dashed;" />
                </children>
             </StackPane>
             <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <children>
-                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+                  <TextArea editable="false" prefHeight="200.0" prefWidth="200.0" style="-fx-border-style: dashed;" />
                </children>
             </StackPane>
             <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <children>
-                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+                  <TextArea editable="false" prefHeight="200.0" prefWidth="200.0" style="-fx-border-style: dashed;" />
                </children>
             </StackPane>
             <StackPane prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: white;">
@@ -97,21 +97,21 @@
             </StackPane>
          </children>
       </GridPane>
-      <AnchorPane layoutX="336.0" layoutY="9.0" prefHeight="99.0" prefWidth="338.0">
+      <AnchorPane layoutX="5.0" layoutY="-2.0" prefHeight="69.0" prefWidth="704.0">
          <children>
-            <ImageView fitHeight="39.0" fitWidth="69.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="39.0" fitWidth="69.0" layoutX="229.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../IMDB_logo2.png" />
                </image>
             </ImageView>
-            <Text layoutX="13.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-----" textAlignment="CENTER" wrappingWidth="38.0" />
-            <ImageView fitHeight="39.0" fitWidth="69.0" layoutX="87.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+            <Text layoutX="242.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-----" textAlignment="CENTER" wrappingWidth="38.0" />
+            <ImageView fitHeight="39.0" fitWidth="69.0" layoutX="316.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../calendar.png" />
                </image>
             </ImageView>
-            <Text layoutX="88.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-----" textAlignment="CENTER" wrappingWidth="38.0" />
-            <StackPane layoutX="141.0" layoutY="5.0" prefHeight="53.0" prefWidth="56.0">
+            <Text layoutX="317.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-----" textAlignment="CENTER" wrappingWidth="38.0" />
+            <StackPane layoutX="370.0" layoutY="5.0" prefHeight="53.0" prefWidth="56.0">
                <children>
                   <ImageView fitHeight="57.0" fitWidth="53.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -121,6 +121,13 @@
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="21.0" />
                </children>
             </StackPane>
+            <Text layoutX="379.0" layoutY="67.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-----" textAlignment="CENTER" wrappingWidth="38.0" />
+            <Text layoutX="438.0" layoutY="66.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-----" textAlignment="CENTER" wrappingWidth="38.0" />
+            <ImageView fitHeight="39.0" fitWidth="69.0" layoutX="437.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../img_493024.png" />
+               </image>
+            </ImageView>
          </children>
       </AnchorPane>
    </children>

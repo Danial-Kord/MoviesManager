@@ -33,30 +33,6 @@ public class FindInfoFromNet {
             System.out.println("net problem");
         }
 
-        try {
-            if (sorce != null || moreDetails != null) {
-                if(sorce!=null) {
-                    movie.setSummery(StringCheckUpManager.getSummery(sorce));
-                    movie.setIMDBrating(StringCheckUpManager.getIMDBscore(sorce));
-                    movie.setGenre(StringCheckUpManager.getGenre(sorce));
-                    System.out.println("genere get");
-                    String imageUrl = StringCheckUpManager.getImageUrl(sorce);//TODO image
-                    System.out.println("image url get");
-                    saveImage(imageUrl,movie);
-                    movie.setIMDBscore(StringCheckUpManager.IMDB_best_ever(sorce));
-                    System.out.println("rating...");
-
-                }
-                else {
-//                movie.setActors(StringCheckUpManager.findingActors(moreDetails));
-//                movie.setFullSummery(StringCheckUpManager.moreDetaildSummery(moreDetails));
-                }
-            } else {
-                System.out.println("no connection! or ridi ba searchet :|");
-            }
-        } catch (IndexOutOfBoundsException | NumberFormatException e) {
-            System.out.println("site formating has been changed!");
-        }
         if (sorce != null) {
             try {
                 moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
@@ -73,6 +49,8 @@ public class FindInfoFromNet {
                         System.out.println("directors finished");
                         movie.setDuration(StringCheckUpManager.getHours(moreDetails));
                         System.out.println("time get");
+                        movie.setNumberOfVotes(StringCheckUpManager.getNumberOfVotes(moreDetails));
+                        System.out.println("numberOfVotes");
 
                     }
                     catch (IndexOutOfBoundsException | NumberFormatException e) {
@@ -87,6 +65,31 @@ public class FindInfoFromNet {
                 System.out.println("net problem");
             }
 
+
+            try {
+                if (sorce != null) {
+                    if(sorce!=null) {
+                        movie.setSummery(StringCheckUpManager.getSummery(sorce));
+                        movie.setIMDBrating(StringCheckUpManager.getIMDBscore(sorce));
+                        movie.setGenre(StringCheckUpManager.getGenre(sorce));
+                        System.out.println("genere get");
+                        String imageUrl = StringCheckUpManager.getImageUrl(sorce);//TODO image
+                        System.out.println("image url get");
+                        saveImage(imageUrl,movie);
+                        movie.setIMDBscore(StringCheckUpManager.IMDB_best_ever(sorce));
+                        System.out.println("rating...");
+
+                    }
+                    else {
+//                movie.setActors(StringCheckUpManager.findingActors(moreDetails));
+//                movie.setFullSummery(StringCheckUpManager.moreDetaildSummery(moreDetails));
+                    }
+                } else {
+                    System.out.println("no connection! or ridi ba searchet :|");
+                }
+            } catch (IndexOutOfBoundsException | NumberFormatException e) {
+                System.out.println("site formating has been changed!");
+            }
         }
         return movie;
     }

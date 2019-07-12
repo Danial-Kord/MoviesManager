@@ -88,12 +88,32 @@
                         <MenuButton depthTest="DISABLE" mnemonicParsing="false" text="genres">
                           <items>
                               <MenuItem mnemonicParsing="false" text="all" />
+                              <MenuItem mnemonicParsing="false" text="Science-Fiction" />
                             <MenuItem mnemonicParsing="false" text="Comedy" />
                             <MenuItem mnemonicParsing="false" text="Action" />
                               <MenuItem mnemonicParsing="false" text="Adventure" />
                               <MenuItem mnemonicParsing="false" text="Horror" />
                               <MenuItem mnemonicParsing="false" text="Musical" />
                               <MenuItem mnemonicParsing="false" text="Family" />
+                              <MenuItem mnemonicParsing="false" text="Mystery" />
+                              <MenuItem mnemonicParsing="false" text="Fantasy" />
+                              <MenuItem mnemonicParsing="false" text="Animation" />
+                              <MenuItem mnemonicParsing="false" text="Biography" />
+                              <MenuItem mnemonicParsing="false" text="War" />
+                              <MenuItem mnemonicParsing="false" text="History" />
+                              <MenuItem mnemonicParsing="false" text="Short" />
+                              <MenuItem mnemonicParsing="false" text="Western" />
+                              <MenuItem mnemonicParsing="false" text="Noir" />
+                              <MenuItem mnemonicParsing="false" text="Sport" />
+                              <MenuItem mnemonicParsing="false" text="Reality-Tv" />
+                              <MenuItem mnemonicParsing="false" text="Stand-Up-Comedy" />
+                              <MenuItem mnemonicParsing="false" text="Game-Show" />
+                              <MenuItem mnemonicParsing="false" text="Talk-Show" />
+                              <MenuItem mnemonicParsing="false" text="Sitcom" />
+                              <MenuItem mnemonicParsing="false" text="Supernatural" />
+                              <MenuItem mnemonicParsing="false" text="Superhero" />
+                              <MenuItem mnemonicParsing="false" text="Live-Action" />
+                              <MenuItem mnemonicParsing="false" text="theatre" />
                               <MenuItem mnemonicParsing="false" text="none" />
                           </items>
                         </MenuButton>

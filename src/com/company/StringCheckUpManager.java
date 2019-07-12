@@ -48,7 +48,6 @@ public class StringCheckUpManager {
         String out="";
         String[] regex = in.split(",");
         for (int i=0;i<regex.length;i++){
-            System.out.println(regex[i]);
             out+=regex[i].substring(regex[i].indexOf("blank\">"),regex[i].indexOf("</a>")).replaceFirst("blank\">","")+" ";
 
         }
@@ -82,13 +81,55 @@ public class StringCheckUpManager {
         if(sorce.contains("ماجراجویی"))
             out += "Adventure,";
 
-        //TODO
-//        if(sorce.contains("ماجراجویی"))
-//            out += "ماجراحویی ";
-//        if(sorce.contains("ماجراجویی"))
-//            out += "ماجراحویی ";
-//        if(sorce.contains("ماجراجویی"))
-//            out += "ماجراحویی ";
+
+        if(sorce.contains("علمی-تخیلی"))
+            out += "Science-Fiction";
+        if(sorce.contains("معمایی"))
+            out += "Mystery";
+        if(sorce.contains("فانتزی"))
+            out += "Fantasy";
+
+        if(sorce.contains("خانوادگی"))
+            out += "Family";
+        if(sorce.contains("مستند"))
+            out += "Documentary";
+        if(sorce.contains("انیمیشن"))
+            out += "Animation";
+        if(sorce.contains("زندگینامه"))
+            out += "Biography";
+        if(sorce.contains("موزیکال"))
+            out += "Musical";
+        if(sorce.contains("جنگی"))
+            out += "War";
+        if(sorce.contains("تاریخی"))
+            out += "History";
+        if(sorce.contains("کوتاه"))
+            out += "Short";
+        if(sorce.contains("وسترن"))
+            out += "Western";
+        if(sorce.contains("نوآر"))
+            out += "Noir";
+        if(sorce.contains("ورزشی"))
+            out += "Sport";
+        if(sorce.contains("برنامه تلویزیونی"))
+            out += "Reality-Tv";
+        if(sorce.contains("استند آپ کمدی"))
+            out += "Stand-Up-Comedy";
+        if(sorce.contains("مسابقه تلویزیونی"))
+            out += "Game-Show";
+        if(sorce.contains("تاک شو"))
+            out += "Talk-Show";
+        if(sorce.contains("سیتکام"))
+            out += "Sitcom";
+        if(sorce.contains("فراطبیعی"))
+            out += "Supernatural";
+        if(sorce.contains("ابر قهرمانی"))
+            out += "Superhero";
+        if(sorce.contains("لایو اکشن"))
+            out += "Live-Action";
+        if(sorce.contains("تئاتر"))
+            out += "Theatre";
+
         return out;
     }
     public static String getSummeryEn (String sorce)throws IndexOutOfBoundsException{
@@ -96,7 +137,7 @@ public class StringCheckUpManager {
         System.out.println(sorce.substring(sorce.length()-5));
         String in = sorce.substring(0);
          in = in.substring(in.lastIndexOf("خلاصه داستان"));
-        in = in.substring(in.lastIndexOf("id=\"tab_en\"><p>")).replace("\"id=\\\"tab_en\\\"><p>\"","");
+        in = in.substring(in.lastIndexOf("id=\"tab_en\"><p>")).replace("id=\"tab_en\"><p>","");
 
         return in.substring(0,in.indexOf("</p>")).replace("&#039;","");
     }
@@ -137,11 +178,13 @@ public class StringCheckUpManager {
             sorce = sorce.replace("</a>","");
         }
         sorce = sorce.substring(sorce.indexOf("\""));
+
         System.out.println(sorce);
         return sorce.replace("\"","");
     }
     public static String getHours(String sorce)throws IndexOutOfBoundsException{
         String sorce1 = sorce.substring(sorce.indexOf("مدت زمان"));
-        return sorce1.substring(sorce1.indexOf("</span> "),sorce1.indexOf("</div>")).replace("</span>","");
+        return sorce1.substring(sorce1.indexOf("</span> "),sorce1.indexOf("</div>")).replace("</span>","")
+                .replace("ساعت","h").replace("دقیقه","m").replace("و","&");
     }
 }

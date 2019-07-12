@@ -56,6 +56,7 @@ public class Gui extends Application {
     private Stage stage;
     private HBox hBox;
     private VBox vBox;
+    private Tab lastTab;
     private ArrayList<MediaContent>allMediaContents;
     public static void main(String[] args) {
         launch(args);
@@ -120,6 +121,7 @@ public class Gui extends Application {
 
         tabPane = (TabPane) root.getCenter();
         tabManager = new TabManager(tabPane);
+        lastTab = tabPane.getTabs().get(0);
         Node mainNode =  tabPane.getTabs().get(0).getContent();
         mainPane = (StackPane) (mainNode);
 
@@ -298,8 +300,20 @@ public class Gui extends Application {
 
         for (int i=0;i<tabPane.getTabs().size();i++)
             if (tabPane.getTabs().get(i).getId().equals("activeTab")) {
-                setActivePaneContent(mediaContents,i);
-                break;
+                if(lastTab.equals(tabPane.getTabs().get(i))) {
+                    setActivePaneContent(mediaContents, i);
+                    System.out.println("holy shit");
+                    break;
+                }
+                else {
+                    ArrayList<MediaContent>mediaContents1 = new ArrayList<MediaContent>();
+                    for (int j=0;j<mediaContents.size();j++){
+                        mediaContents1.add(new MediaContent(mediaContents.get(j).getMovie(),information));
+                    }
+                    setActivePaneContent(mediaContents1, i);
+                    System.out.println("holy shit");
+                    break;
+                }
             }
         }
     public void setSerachHandler(){

@@ -36,7 +36,7 @@ public class TabManager {
             }
                 else if(tab.getId().equals("deActiveTab")){
                     hit = true;
-                    tab.setId("activePane");
+                    tab.setId("activeTab");
                 }
                 if(hit){
                     for (Tab tab1 : mainPane.getTabs()) {
@@ -45,8 +45,10 @@ public class TabManager {
                         }
                     }
                 }
+
         }
         };
         tab.setOnSelectionChanged(eventHandler);
+//        tab.setOnClosed(eventHandler);
     }
 }

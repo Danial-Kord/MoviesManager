@@ -23,6 +23,7 @@ public class Movie implements Serializable {
     private boolean favoriteMovie = false;
     private String duration;
     private String enSummery;
+    private String numberOfVotes;
     private HashSet<String>favorite;//choose some categories for your movie that you want to add that shortcut in there.
     public Movie(String name, String year,String path) {
         this.name = name;
@@ -56,6 +57,14 @@ public class Movie implements Serializable {
 
     public String getEnSummery() {
         return enSummery;
+    }
+
+    public void setNumberOfVotes(String numberOfVotes) {
+        this.numberOfVotes = numberOfVotes;
+    }
+
+    public String getNumberOfVotes() {
+        return numberOfVotes;
     }
 
     public void setImagePath(String imagePath) {

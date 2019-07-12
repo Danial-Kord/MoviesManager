@@ -8,6 +8,9 @@ import javafx.scene.Cursor;
 import javafx.scene.DepthTest;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -19,6 +22,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 
+import java.awt.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,8 +34,9 @@ public class MediaPane {
     private ImageView like;
     private SplitMenuButton categories;
     private TextArea details;
+    private  Button openFolder;
     private GridPane detailsPane;
-    public MediaPane(Movie movie,Information information){
+    public MediaPane(final Movie movie, Information information){
         Stage primaryStage = new Stage();
         this.movie = movie;
         try {
@@ -46,6 +52,20 @@ public class MediaPane {
         ToolBar left = (ToolBar)borderPane1.getLeft();
         ToolBar right = (ToolBar)borderPane1.getRight();
         like = (javafx.scene.image.ImageView)left.getItems().get(0);
+        openFolder = (Button)left.getItems().get(1);
+        openFolder.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                File folder = new File(movie.getFolderPath());
+                if(folder.exists()) {
+                    try {
+                        Desktop.getDesktop().open(folder);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
         categories = (SplitMenuButton)right.getItems().get(0);
 
         AnchorPane anchorPane = (AnchorPane)root.getChildren().get(2);
@@ -53,6 +73,8 @@ public class MediaPane {
         Text year = (Text)anchorPane.getChildren().get(3);
         StackPane stackPane =(StackPane)anchorPane.getChildren().get(4);
         Text IMDBRating = (Text)stackPane.getChildren().get(1);
+        Text IMDBVotes = (Text)anchorPane.getChildren().get(5);
+        Text duration = (Text)anchorPane.getChildren().get(6);
 
         if(movie.getIMDBscore()!=null){
             if(!movie.getIMDBscore().equals(""))
@@ -65,6 +87,14 @@ public class MediaPane {
         if(movie.getYear()!=null){
             if(!movie.getYear().equals(""))
                 year.setText(movie.getYear());
+        }
+        if(movie.getDuration()!=null){
+            if(!movie.getDuration().equals(""))
+                duration.setText(movie.getDuration());
+        }
+        if(movie.getNumberOfVotes()!=null){
+            if(!movie.getNumberOfVotes().equals(""))
+                IMDBVotes.setText(movie.getNumberOfVotes());
         }
         FileInputStream input= null;
         FileInputStream input2= null;
@@ -100,8 +130,29 @@ public class MediaPane {
         if(!movie.isFavoriteMovie())
         like.setId("shouldBeDark");
         setHandler();
-        root.setId("backGroundRepeat");
+//        root.setId("backGroundRepeat");
         root.getStylesheets().add("UI/Danial.css");
+
+        StackPane stackPane1 = (StackPane) detailsPane.getChildren().get(0);
+        TextArea actors = (TextArea)stackPane1.getChildren().get(0);
+        actors.setText(movie.getActors());
+        actors.setWrapText(true);
+
+        StackPane stackPane2 = (StackPane) detailsPane.getChildren().get(1);
+        TextArea enSummery = (TextArea)stackPane2.getChildren().get(0);
+        enSummery.setText(movie.getEnSummery());
+        enSummery.setWrapText(true);
+
+        StackPane stackPane3 = (StackPane) detailsPane.getChildren().get(2);
+        TextArea directors = (TextArea)stackPane3.getChildren().get(0);
+        directors.setText(movie.getDirectors());
+        directors.setWrapText(true);
+
+        StackPane stackPane4 = (StackPane) detailsPane.getChildren().get(3);
+        TextArea generes = (TextArea)stackPane4.getChildren().get(0);
+        generes.setText(movie.getGenre());
+        generes.setWrapText(true);
+
 
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 700, 400));
