@@ -20,6 +20,7 @@ public class Movie implements Serializable {
     private String folderPath;
     private boolean isUpdatedFromNet = false;
     private Date lastUpdate = null;
+    private boolean favoriteMovie = false;
     private HashSet<String>favorite;//choose some categories for your movie that you want to add that shortcut in there.
     public Movie(String name, String year,String path) {
         this.name = name;
@@ -85,11 +86,11 @@ public class Movie implements Serializable {
 
     public void setGenre(String genre) {
         this.genre = genre;
-        String[]regex = genre.split(",");
-        for (String temp : regex) {
-            if(temp!= null&& temp!= "")
-            addCategory(temp);
-        }
+//        String[]regex = genre.split(",");
+//        for (String temp : regex) {
+//            if(temp!= null&& temp!= "")
+//            addCategory(temp);
+//        }
     }
 
     public String getGenre() {
@@ -128,8 +129,7 @@ public class Movie implements Serializable {
 
     public void setIMDBscore(String IMDBscore) {
         this.IMDBscore = IMDBscore;
-        if(IMDBscore != null)
-            favorite.add("Best 250 IMDB");
+
     }
 
     public String getFolderPath() {
@@ -138,6 +138,14 @@ public class Movie implements Serializable {
 
     public void setIMDBrating(String IMDBrating) {
         this.IMDBrating = IMDBrating;
+    }
+
+    public void setFavoriteMovie(boolean favoriteMovie) {
+        this.favoriteMovie = favoriteMovie;
+    }
+
+    public boolean isFavoriteMovie() {
+        return favoriteMovie;
     }
 
     public void setFullSummery(String fullSummery) {

@@ -34,8 +34,10 @@ public class MediaContent {
     private ImageView image;
     private Font font;
     private ProgressIndicator progressIndicator;
-    public MediaContent(final Movie movie){
+    private Information information;
+    public MediaContent(final Movie movie,Information information){
         this.movie = movie;
+        this.information = information;
         font = new Font("Times New Roman",12);
         summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n"+movie.getGenre()+"\n"+
                 movie.getSummery());
@@ -146,7 +148,7 @@ public class MediaContent {
                     summery.setVisible(false);
                 }
                 if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED)){
-                    new MediaPane(movie);
+                    new MediaPane(movie,information);
                 }
             }
         };

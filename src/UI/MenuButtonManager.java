@@ -117,7 +117,8 @@ public class MenuButtonManager {
         int size = information.categoriesTyps.size();
         if(searchBox.getText().equals(""))
             return;
-        information.addCategoryType(searchBox.getText());
+        String text = searchBox.getText();
+        information.addCategoryType(text);
         if(information.categoriesTyps.size() == size)
             return;
         TextField textField = new TextField(searchBox.getText());

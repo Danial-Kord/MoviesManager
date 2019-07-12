@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.media.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
@@ -7,16 +10,118 @@
 <?import javafx.scene.layout.*?>
 
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="513.0" prefWidth="712.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ImageView fitHeight="236.0" fitWidth="200.0" layoutX="41.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true" />
-      <ImageView fitHeight="25.0" fitWidth="24.0" layoutX="41.0" layoutY="284.0" pickOnBounds="true" preserveRatio="true" />
-      <TextArea editable="false" layoutX="277.0" layoutY="66.0" prefHeight="217.0" prefWidth="294.0" />
-      <SplitMenuButton layoutX="139.0" layoutY="284.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="SplitMenuButton">
-        <items>
-          <MenuItem mnemonicParsing="false" text="Action 1" />
-          <MenuItem mnemonicParsing="false" text="Action 2" />
-        </items>
-      </SplitMenuButton>
+      <BorderPane layoutX="32.0" layoutY="78.0" prefHeight="275.0" prefWidth="183.0" style="-fx-border-style: solid;">
+         <center>
+            <ImageView fitHeight="282.0" fitWidth="239.0" pickOnBounds="true" BorderPane.alignment="CENTER" />
+         </center>
+         <bottom>
+            <BorderPane prefHeight="37.0" prefWidth="225.0" style="-fx-border-style: dashed;" BorderPane.alignment="CENTER">
+               <left>
+                  <ToolBar prefHeight="35.0" prefWidth="107.0" style="-fx-background-color: none;" BorderPane.alignment="CENTER">
+                    <items>
+                        <ImageView fitHeight="25.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../1200px-Heart_corazón.svg.png" />
+                           </image>
+                        </ImageView>
+                    </items>
+                  </ToolBar>
+               </left>
+               <right>
+                  <ToolBar prefHeight="35.0" prefWidth="137.0" BorderPane.alignment="CENTER">
+                    <items>
+                        <SplitMenuButton mnemonicParsing="false" prefHeight="25.0" prefWidth="98.0" text="Categories">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="More" />
+                          </items>
+                        </SplitMenuButton>
+                    </items>
+                  </ToolBar>
+               </right>
+            </BorderPane>
+         </bottom>
+      </BorderPane>
+      <GridPane layoutX="295.0" layoutY="150.0" prefHeight="214.0" prefWidth="403.0" style="-fx-border-style: solid;">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="165.0" minWidth="10.0" prefWidth="69.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="341.0" minWidth="10.0" prefWidth="332.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1">
+               <children>
+                  <TextArea prefHeight="200.0" prefWidth="200.0" style="-fx-border-style: none;" />
+               </children>
+            </StackPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <children>
+                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+               </children>
+            </StackPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <children>
+                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+               </children>
+            </StackPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <children>
+                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+               </children>
+            </StackPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: white;">
+               <children>
+                  <Text fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" text="Actors" textAlignment="CENTER" wrappingWidth="46.13671875" />
+               </children>
+            </StackPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: white;" GridPane.rowIndex="1">
+               <children>
+                  <Text fill="#ff0400" strokeType="OUTSIDE" strokeWidth="0.0" text="Summery" textAlignment="CENTER" wrappingWidth="62.13671875" />
+               </children>
+            </StackPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: white;" GridPane.rowIndex="2">
+               <children>
+                  <Text fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" text="Directors" textAlignment="CENTER" wrappingWidth="60.13671875" />
+               </children>
+            </StackPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: white;" GridPane.rowIndex="3">
+               <children>
+                  <Text fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" text="Generes" textAlignment="CENTER" wrappingWidth="56.13671875" />
+               </children>
+            </StackPane>
+         </children>
+      </GridPane>
+      <AnchorPane layoutX="336.0" layoutY="9.0" prefHeight="99.0" prefWidth="338.0">
+         <children>
+            <ImageView fitHeight="39.0" fitWidth="69.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../IMDB_logo2.png" />
+               </image>
+            </ImageView>
+            <Text layoutX="13.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-----" textAlignment="CENTER" wrappingWidth="38.0" />
+            <ImageView fitHeight="39.0" fitWidth="69.0" layoutX="87.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../calendar.png" />
+               </image>
+            </ImageView>
+            <Text layoutX="88.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-----" textAlignment="CENTER" wrappingWidth="38.0" />
+            <StackPane layoutX="141.0" layoutY="5.0" prefHeight="53.0" prefWidth="56.0">
+               <children>
+                  <ImageView fitHeight="57.0" fitWidth="53.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../Star_Gold-512.png" />
+                     </image>
+                  </ImageView>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="21.0" />
+               </children>
+            </StackPane>
+         </children>
+      </AnchorPane>
    </children>
 </AnchorPane>

@@ -15,7 +15,7 @@ public class Information implements Serializable {
     private  ArrayList<Boolean>thisPathIsdone ;//TODO
     public static final String path =  System.getProperty("user.home");
     public static String categoriesPath = path+"\\categories";
-    public HashSet<String>categoriesTyps;
+    public  HashSet<String>categoriesTyps = new HashSet<String>();;
     public Information() {
         categoriesTyps = new HashSet<String>();
         categoriesPath = path+"\\categories";

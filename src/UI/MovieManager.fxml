@@ -64,11 +64,21 @@
                         <TextField promptText="Search here..." style="-fx-background-radius: 25;" />
                         <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0" style="-fx-background-radius: 15;" text="ok">
                         </Button>
+                        <Button mnemonicParsing="false" style="-fx-background-radius: 10 10 10 10;" text="find all" />
                      </items>
                   </ToolBar>
                   <ToolBar prefHeight="40.0" prefWidth="2000.0" style="-fx-padding: 0 0 0 120;">
                      <items>
-                        <Button mnemonicParsing="false" text="250IMDB" />
+                        <ImageView fitHeight="32.0" fitWidth="34.0" pickOnBounds="true">
+                           <image>
+                              <Image url="@../1200px-Heart_corazón.svg.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="28.0" fitWidth="67.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../IMDB_logo2.png" />
+                           </image>
+                        </ImageView>
                         <MenuButton mnemonicParsing="false" style="-fx-border-style: none;" text="Categories">
                           <items>
                               <MenuItem mnemonicParsing="false" text="none" />

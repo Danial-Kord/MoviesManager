@@ -14,10 +14,12 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -26,6 +28,7 @@ import javafx.scene.media.MediaView;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.control.ScrollBar;
+import javafx.stage.WindowEvent;
 
 
 import java.io.IOException;
@@ -41,7 +44,7 @@ public class Gui extends Application {
     public static BorderPane root;
     TabManager tabManager;
     private InformationManagement informationManagement;
-    private Button find250IMDB;
+    private ImageView find250IMDB;
     private MenuButtonManager categories;
     private MenuButtonManager generes;
     private Information information;
@@ -49,6 +52,10 @@ public class Gui extends Application {
     private  ProgressBar progressBar;
     private StackPane loading;
     private Text loadingText;
+    private ImageView likes;
+    private Stage stage;
+    private HBox hBox;
+    private VBox vBox;
     private ArrayList<MediaContent>allMediaContents;
     public static void main(String[] args) {
         launch(args);
@@ -67,7 +74,7 @@ public class Gui extends Application {
 
 
 
-
+    stage = primaryStage;
     allMediaContents = new ArrayList<MediaContent>();
 //        final ProgressPane progressPane = new ProgressPane(10000);
 //        Platform.runLater(new Runnable() {
@@ -93,9 +100,9 @@ public class Gui extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        VBox vBox = (VBox)root.getTop();
+         vBox = (VBox)root.getTop();
         menuBar = (MenuBar)vBox.getChildren().get(0);
-        HBox hBox = (HBox)vBox.getChildren().get(2);
+         hBox = (HBox)vBox.getChildren().get(2);
         serach = (ToolBar)hBox.getChildren().get(0);
         findFavorite = (ToolBar)hBox.getChildren().get(1);
         findFavorite.setOrientation(Orientation.HORIZONTAL);
@@ -115,9 +122,6 @@ public class Gui extends Application {
         tabManager = new TabManager(tabPane);
         Node mainNode =  tabPane.getTabs().get(0).getContent();
         mainPane = (StackPane) (mainNode);
-        categories = new MenuButtonManager((MenuButton)findFavorite.getItems().get(1),information);
-        generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(2),information);
-        find250IMDB = (Button) findFavorite.getItems().get(0);
 
         Sorting.buildConditions();
         information = InfoSaver.read();
@@ -127,6 +131,11 @@ public class Gui extends Application {
         informationManagement.checkNewMovies(information,this);
 //        information.buildShortCuts();
         InfoSaver.save(information);
+        categories = new MenuButtonManager((MenuButton)findFavorite.getItems().get(2),information);
+        generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(3),information);
+        find250IMDB = (ImageView) findFavorite.getItems().get(1);
+        likes = (ImageView)findFavorite.getItems().get(0);
+
 
         StackPane stackPane = (StackPane) tabPane.getTabs().get(1).getContent();
         ListView<Text> textListView = new ListView<Text>();
@@ -217,6 +226,13 @@ public class Gui extends Application {
 //        root.setTop(top);
 
 //        root.getStylesheets().add("UI/Danial.css");
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent windowEvent) {
+                InfoSaver.save(information);
+                stage.close();
+            }
+        });
     }
 
     public Text getLoadingText() {
@@ -246,7 +262,7 @@ public class Gui extends Application {
             }
         }
         if(flag){
-            allMediaContents.add(new MediaContent(movie));
+            allMediaContents.add(new MediaContent(movie,information));
         }
     }
     public void setActivePaneContent(ArrayList<MediaContent>mediaContents,int tab) {
@@ -288,16 +304,17 @@ public class Gui extends Application {
         }
     public void setSerachHandler(){
         TextField searchBox = (TextField) serach.getItems().get(0);
-        Button ok = (Button) serach.getItems().get(1);
-
-        EventHandler<MouseEvent>mouseEvent = new EventHandler<MouseEvent>() {
+        final Button ok = (Button) serach.getItems().get(1);
+        Button findAll = (Button)serach.getItems().get(2);
+        final EventHandler<MouseEvent>mouseEvent = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 Button button = (Button)mouseEvent.getSource();
-                if(button.equals(find250IMDB))
-                    find250IMDB();
-                else
-                   searchForResults();
+                    if(button.equals(ok))
+                    searchForResults();
+                    else {
+                        findAll();
+                    }
             }
         };
         EventHandler<KeyEvent>keyEventEventHandler = new EventHandler<KeyEvent>() {
@@ -310,7 +327,40 @@ public class Gui extends Application {
         };
         searchBox.addEventHandler(KeyEvent.ANY,keyEventEventHandler);
         ok.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
-        find250IMDB.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
+        findAll.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
+
+        EventHandler<MouseEvent>mouseEventEventHandler = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                ImageView imageView = (ImageView)mouseEvent.getSource();
+                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED)){
+                    if(imageView.equals(likes))
+                    findLikes();
+                    else if(imageView.equals(find250IMDB))
+                        find250IMDB();
+                    return;
+                }
+                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_ENTERED)
+
+//                       || (mouseEvent.getX() > image.getX() && mouseEvent.getX()<image.getX()+image.getFitWidth()
+//                                && mouseEvent.getY() > image.getY()&& mouseEvent.getY()<image.getY()+image.getFitHeight())
+                )
+                {
+                    vBox.setCursor(Cursor.HAND);
+
+                }
+                else {
+                    vBox.setCursor(Cursor.DEFAULT);
+                }
+
+            }
+        };
+        likes.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
+        likes.addEventHandler(MouseEvent.MOUSE_ENTERED,mouseEventEventHandler);
+        likes.addEventHandler(MouseEvent.MOUSE_EXITED,mouseEventEventHandler);
+        find250IMDB.addEventHandler(MouseEvent.MOUSE_EXITED,mouseEventEventHandler);
+        find250IMDB.addEventHandler(MouseEvent.MOUSE_ENTERED,mouseEventEventHandler);
+        find250IMDB.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
     }
     public void searchForResults(){
         ArrayList<String>searchParams = new ArrayList<String>();
@@ -346,21 +396,27 @@ public class Gui extends Application {
 //            }
 
             for (int i=0;i<allMediaContents.size();i++){
+                if(gener.equals("all")){
+                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
+                    mediaContents.add(mediaContent);
+                    continue;
+                }
                 if(!gener.equals("") && allMediaContents.get(i).getMovie().getGenre()!=null && !gener.equals("none"))
-                if(allMediaContents.get(i).getMovie().getGenre().toLowerCase().contains(gener.toLowerCase())||gener.equals("all")){
-                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie());
+                if(allMediaContents.get(i).getMovie().getGenre().toLowerCase().contains(gener.toLowerCase())){
+                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
                     mediaContents.add(mediaContent);
                     continue;
                 }
                 if(!favorite.equals("")){
-                    if(information.categoriesTyps.contains(gener.toLowerCase())){//TODO
-                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie());
+
+                    if(allMediaContents.get(i).getMovie().getFavorites().contains(favorite)){//TODO
+                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
                         mediaContents.add(mediaContent);
                         continue;
                     }
                     if(!name.equals(""))
                     if(allMediaContents.get(i).getMovie().getName().toLowerCase().contains(name.toLowerCase())){
-                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie());
+                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
                         mediaContents.add(mediaContent);
                         continue;
                     }
@@ -372,8 +428,9 @@ public class Gui extends Application {
     public void find250IMDB(){
         ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
         for (int i=0;i<allMediaContents.size();i++){
-                if(allMediaContents.get(i).getMovie().getIMDBscore()!="" || allMediaContents.get(i).getMovie().getIMDBscore()!=null){
-                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie());
+            if(allMediaContents.get(i).getMovie().getIMDBscore()!=null)
+                if(!allMediaContents.get(i).getMovie().getIMDBscore().equals("")){
+                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
                     mediaContents.add(mediaContent);
                 }
         }
@@ -394,7 +451,8 @@ public class Gui extends Application {
                     InfoSaver.save(information);
                 }
                 else if(mouseEvent.getSource().equals(exit)){
-
+                    InfoSaver.save(information);
+                    stage.close();
                 }
             }
         };
@@ -402,5 +460,15 @@ public class Gui extends Application {
         save.addEventHandler(Event.ANY,eventHandler);
         exit.addEventHandler(Event.ANY,eventHandler);
         //TODO
+    }
+    private void findLikes(){
+        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
+        for (int i=0;i<allMediaContents.size();i++){
+                if(allMediaContents.get(i).getMovie().isFavoriteMovie()){
+                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
+                    mediaContents.add(mediaContent);
+                }
+        }
+        setActivePaneContent(mediaContents);
     }
 }
