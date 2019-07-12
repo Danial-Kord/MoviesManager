@@ -41,6 +41,28 @@ public class StringCheckUpManager {
         temp = temp.substring(temp.lastIndexOf("<a href=\""));
         return temp.replace("<a href=\"","").replace("#p","");
     }
+    public static String getDirectors(String sorce){
+        String in = sorce.substring(sorce.indexOf("کارگردان"));
+        in = in .substring(0,in.indexOf("</div>"));
+
+        String out="";
+        String[] regex = in.split(",");
+        for (int i=0;i<regex.length;i++){
+            System.out.println(regex[i]);
+            out+=regex[i].substring(regex[i].indexOf("blank\">"),regex[i].indexOf("</a>")).replaceFirst("blank\">","")+" ";
+
+        }
+        System.out.println(out);
+
+
+
+
+        return out;
+    }
+    public static String getNumberOfVotes(String sorce){
+        String in = sorce.substring(sorce.indexOf("امتیاز IMDb"));
+        return in.substring(in.indexOf("<em>"),in.indexOf("</em>")).replaceFirst("<em>","");
+    }
     public static String getGenre(String sorce)throws IndexOutOfBoundsException{
         String out = ",";
         if(sorce.contains("هیجان انگیز"))
@@ -69,6 +91,15 @@ public class StringCheckUpManager {
 //            out += "ماجراحویی ";
         return out;
     }
+    public static String getSummeryEn (String sorce)throws IndexOutOfBoundsException{
+//        tab_en
+        System.out.println(sorce.substring(sorce.length()-5));
+        String in = sorce.substring(0);
+         in = in.substring(in.lastIndexOf("خلاصه داستان"));
+        in = in.substring(in.lastIndexOf("id=\"tab_en\"><p>")).replace("\"id=\\\"tab_en\\\"><p>\"","");
+
+        return in.substring(0,in.indexOf("</p>")).replace("&#039;","");
+    }
     public static String getImageUrl(String sorce) throws IndexOutOfBoundsException {
         String sorce1 =
 //                "view-source:"+
@@ -86,10 +117,14 @@ public class StringCheckUpManager {
         System.out.println(sorce);
         return sorce.substring(sorce.indexOf("<!-- Post -->"),sorce.indexOf("<div class=\"clearfix\"></div>"));
    }
-    public static String findingActors (String sorce)throws IndexOutOfBoundsException{
-        sorce = (sorce.substring(sorce.indexOf("<a href=\"/search?cast"),sorce.length()-1));
-        sorce = sorce.substring(0,sorce.indexOf("</bdi></div><div class=\"info\">"));
-        sorce = sorce.replace("</bdi></div><div class=\"info\">","");
+    public static String findingActors (String sorce1)throws IndexOutOfBoundsException{
+        String sorce="";
+        sorce = (sorce1.substring(sorce1.indexOf("بازیگران اصلی")));
+        sorce = sorce.substring(0,sorce.indexOf("</bdi>"));
+        sorce = sorce.replace("<bdi>","");
+        sorce = sorce.replace("بازیگران اصلی","");
+        sorce = sorce.replace("</span> ","");
+
         String key = "<a href=\"/search?cast=";
         while (sorce.contains(key)){
             String key2 = sorce.substring(sorce.indexOf(key),(sorce.indexOf(key)+key.length()) + 9);//some thing that starts with key and countinous with key2 is repeted that should be delet
@@ -101,6 +136,12 @@ public class StringCheckUpManager {
         while (sorce.contains("</a>")){
             sorce = sorce.replace("</a>","");
         }
+        sorce = sorce.substring(sorce.indexOf("\""));
+        System.out.println(sorce);
         return sorce.replace("\"","");
+    }
+    public static String getHours(String sorce)throws IndexOutOfBoundsException{
+        String sorce1 = sorce.substring(sorce.indexOf("مدت زمان"));
+        return sorce1.substring(sorce1.indexOf("</span> "),sorce1.indexOf("</div>")).replace("</span>","");
     }
 }

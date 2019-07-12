@@ -24,8 +24,6 @@ public class FindInfoFromNet {
         try {
             sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.digital/?s=" + name));
             System.out.println("Dadadada");
-//            if (sorce != null)
-//                moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
         }
         catch (UnknownHostException e){
             System.out.println("offline");
@@ -45,9 +43,9 @@ public class FindInfoFromNet {
                     String imageUrl = StringCheckUpManager.getImageUrl(sorce);//TODO image
                     System.out.println("image url get");
                     saveImage(imageUrl,movie);
-
                     movie.setIMDBscore(StringCheckUpManager.IMDB_best_ever(sorce));
                     System.out.println("rating...");
+
                 }
                 else {
 //                movie.setActors(StringCheckUpManager.findingActors(moreDetails));
@@ -58,6 +56,37 @@ public class FindInfoFromNet {
             }
         } catch (IndexOutOfBoundsException | NumberFormatException e) {
             System.out.println("site formating has been changed!");
+        }
+        if (sorce != null) {
+            try {
+                moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
+                if(moreDetails!=null){
+                    try {
+
+//                        moreDetails = StringCheckUpManager.getMoreDetails(moreDetails);
+                        System.out.println("more details:");
+                        movie.setEnSummery(StringCheckUpManager.getSummeryEn(moreDetails));
+                        System.out.println("summery en finished");
+                        movie.setActors(StringCheckUpManager.findingActors(moreDetails));
+                        System.out.println("actors finished");
+                        movie.setDirectors(StringCheckUpManager.getDirectors(moreDetails));
+                        System.out.println("directors finished");
+                        movie.setDuration(StringCheckUpManager.getHours(moreDetails));
+                        System.out.println("time get");
+
+                    }
+                    catch (IndexOutOfBoundsException | NumberFormatException e) {
+                        System.out.println("site formating2 has been changed!");
+                    }
+                }
+            }  catch (UnknownHostException e){
+                System.out.println("offline");
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("net problem");
+            }
+
         }
         return movie;
     }
