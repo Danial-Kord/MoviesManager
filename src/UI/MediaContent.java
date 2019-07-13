@@ -40,8 +40,8 @@ public class MediaContent {
         this.information = information;
         font = new Font("Times New Roman",12);
 
-        summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n genres : "+movie.getGenre()+"\n"+
-              "directors : \n"+  movie.getDirectors()
+        summery.setText(movie.getYear() +"\n"+movie.getName()+"\n genres : "+movie.getGenre()+"\n"+
+                "directors : \n"+  movie.getDirectors()+"\n"+"Actors :"+"\n"+movie.getActors()
         );
         summery.setId("bold");
         FileInputStream input= null;
@@ -166,7 +166,7 @@ public class MediaContent {
         ){
 //            this.movie = movie;
             summery.setText(movie.getYear() +"\n"+movie.getName()+"\n genres : "+movie.getGenre()+"\n"+
-                    "directors : \n"+  movie.getDirectors()
+                    "directors : \n"+  movie.getDirectors()+"\n"+"Actors :"+"\n"+movie.getActors()
             );
             summery.setFont(font);
             if(movie.isUpdatedFromNet()) {

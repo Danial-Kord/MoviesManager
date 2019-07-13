@@ -14,8 +14,13 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
+          <root url="file://$MODULE_DIR$" />
           <root url="file://$MODULE_DIR$/src" />
         </SOURCES>
+        <excluded>
+          <root url="file://$MODULE_DIR$" />
+        </excluded>
+        <jarDirectory url="file://$MODULE_DIR$" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
   </component>

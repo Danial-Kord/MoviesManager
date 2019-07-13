@@ -38,7 +38,10 @@ public class InformationManagement {
 
                             if (information.getMovies().get(i).getName().equals(Sorting.findName(file))
                                     && information.getMovies().get(i).getYear().equals(Sorting.getYear(file.getName()))
-                                    && movies.get(i).getPath().equals(file.getAbsolutePath())) {
+//                                    && movies.get(i).getPath().equals(file.getAbsolutePath())TODO changed
+
+                            ) {
+                                information.getMovies().get(i).setPath(file.getAbsolutePath());
                                 flag = true;
                                 break;
                             }

@@ -60,6 +60,7 @@ public class StringCheckUpManager {
     }
     public static String getNumberOfVotes(String sorce){
         String in = sorce.substring(sorce.indexOf("امتیاز IMDb"));
+        in = in.substring(in.indexOf("اساس"));
         return in.substring(in.indexOf("<em>"),in.indexOf("</em>")).replaceFirst("<em>","");
     }
     public static String getGenre(String sorce)throws IndexOutOfBoundsException{
