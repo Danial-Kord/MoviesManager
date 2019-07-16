@@ -59,6 +59,7 @@ public class Gui extends Application {
     private VBox vBox;
     private Tab lastTab;
     private Gui gui;
+    private MenuButtonManager folders;
     private ArrayList<MediaContent>allMediaContents;
     public static void main(String[] args) {
         launch(args);
@@ -103,9 +104,9 @@ public class Gui extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-         vBox = (VBox)root.getTop();
+        vBox = (VBox)root.getTop();
         menuBar = (MenuBar)vBox.getChildren().get(0);
-         hBox = (HBox)vBox.getChildren().get(2);
+        hBox = (HBox)vBox.getChildren().get(2);
         serach = (ToolBar)hBox.getChildren().get(0);
         findFavorite = (ToolBar)hBox.getChildren().get(1);
         findFavorite.setOrientation(Orientation.HORIZONTAL);
@@ -139,7 +140,7 @@ public class Gui extends Application {
         generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(3),information);
         find250IMDB = (ImageView) findFavorite.getItems().get(1);
         likes = (ImageView)findFavorite.getItems().get(0);
-
+        folders = new MenuButtonManager((MenuButton)findFavorite.getItems().get(4),information);
 
         StackPane stackPane = (StackPane) tabPane.getTabs().get(1).getContent();
         ListView<Text> textListView = new ListView<Text>();
@@ -148,7 +149,7 @@ public class Gui extends Application {
         setSerachHandler();
         setting = new Setting(information,informationManagement,this);
         setMenuBarHandler();
-
+        ContextMenuManager.gui = gui;
 //        stage.getIcons().add(new Image("file:icon.png"));
         stage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
         primaryStage.setTitle("Movie Manager");
@@ -178,13 +179,13 @@ public class Gui extends Application {
 
 
 //        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();//TODO
-        System.out.println(information.getMovies().size());
-        for (int i=0;i<information.getMovies().size();i++) {
-//            MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
-//            allMediaContents.add(mediaContent);
-            updateOrAddMediaContent(information.getMovies().get(i));
-        }
-        setActivePaneContent(allMediaContents);
+//        System.out.println(information.getMovies().size());
+//        for (int i=0;i<information.getMovies().size();i++) {
+////            MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
+////            allMediaContents.add(mediaContent);
+//            updateOrAddMediaContent(information.getMovies().get(i));
+//        }
+//        setActivePaneContent(allMediaContents);
 
 
 
@@ -238,6 +239,10 @@ public class Gui extends Application {
                 stage.close();
             }
         });
+    }
+
+    public ArrayList<MediaContent> getAllMediaContents() {
+        return allMediaContents;
     }
 
     public Text getLoadingText() {
@@ -379,6 +384,7 @@ public class Gui extends Application {
         find250IMDB.addEventHandler(MouseEvent.MOUSE_EXITED,mouseEventEventHandler);
         find250IMDB.addEventHandler(MouseEvent.MOUSE_ENTERED,mouseEventEventHandler);
         find250IMDB.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
+
     }
     public void searchForResults(){
         ArrayList<String>searchParams = new ArrayList<String>();
@@ -386,6 +392,7 @@ public class Gui extends Application {
         String name = searchBox.getText();
         String favorite="";
         String gener = "";
+        String folder="";
         searchParams.add(searchBox.getText());
         if(categories.getSelected()!=null) {
             searchParams.add(categories.getSelected());
@@ -394,6 +401,10 @@ public class Gui extends Application {
         if(generes.getSelected()!=null) {
             searchParams.add(generes.getSelected());
             gener = generes.getSelected();
+        }
+        if(folders.getSelected()!=null) {
+            searchParams.add(folders.getSelected());
+            folder = folders.getSelected();
         }
 
 
@@ -419,12 +430,14 @@ public class Gui extends Application {
                     mediaContents.add(mediaContent);
                     continue;
                 }
+
                 if(!gener.equals("") && allMediaContents.get(i).getMovie().getGenre()!=null && !gener.equals("none"))
                 if(allMediaContents.get(i).getMovie().getGenre().toLowerCase().contains(gener.toLowerCase())){
                     MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
                     mediaContents.add(mediaContent);
                     continue;
                 }
+
                 if(!favorite.equals("")) {
 
                     if (allMediaContents.get(i).getMovie().getFavorites().contains(favorite)) {//TODO
@@ -433,7 +446,14 @@ public class Gui extends Application {
                         continue;
                     }
                 }
-//
+                if(!folder.equals("")) {
+
+                    if (allMediaContents.get(i).getMovie().getFolderPath().contains(folder)) {//TODO
+                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(), information);
+                        mediaContents.add(mediaContent);
+                        continue;
+                    }
+                }
                     if(!name.equals(""))
                     if(allMediaContents.get(i).getMovie().getName().toLowerCase().contains(name.toLowerCase())){
                         MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
@@ -456,6 +476,11 @@ public class Gui extends Application {
         }
         setActivePaneContent(mediaContents);
     }
+
+    public MenuButtonManager getFolders() {
+        return folders;
+    }
+
     public void setMenuBarHandler(){
          Menu fileMenu = menuBar.getMenus().get(0);
          final MenuItem update = fileMenu.getItems().get(0);

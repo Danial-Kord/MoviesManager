@@ -32,7 +32,7 @@ public class MediaPane {
     private Movie movie;
     private AnchorPane root;
     private ImageView like;
-    private SplitMenuButton categories;
+    private MenuButton categories;
     private TextArea details;
     private  Button openFolder;
     private GridPane detailsPane;
@@ -66,7 +66,7 @@ public class MediaPane {
                 }
             }
         });
-        categories = (SplitMenuButton)right.getItems().get(0);
+        categories = (MenuButton) right.getItems().get(0);
 
         AnchorPane anchorPane = (AnchorPane)root.getChildren().get(2);
         Text IMDBScore = (Text)anchorPane.getChildren().get(1);
@@ -75,6 +75,7 @@ public class MediaPane {
         Text IMDBRating = (Text)stackPane.getChildren().get(1);
         Text IMDBVotes = (Text)anchorPane.getChildren().get(5);
         Text duration = (Text)anchorPane.getChildren().get(6);
+        Text name = (Text)anchorPane.getChildren().get(8);
 
         if(movie.getIMDBscore()!=null){
             if(!movie.getIMDBscore().equals(""))
@@ -95,6 +96,10 @@ public class MediaPane {
         if(movie.getNumberOfVotes()!=null){
             if(!movie.getNumberOfVotes().equals(""))
                 IMDBVotes.setText(movie.getNumberOfVotes());
+        }
+        if(movie.getName()!=null){
+            if(!movie.getName().equals(""))
+                name.setText(movie.getName());
         }
         FileInputStream input= null;
         FileInputStream input2= null;
@@ -140,7 +145,14 @@ public class MediaPane {
 
         StackPane stackPane2 = (StackPane) detailsPane.getChildren().get(1);
         TextArea enSummery = (TextArea)stackPane2.getChildren().get(0);
-        enSummery.setText(movie.getEnSummery());
+
+        if(movie.getEnSummery()!=null || movie.getEnSummery()!="") {
+            enSummery.setText(movie.getEnSummery());
+        }
+        else {
+            enSummery.setText(movie.getSummery());
+
+        }
         enSummery.setWrapText(true);
 
         StackPane stackPane3 = (StackPane) detailsPane.getChildren().get(2);

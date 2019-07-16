@@ -32,7 +32,7 @@ public class MenuButtonManager {
             for (String item : information.categoriesTyps){
                 TextField textField = new TextField(item);
                 textField.setEditable(false);
-                TextFieldManager.textFieldHandler(textField,toolBarListView);
+                TextFieldManager.textFieldHandler(textField,toolBarListView,information.categoriesTyps);
                 toolBarListView.getItems().add(textField);
                 menuButton.getItems().get(menuButton.getItems().size()-1).setText(item);
                 menuButton.getItems().add(new MenuItem("add new"));
@@ -44,9 +44,19 @@ public class MenuButtonManager {
                 }
             });
         }
+        if(menuButton.getText().equals("Folder")){
+            for (String path : information.getPaths()) {
+                menuButton.getItems().add(new MenuItem(path));
+            }
+        }
         for (int i=0;i<menuButton.getItems().size();i++){
             setListener(menuButton.getItems().get(i));
         }
+    }
+
+    public MenuButton getMenuButton() {
+
+        return menuButton;
     }
 
     public void setListener(MenuItem menuItem){
@@ -122,7 +132,7 @@ public class MenuButtonManager {
         if(information.categoriesTyps.size() == size)
             return;
         TextField textField = new TextField(searchBox.getText());
-        TextFieldManager.textFieldHandler(textField,toolBarListView);
+        TextFieldManager.textFieldHandler(textField,toolBarListView,information.categoriesTyps);
         toolBarListView.getItems().add(textField);
         menuButton.getItems().get(menuButton.getItems().size()-1).setText(searchBox.getText());
         menuButton.getItems().add(new MenuItem("add new"));

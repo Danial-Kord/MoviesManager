@@ -13,6 +13,7 @@ import java.util.ListResourceBundle;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -35,18 +36,19 @@ public class MediaContent {
     private Font font;
     private ProgressIndicator progressIndicator;
     private Information information;
+    private MediaContent mediaContent;
     public MediaContent(final Movie movie,Information information){
         this.movie = movie;
         this.information = information;
         font = new Font("Times New Roman",12);
 
-        summery.setText(movie.getYear() +"\n"+movie.getName()+"\n genres : "+movie.getGenre()+"\n"+
+        summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n genres : "+movie.getGenre()+"\n"+
                 "directors : \n"+  movie.getDirectors()+"\n"+"Actors :"+"\n"+movie.getActors()
         );
         summery.setId("bold");
         FileInputStream input= null;
         try {
-            if(movie.isUpdatedFromNet() || Information.isPathExist(movie.getImagePath())) {
+            if( Information.isPathExist(movie.getImagePath())) {
                 input = new FileInputStream(movie.getImagePath());
             }
             else
@@ -85,6 +87,7 @@ public class MediaContent {
 //        stackPane.getChildren().add(progressIndicator);
         setEventHandler();
         summery.setFont(this.font);
+        mediaContent = this;
     }
 
     public ProgressIndicator getProgressIndicator() {
@@ -149,8 +152,12 @@ public class MediaContent {
                     image.setId("shouldBeLight");
                     summery.setVisible(false);
                 }
-                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED)){
+                if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED) && mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                     new MediaPane(movie,information);
+                }
+                else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED) && mouseEvent.getButton().equals(MouseButton.SECONDARY)){
+                    ContextMenuManager.onMediaContent(mediaContent,stackPane,mouseEvent.getX(),mouseEvent.getY());
+
                 }
             }
         };
@@ -159,6 +166,7 @@ public class MediaContent {
         stackPane.addEventHandler(MouseEvent.MOUSE_ENTERED,eventHandler);
         stackPane.addEventHandler(MouseEvent.MOUSE_CLICKED,eventHandler);
     }
+
     public boolean updateInfo(Movie movie){
         if(movie.getName().equals(this.movie.getName())&&
             movie.getYear().equals(this.movie.getYear())
@@ -169,7 +177,7 @@ public class MediaContent {
                     "directors : \n"+  movie.getDirectors()+"\n"+"Actors :"+"\n"+movie.getActors()
             );
             summery.setFont(font);
-            if(movie.isUpdatedFromNet()) {
+            if(movie.isUpdatedFromNet() && Sorting.isPathExist(movie.getFolderPath())) {
                 FileInputStream input=null;
                 try {
                     input = new FileInputStream(movie.getImagePath());

@@ -12,17 +12,23 @@ import java.net.UnknownHostException;
 
 public class FindInfoFromNet {
     public static Movie searchResults(Movie movie) {
-        if (movie.getYear().equals("")) {
+        if (movie.getYear().equals("") && !movie.getName().endsWith("mk")) {
             return movie;
         }
         String name;
         String sorce = null;
         String moreDetails = ":)";
-        name = movie.getName().replaceAll(" ", "+");
-        name+="+"+movie.getYear();
+        name = movie.getName().replace("mk","").replaceAll(" ", "+");
+        name+="+"+movie.getYear()+"&sort=user_rate";//TODO chnged
         System.out.println(name);
         try {
-            sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.digital/?s=" + name));
+            if(!movie.isUpdatedFromNet()) {
+                sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.digital/?s=" + name));
+                movie.setSorce(sorce);
+            }
+            else {
+                sorce = movie.getSorce();
+            }
             System.out.println("Dadadada");
         }
         catch (UnknownHostException e){
@@ -33,16 +39,22 @@ public class FindInfoFromNet {
             System.out.println("net problem");
         }
 
-        if (sorce != null) {
+        System.out.println(movie.isUpdated2());
+        if (sorce != null && !movie.isUpdated2()) {
             try {
-                moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
+                if(movie.getSorce2()==null || movie.getSorce2().equals("")) {
+                    moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
+                }
+                else {
+                    moreDetails = movie.getSorce2();
+                }
                 if(moreDetails!=null){
                     try {
+//                        moreDetails = StringCheckUpManager.moreDetaildSummery(moreDetails);
+                        movie.setSorce2(moreDetails);//TODO
 
-//                        moreDetails = StringCheckUpManager.getMoreDetails(moreDetails);
                         System.out.println("more details:");
-                        movie.setEnSummery(StringCheckUpManager.getSummeryEn(moreDetails));
-                        System.out.println("summery en finished");
+//                        moreDetails = StringCheckUpManager.getMoreDetails(moreDetails);
                         movie.setActors(StringCheckUpManager.findingActors(moreDetails));
                         System.out.println("actors finished");
                         movie.setDirectors(StringCheckUpManager.getDirectors(moreDetails));
@@ -51,10 +63,13 @@ public class FindInfoFromNet {
                         System.out.println("time get");
                         movie.setNumberOfVotes(StringCheckUpManager.getNumberOfVotes(moreDetails));
                         System.out.println("numberOfVotes");
-
+                        movie.setEnSummery(StringCheckUpManager.getSummeryEn(moreDetails));
+                        System.out.println("summery en finished");
+                        movie.setUpdated2(true);
                     }
                     catch (IndexOutOfBoundsException | NumberFormatException e) {
                         System.out.println("site formating2 has been changed!");
+
                     }
                 }
             }  catch (UnknownHostException e){
@@ -67,7 +82,7 @@ public class FindInfoFromNet {
 
 
             try {
-                if (sorce != null) {
+                if (sorce != null && !movie.isUpdatedFromNet()) {
                     if(sorce!=null) {
                         movie.setSummery(StringCheckUpManager.getSummery(sorce));
                         movie.setIMDBrating(StringCheckUpManager.getIMDBscore(sorce));
@@ -95,8 +110,11 @@ public class FindInfoFromNet {
     }
     private static void saveImage(String urlString,Movie movie){
         System.out.println("writing image");
-        File file = new File(movie.getFolderPath()+"\\image.jpg");
-        String path = movie.getFolderPath()+"\\image.jpg";
+        String name=movie.getName();
+
+        File file = new File(movie.getFolderPath()+"\\"+name+"image"+".jpg");
+
+        String path = movie.getFolderPath()+"\\"+name+"image"+".jpg";
 
         if(file.exists()) {
             movie.setImagePath(path);

@@ -17,6 +17,10 @@ public class StringCheckUpManager {
         if(numberOfSearchResults >= 1){
             if(numberOfSearchResults == 1)
             return sorce;
+            if(numberOfSearchResults <= 70){
+                sorce = sorce.substring(sorce.indexOf("<article class=\"post\">"),sorce.indexOf("</article>"));
+                return sorce;
+            }
         }
         return null;
     }
@@ -156,8 +160,8 @@ public class StringCheckUpManager {
                 .replace("<div class=\"imdb-top-rated-old-style\">","");
     }
     public static String moreDetaildSummery(String sorce)throws IndexOutOfBoundsException{
-        System.out.println(sorce);
-        return sorce.substring(sorce.indexOf("<!-- Post -->"),sorce.indexOf("<div class=\"clearfix\"></div>")).replace("IMDB","");
+//        System.out.println(sorce);
+        return sorce.substring(sorce.indexOf("<!-- Post -->"),sorce.indexOf("<!-- //Post -->"));
    }
     public static String findingActors (String sorce1)throws IndexOutOfBoundsException{
         String sorce="";

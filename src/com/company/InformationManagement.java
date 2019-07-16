@@ -83,7 +83,7 @@ public class InformationManagement {
                 public Parent call() {
                     int i=0;
                     for (Movie movie : information.getMovies()) {//TODO changed movies
-                        if(movie.isUpdatedFromNet())
+                        if(!Sorting.isPathExist(movie.getFolderPath()))
                             continue;
                         System.out.println("is here");
                         System.out.println(movie.getName());

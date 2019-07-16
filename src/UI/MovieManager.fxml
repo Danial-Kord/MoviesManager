@@ -86,7 +86,7 @@
                             <MenuItem mnemonicParsing="false" text="add new" />
                           </items>
                         </MenuButton>
-                        <MenuButton depthTest="DISABLE" mnemonicParsing="false" text="genres">
+                        <MenuButton depthTest="DISABLE" mnemonicParsing="false" text="Genres">
                           <items>
                               <MenuItem mnemonicParsing="false" text="all" />
                               <MenuItem mnemonicParsing="false" text="Science-Fiction" />
@@ -118,6 +118,7 @@
                               <MenuItem mnemonicParsing="false" text="none" />
                           </items>
                         </MenuButton>
+                        <MenuButton mnemonicParsing="false" text="Folder" />
                      </items>
                   </ToolBar>
                </children>

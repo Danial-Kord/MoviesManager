@@ -114,6 +114,10 @@ public class Sorting {
         return false;
 
     }
+    public static boolean isPathExist(String path){
+        File file = new File(path);
+        return file.exists();
+    }
         private static ArrayList<String> input () {
             ArrayList<String> input = new ArrayList<String>();
             boolean flag = true;

@@ -43,6 +43,8 @@ public class DirCleaner {
 
     public static ArrayList<File> getMovies(File dad,ArrayList<File>files){
         File[] fileList = dad.listFiles();
+        if(fileList == null)
+            return files;
         for (File temp : fileList){
             if(temp.isDirectory()){
                 files = getMovies(temp,files);

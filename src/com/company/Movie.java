@@ -24,6 +24,9 @@ public class Movie implements Serializable {
     private String duration;
     private String enSummery;
     private String numberOfVotes;
+    private boolean isUpdated2=false;
+    private String sorce;
+    private String sorce2;
     private HashSet<String>favorite;//choose some categories for your movie that you want to add that shortcut in there.
     public Movie(String name, String year,String path) {
         this.name = name;
@@ -85,6 +88,30 @@ public class Movie implements Serializable {
 
     public void setUpdatetFromNet(boolean updatetFromNet) {
         isUpdatedFromNet = updatetFromNet;
+    }
+
+    public void setUpdated2(boolean updated2) {
+        isUpdated2 = updated2;
+    }
+
+    public void setSorce(String sorce) {
+        this.sorce = sorce;
+    }
+
+    public String getSorce() {
+        return sorce;
+    }
+
+    public void setSorce2(String sorce2) {
+        this.sorce2 = sorce2;
+    }
+
+    public String getSorce2() {
+        return sorce2;
+    }
+
+    public boolean isUpdated2() {
+        return isUpdated2;
     }
 
     public String getName() {

@@ -50,7 +50,7 @@ public class Setting {
         for (String s : information.getPaths()) {
             TextField listTextField = new TextField(s);
             pathListView.getItems().add(listTextField);
-            TextFieldManager.textFieldHandler(listTextField,pathListView);
+            TextFieldManager.textFieldHandler(listTextField,pathListView,information.getPaths());
         }
 
         setSettingPaneHandler();
@@ -117,9 +117,12 @@ public class Setting {
         if(size != information.getPaths().size()){
             TextField listTextField = new TextField(choosePath);
             pathListView.getItems().add(listTextField);
-            TextFieldManager.textFieldHandler(listTextField,pathListView);
+            TextFieldManager.textFieldHandler(listTextField,pathListView,information.getPaths());
         }
         informationManagement.addInformation(choosePath,information);
+        MenuItem menuItem = new MenuItem(choosePath);
+        gui.getFolders().getMenuButton().getItems().add(menuItem);
+        gui.getFolders().setListener(menuItem);
 //        for (int i=0;i<information.getMovies().size();i++) {
 //            mediaContents.add(new MediaContent(information.getMovies().get(i)));
 //        }
