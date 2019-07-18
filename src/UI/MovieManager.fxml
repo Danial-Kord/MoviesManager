@@ -12,7 +12,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="558.0" prefWidth="701.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="558.0" prefWidth="956.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
@@ -62,20 +62,20 @@
                <children>
                   <ToolBar prefHeight="40.0" prefWidth="2000.0">
                      <items>
-                        <TextField promptText="Search here..." style="-fx-background-radius: 25;" />
+                        <TextField prefHeight="17.0" prefWidth="187.0" promptText="Search here..." style="-fx-background-radius: 25;" />
                         <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0" style="-fx-background-radius: 15;" text="ok">
                         </Button>
-                        <Button mnemonicParsing="false" style="-fx-background-radius: 10 10 10 10;" text="find all" />
+                        <Button mnemonicParsing="false" prefHeight="22.0" prefWidth="65.0" style="-fx-background-radius: 10 10 10 10;" text="find all" />
                      </items>
                   </ToolBar>
-                  <ToolBar prefHeight="40.0" prefWidth="2000.0" style="-fx-padding: 0 0 0 120;">
+                  <ToolBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="2000.0" style="-fx-padding: 0 0 0 120;">
                      <items>
-                        <ImageView fitHeight="32.0" fitWidth="34.0" pickOnBounds="true">
+                        <ImageView fitHeight="29.0" fitWidth="27.0" pickOnBounds="true">
                            <image>
                               <Image url="@../1200px-Heart_corazón.svg.png" />
                            </image>
                         </ImageView>
-                        <ImageView fitHeight="28.0" fitWidth="67.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="29.0" fitWidth="56.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../IMDB_logo2.png" />
                            </image>
@@ -118,7 +118,12 @@
                               <MenuItem mnemonicParsing="false" text="none" />
                           </items>
                         </MenuButton>
-                        <MenuButton mnemonicParsing="false" text="Folder" />
+                        <MenuButton mnemonicParsing="false" text="Folder">
+                           <items>
+                              <MenuItem mnemonicParsing="false" text="all" />
+                           </items></MenuButton>
+                        <DatePicker prefHeight="31.0" prefWidth="145.0" promptText="to..." />
+                        <DatePicker prefHeight="31.0" prefWidth="140.0" promptText="from..." />
                      </items>
                   </ToolBar>
                </children>

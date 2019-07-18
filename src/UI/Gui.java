@@ -61,6 +61,8 @@ public class Gui extends Application {
     private Gui gui;
     private MenuButtonManager folders;
     private ArrayList<MediaContent>allMediaContents;
+    private DatePicker from;
+    private DatePicker to;
     public static void main(String[] args) {
         launch(args);
     }
@@ -141,6 +143,12 @@ public class Gui extends Application {
         find250IMDB = (ImageView) findFavorite.getItems().get(1);
         likes = (ImageView)findFavorite.getItems().get(0);
         folders = new MenuButtonManager((MenuButton)findFavorite.getItems().get(4),information);
+        from = (DatePicker) findFavorite.getItems().get(5);
+        to = (DatePicker) findFavorite.getItems().get(6);
+        to.getEditor().setEditable(false);
+        from.getEditor().setEditable(false);
+        from.getEditor().setDisable(true);
+        to.getEditor().setDisable(true);
 
         StackPane stackPane = (StackPane) tabPane.getTabs().get(1).getContent();
         ListView<Text> textListView = new ListView<Text>();
@@ -329,6 +337,7 @@ public class Gui extends Application {
         TextField searchBox = (TextField) serach.getItems().get(0);
         final Button ok = (Button) serach.getItems().get(1);
         Button findAll = (Button)serach.getItems().get(2);
+
         final EventHandler<MouseEvent>mouseEvent = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
@@ -387,83 +396,100 @@ public class Gui extends Application {
 
     }
     public void searchForResults(){
-        ArrayList<String>searchParams = new ArrayList<String>();
-        TextField searchBox = (TextField) serach.getItems().get(0);
-        String name = searchBox.getText();
-        String favorite="";
-        String gener = "";
-        String folder="";
-        searchParams.add(searchBox.getText());
-        if(categories.getSelected()!=null) {
-            searchParams.add(categories.getSelected());
-            favorite = categories.getSelected();
-        }
-        if(generes.getSelected()!=null) {
-            searchParams.add(generes.getSelected());
-            gener = generes.getSelected();
-        }
-        if(folders.getSelected()!=null) {
-            searchParams.add(folders.getSelected());
-            folder = folders.getSelected();
-        }
 
 
         ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
-//        for (int i=0;i<information.getMovies().size();i++){
-//            for (int j=0;j<searchParams.size();j++){
-//                if(searchParams.get(j).equals(""))
-//                    continue;
-//                System.out.println("...."+searchParams.get(j));
-//                if(information.getMovies().get(i).getName().contains(searchParams.get(j))||
-//                        information.getMovies().get(i).getGenre().contains(searchParams.get(j))||
-//                        searchParams.get(j).equals("all")
-//                        ){
-//                    MediaContent mediaContent = new MediaContent(information.getMovies().get(i));
-//                    mediaContents.add(mediaContent);
-//                    break;
-//                }
-//            }
-
-            for (int i=0;i<allMediaContents.size();i++){
-                if(gener.equals("all")){
-                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
-                    mediaContents.add(mediaContent);
-                    continue;
-                }
-
-                if(!gener.equals("") && allMediaContents.get(i).getMovie().getGenre()!=null && !gener.equals("none"))
-                if(allMediaContents.get(i).getMovie().getGenre().toLowerCase().contains(gener.toLowerCase())){
-                    MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
-                    mediaContents.add(mediaContent);
-                    continue;
-                }
-
-                if(!favorite.equals("")) {
-
-                    if (allMediaContents.get(i).getMovie().getFavorites().contains(favorite)) {//TODO
-                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(), information);
-                        mediaContents.add(mediaContent);
-                        continue;
-                    }
-                }
-                if(!folder.equals("")) {
-
-                    if (allMediaContents.get(i).getMovie().getFolderPath().contains(folder)) {//TODO
-                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(), information);
-                        mediaContents.add(mediaContent);
-                        continue;
-                    }
-                }
-                    if(!name.equals(""))
-                    if(allMediaContents.get(i).getMovie().getName().toLowerCase().contains(name.toLowerCase())){
-                        MediaContent mediaContent = new MediaContent(allMediaContents.get(i).getMovie(),information);
-                        mediaContents.add(mediaContent);
-                        continue;
-                    }
-
-            }
+        mediaContents = searchForResults("year",allMediaContents);
+        mediaContents = searchForResults("category",mediaContents);
+        mediaContents = searchForResults("folder",mediaContents);
+        mediaContents = searchForResults("gener",mediaContents);
+        mediaContents = searchForResults("name",mediaContents);
         System.out.println("done");
         setActivePaneContent(mediaContents);
+    }
+    private ArrayList<MediaContent> searchForResults(String condition,ArrayList<MediaContent>mediaContents){
+
+        ArrayList<MediaContent>mediaContents1 = new ArrayList<MediaContent>();
+        if(condition.equals("year")){
+            String to="";
+            String from = "";
+            to = this.from.getEditor().getText();
+            from = this.to.getEditor().getText();
+            if(!to.equals("") && !from.equals(""))
+            for(int i=0;i<mediaContents.size();i++){
+                    if(mediaContents.get(i).getMovie().getYear().compareTo(to.substring(to.length()-4))<=0 &&
+                        mediaContents.get(i).getMovie().getYear().compareTo(from.substring(from.length()-4))>=0){
+                        MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(),information);
+                        mediaContents1.add(mediaContent);
+                    }
+            }
+            else
+            return mediaContents;
+        }
+        else if (condition.equals("category")){
+            String favorite="";
+            if(categories.getSelected()!=null) {
+                favorite = categories.getSelected();
+            }
+            if(!favorite.equals("") && !favorite.equals("none"))
+            for(int i=0;i<mediaContents.size();i++) {
+                if (mediaContents.get(i).getMovie().getFavorites().contains(favorite)) {//TODO
+                    MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(), information);
+                    mediaContents1.add(mediaContent);
+                }
+            }
+            else
+            return mediaContents;
+        }
+        else if (condition.equals("gener")){
+            String gener = "";
+            if(generes.getSelected()!=null) {
+                gener = generes.getSelected();
+            }
+            if(!gener.equals(""))
+            for(int i=0;i<mediaContents.size();i++) {
+                if(gener.equals("all")){
+                    MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(),information);
+                    mediaContents1.add(mediaContent);
+                }
+                else if(mediaContents.get(i).getMovie().getGenre()!=null && !gener.equals("none"))
+                    if(mediaContents.get(i).getMovie().getGenre().toLowerCase().contains(gener.toLowerCase())){
+                        MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(),information);
+                        mediaContents1.add(mediaContent);
+                    }
+            }
+            else
+            return mediaContents;
+        }
+        else if (condition.equals("folder")){
+            String folder="";
+            if(folders.getSelected()!=null) {
+                folder = folders.getSelected();
+            }
+            if(!folder.equals("") && !folder.equals("all"))
+            for(int i=0;i<mediaContents.size();i++) {
+                if (mediaContents.get(i).getMovie().getFolderPath().contains(folder)) {//TODO
+                    MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(), information);
+                    mediaContents1.add(mediaContent);
+                }
+            }
+            else
+            return mediaContents;
+        }
+        else if (condition.equals("name")){
+            TextField searchBox = (TextField) serach.getItems().get(0);
+            String name = searchBox.getText();
+            if(!name.equals(""))
+            for(int i=0;i<mediaContents.size();i++) {
+                if(mediaContents.get(i).getMovie().getName().toLowerCase().contains(name.toLowerCase())){
+                    MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(),information);
+                    mediaContents1.add(mediaContent);
+                }
+            }
+            else
+            return mediaContents;
+        }
+        return mediaContents1;
     }
     public void find250IMDB(){
         ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();

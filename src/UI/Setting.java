@@ -74,6 +74,7 @@ public class Setting {
                 }
             }
         });
+
 //        stage.getIcons().add(new Image("file:icon.png"));
         stage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
 

@@ -4,6 +4,7 @@ import com.company.Information;
 import com.company.Movie;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.NodeOrientation;
 import javafx.scene.Cursor;
 import javafx.scene.DepthTest;
 import javafx.scene.Scene;
@@ -146,13 +147,15 @@ public class MediaPane {
         StackPane stackPane2 = (StackPane) detailsPane.getChildren().get(1);
         TextArea enSummery = (TextArea)stackPane2.getChildren().get(0);
 
-        if(movie.getEnSummery()!=null || movie.getEnSummery()!="") {
-            enSummery.setText(movie.getEnSummery());
-        }
-        else {
-            enSummery.setText(movie.getSummery());
+//        if(movie.getEnSummery()!=null && movie.getEnSummery()!="") {
+        enSummery.setText(movie.getSummery());
+        enSummery.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
 
-        }
+//        }
+//        else {
+//            enSummery.setText(movie.getSummery());
+//            enSummery.setText("سلام من  دانم");
+//        }
         enSummery.setWrapText(true);
 
         StackPane stackPane3 = (StackPane) detailsPane.getChildren().get(2);
@@ -168,7 +171,7 @@ public class MediaPane {
 //        primaryStage.getIcons().add(new Image("file:icon.png"));
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
         primaryStage.setTitle("Movie Manager");
-        primaryStage.setScene(new Scene(root, 700, 400));
+        primaryStage.setScene(new Scene(root, 950, 450));
         primaryStage.setResizable(false);
         primaryStage.show();
 

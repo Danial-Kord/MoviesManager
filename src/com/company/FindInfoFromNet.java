@@ -63,8 +63,8 @@ public class FindInfoFromNet {
                         System.out.println("time get");
                         movie.setNumberOfVotes(StringCheckUpManager.getNumberOfVotes(moreDetails));
                         System.out.println("numberOfVotes");
-                        movie.setEnSummery(StringCheckUpManager.getSummeryEn(moreDetails));
-                        System.out.println("summery en finished");
+//                        movie.setEnSummery(StringCheckUpManager.getSummeryEn(moreDetails));
+//                        System.out.println("summery en finished");
                         movie.setUpdated2(true);
                     }
                     catch (IndexOutOfBoundsException | NumberFormatException e) {
