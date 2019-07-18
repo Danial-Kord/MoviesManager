@@ -1,5 +1,6 @@
 package UI;
 
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -37,13 +38,19 @@ public class ContextMenuManager {
     public static void onMediaContent(final MediaContent mediaContent, StackPane stackPane,double x ,double y){
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.getItems().add(new MenuItem("Delete"));
+        contextMenu.getItems().add(new MenuItem("Visible"));
         contextMenu.getItems().add(new MenuItem("Like"));
-        EventHandler<MouseEvent>mouseEventEventHandler = new EventHandler<MouseEvent>() {
+        EventHandler<Event>mouseEventEventHandler = new EventHandler<Event>() {
             @Override
-            public void handle(MouseEvent mouseEvent) {
+            public void handle(Event mouseEvent) {
                 MenuItem menuItem = (MenuItem) mouseEvent.getSource();
                 if(menuItem.getText().equals("Delete")){
+                    mediaContent.getMovie().setShow(false);
                     gui.getAllMediaContents().remove(mediaContent);
+                }
+                else if(menuItem.getText().equals("Visible")){
+                    mediaContent.getMovie().setShow(true);
+                    gui.updateOrAddMediaContent(mediaContent.getMovie());
                 }
                 else if(menuItem.getText().equals("Like")){
                     mediaContent.getMovie().setFavoriteMovie(true);
@@ -51,7 +58,7 @@ public class ContextMenuManager {
             }
         };
         for (int i=0;i<contextMenu.getItems().size();i++){
-            contextMenu.getItems().get(i).addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
+            contextMenu.getItems().get(i).addEventHandler(Event.ANY,mouseEventEventHandler);
         }
         contextMenu.show(stackPane,x,y);
     }

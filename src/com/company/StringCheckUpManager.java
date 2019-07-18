@@ -28,10 +28,14 @@ public class StringCheckUpManager {
         return Integer.parseInt(sorce.substring(0,sorce.indexOf("نتیجه یافت شد")).substring(sorce.indexOf("<bdi>")+5,sorce.lastIndexOf("</bdi>")));
     }
     public static String getSummery(String sorce)throws IndexOutOfBoundsException{
-        return sorce.substring(sorce.indexOf("خلاصه داستان"),sorce.substring(sorce.indexOf("خلاصه داستان"))
+        String out = sorce.substring(sorce.indexOf("خلاصه داستان"),sorce.substring(sorce.indexOf("خلاصه داستان"))
                 .indexOf("</p>")+sorce.indexOf("خلاصه داستان"))
-                .replace("خلاصه داستان:","").replace("</h6>","").replace("<p>","").replace("&hellip;","...");
-
+                .replace("خلاصه داستان:","").replace("</h6>","").replace("<p>","").replaceAll("&hellip;","...")
+                .replaceAll("&quot","\"");
+        while (out.startsWith(" ")){
+            out = out.substring(1);
+        }
+        return out;
 
 
     }

@@ -1,6 +1,7 @@
 package UI;
 
 import com.company.*;
+import com.sun.deploy.util.BlackList;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -63,6 +64,7 @@ public class Gui extends Application {
     private ArrayList<MediaContent>allMediaContents;
     private DatePicker from;
     private DatePicker to;
+    private Button blackList;
     public static void main(String[] args) {
         launch(args);
     }
@@ -145,6 +147,8 @@ public class Gui extends Application {
         folders = new MenuButtonManager((MenuButton)findFavorite.getItems().get(4),information);
         from = (DatePicker) findFavorite.getItems().get(5);
         to = (DatePicker) findFavorite.getItems().get(6);
+        blackList = (Button) findFavorite.getItems().get(7);
+
         to.getEditor().setEditable(false);
         from.getEditor().setEditable(false);
         from.getEditor().setDisable(true);
@@ -271,6 +275,11 @@ public class Gui extends Application {
         }
         setActivePaneContent(allMediaContents);
     }
+
+    public Information getInformation() {
+        return information;
+    }
+
     public void updateOrAddMediaContent(Movie movie){
         boolean flag = true;
         for (int i=0;i<allMediaContents.size();i++){
@@ -319,6 +328,7 @@ public class Gui extends Application {
                 if(lastTab.equals(tabPane.getTabs().get(i))) {
                     setActivePaneContent(mediaContents, i);
                     System.out.println("holy shit");
+                    System.out.println(information.getMovies().size());
                     break;
                 }
                 else {
@@ -344,6 +354,9 @@ public class Gui extends Application {
                 Button button = (Button)mouseEvent.getSource();
                     if(button.equals(ok))
                     searchForResults();
+                    else if(button.equals(blackList)){
+                    findBlackList();
+                    }
                     else {
                         findAll();
                     }
@@ -360,6 +373,7 @@ public class Gui extends Application {
         searchBox.addEventHandler(KeyEvent.ANY,keyEventEventHandler);
         ok.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
         findAll.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
+        blackList.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent);
 
         EventHandler<MouseEvent>mouseEventEventHandler = new EventHandler<MouseEvent>() {
             @Override
@@ -393,7 +407,15 @@ public class Gui extends Application {
         find250IMDB.addEventHandler(MouseEvent.MOUSE_EXITED,mouseEventEventHandler);
         find250IMDB.addEventHandler(MouseEvent.MOUSE_ENTERED,mouseEventEventHandler);
         find250IMDB.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
-
+    }
+    private void findBlackList(){
+        ArrayList<MediaContent>mediaContents = new ArrayList<MediaContent>();
+        for(int i=0;i<information.getMovies().size();i++){
+            if(!information.getMovies().get(i).isShow()){
+                mediaContents.add(new MediaContent(information.getMovies().get(i),information));
+            }
+        }
+        setActivePaneContent(mediaContents);
     }
     public void searchForResults(){
 

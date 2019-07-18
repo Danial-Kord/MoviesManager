@@ -15,10 +15,23 @@ public class FindInfoFromNet {
         if (movie.getYear().equals("") && !movie.getName().endsWith("mk")) {
             return movie;
         }
-        String name;
+        String name="";
         String sorce = null;
         String moreDetails = ":)";
-        name = movie.getName().replace("mk","").replaceAll(" ", "+");
+        name = movie.getName();
+        String[]strings = name.split(" ");
+        name = "";
+        for (int i=0;i<strings.length;i++){
+            if(strings[i].toLowerCase().endsWith("s")){
+                name +=strings[i].substring(0,strings[i].length()-1);
+            }else {
+                name+=strings[i];
+            }
+            name+=" ";
+        }
+//        name = movie.getName().replace("mk","").replaceAll(" ", "+");
+        name = name.replace("mk","").replaceAll(" ", "+");
+
         name+="+"+movie.getYear()+"&sort=user_rate";//TODO chnged
         System.out.println(name);
         try {

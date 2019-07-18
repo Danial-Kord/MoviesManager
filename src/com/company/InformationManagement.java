@@ -74,7 +74,7 @@ public class InformationManagement {
 
             final ArrayList<Movie> movies = getMovies(path,information);
             information.addMovies(movies);
-
+            System.out.println("final movie add size " +movies.size());
             gui.findAll();
 //             ProgressPane pBar = new ProgressPane(movies.size());
 //             final ProgressBar progressBar = pBar.getProgressBar();
@@ -83,7 +83,8 @@ public class InformationManagement {
                 public Parent call() {
                     int i=0;
                     for (Movie movie : information.getMovies()) {//TODO changed movies
-                        if(!Sorting.isPathExist(movie.getFolderPath()))
+                        System.out.println("<><><>"+movie.getName()+"     "+movie.isShow());
+                        if(!Sorting.isPathExist(movie.getFolderPath()) || !movie.isShow())
                             continue;
                         System.out.println("is here");
                         System.out.println(movie.getName());

@@ -124,6 +124,7 @@
                            </items></MenuButton>
                         <DatePicker prefHeight="31.0" prefWidth="145.0" promptText="to..." />
                         <DatePicker prefHeight="31.0" prefWidth="140.0" promptText="from..." />
+                        <Button mnemonicParsing="false" text="blackList" />
                      </items>
                   </ToolBar>
                </children>

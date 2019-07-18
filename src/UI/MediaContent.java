@@ -156,7 +156,7 @@ public class MediaContent {
                     new MediaPane(movie,information);
                 }
                 else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED) && mouseEvent.getButton().equals(MouseButton.SECONDARY)){
-                    ContextMenuManager.onMediaContent(mediaContent,stackPane,mouseEvent.getX(),mouseEvent.getY());
+                    ContextMenuManager.onMediaContent(mediaContent,stackPane,mouseEvent.getScreenX(),mouseEvent.getScreenY());
 
                 }
             }
@@ -168,6 +168,8 @@ public class MediaContent {
     }
 
     public boolean updateInfo(Movie movie){
+        if(!movie.isShow())
+            return true;
         if(movie.getName().equals(this.movie.getName())&&
             movie.getYear().equals(this.movie.getYear())
                 //TODO

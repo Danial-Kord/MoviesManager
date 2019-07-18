@@ -18,6 +18,7 @@ public class Movie implements Serializable {
     private String genre;
     private String imagePath;
     private String folderPath;
+    private boolean show=true;
     private boolean isUpdatedFromNet = false;
     private Date lastUpdate = null;
     private boolean favoriteMovie = false;
@@ -116,6 +117,14 @@ public class Movie implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isShow() {
+        return show;
+    }
+
+    public void setShow(boolean show) {
+        this.show = show;
     }
 
     public String getYear() {
