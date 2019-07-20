@@ -66,9 +66,18 @@
                         <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0" style="-fx-background-radius: 15;" text="ok">
                         </Button>
                         <Button mnemonicParsing="false" prefHeight="22.0" prefWidth="65.0" style="-fx-background-radius: 10 10 10 10;" text="find all" />
+                        <MenuButton mnemonicParsing="false" style="-fx-background-radius: 10 10 10 10;" text="Sort by">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="name" />
+                            <MenuItem mnemonicParsing="false" text="year" />
+                              <MenuItem mnemonicParsing="false" text="IMDB score" />
+                              <MenuItem mnemonicParsing="false" text="number of votes" />
+                              <MenuItem mnemonicParsing="false" text="none" />
+                          </items>
+                        </MenuButton>
                      </items>
                   </ToolBar>
-                  <ToolBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="2000.0" style="-fx-padding: 0 0 0 120;">
+                  <ToolBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="2000.0" style="-fx-padding: ;">
                      <items>
                         <ImageView fitHeight="29.0" fitWidth="27.0" pickOnBounds="true">
                            <image>
@@ -124,7 +133,7 @@
                            </items></MenuButton>
                         <DatePicker prefHeight="31.0" prefWidth="145.0" promptText="to..." />
                         <DatePicker prefHeight="31.0" prefWidth="140.0" promptText="from..." />
-                        <Button mnemonicParsing="false" text="blackList" />
+                        <Button mnemonicParsing="false" text="BlackList" />
                      </items>
                   </ToolBar>
                </children>

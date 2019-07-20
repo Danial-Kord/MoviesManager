@@ -65,6 +65,7 @@ public class Gui extends Application {
     private DatePicker from;
     private DatePicker to;
     private Button blackList;
+    private  MenuButtonManager sort;
     public static void main(String[] args) {
         launch(args);
     }
@@ -114,6 +115,7 @@ public class Gui extends Application {
         serach = (ToolBar)hBox.getChildren().get(0);
         findFavorite = (ToolBar)hBox.getChildren().get(1);
         findFavorite.setOrientation(Orientation.HORIZONTAL);
+        sort = new MenuButtonManager((MenuButton)serach.getItems().get(3),information);
 
         loading = (StackPane)vBox.getChildren().get(1);
         loadingText = (Text)loading.getChildren().get(0);
@@ -293,6 +295,47 @@ public class Gui extends Application {
         }
     }
     public void setActivePaneContent(ArrayList<MediaContent>mediaContents,int tab) {
+        String sort = this.sort.getSelected();
+
+        if(sort!= null){
+            if(!sort.equals("") && !sort.equals("none")){
+                for(int i=0;i<mediaContents.size();i++){
+                    for(int j=i;j<mediaContents.size();j++) {
+                        boolean check = false;
+                        if (sort.equals("year")) {
+                            if (mediaContents.get(i).getMovie().getYear().compareTo(mediaContents.get(j).getMovie().getYear()) < 0) {
+                                check = true;
+                            }
+                        } else if (sort.equals("name")) {
+                            if (mediaContents.get(i).getMovie().getName().compareTo(mediaContents.get(j).getMovie().getName()) < 0) {
+                                check = true;
+                            }
+                        } else if (sort.equals("IMDB score")) {
+                            if(mediaContents.get(j).getMovie().getIMDBrating()!=null)
+                            if (mediaContents.get(i).getMovie().getIMDBrating().compareTo(mediaContents.get(j).getMovie().getIMDBrating()) < 0) {
+                                check = true;
+                            }
+                        } else if (sort.equals("number of votes")) {
+                            try {
+                                if (mediaContents.get(j).getMovie().getNumberOfVotes() != null)
+                                    if (Integer.parseInt(mediaContents.get(i).getMovie().getNumberOfVotes().replace(",", ""))
+                                            < Integer.parseInt(mediaContents.get(j).getMovie().getNumberOfVotes().replace(",", ""))) {
+                                        check = true;
+                                    }
+                            }
+                            catch (NumberFormatException e){
+                                System.out.println("numberformat exeption");
+                            }
+                        }
+                        if (check) {
+                            MediaContent m = mediaContents.get(i);
+                            mediaContents.set(i,mediaContents.get(j));
+                            mediaContents.set(j,m);
+                        }
+                    }
+                }
+            }
+        }
         Tab activeTab = tabPane.getTabs().get(tab);
         StackPane stackPane = (StackPane) activeTab.getContent();
         final FlowPane flowPane = new FlowPane();
@@ -322,6 +365,7 @@ public class Gui extends Application {
         }
     }
     public void setActivePaneContent(ArrayList<MediaContent>mediaContents) {
+
 
         for (int i=0;i<tabPane.getTabs().size();i++)
             if (tabPane.getTabs().get(i).getId().equals("activeTab")) {

@@ -105,7 +105,7 @@ public class MediaPane {
         FileInputStream input= null;
         FileInputStream input2= null;
         try {
-            if(movie.isUpdatedFromNet() || Information.isPathExist(movie.getImagePath())) {
+            if(movie.isUpdatedFromNet() && Information.isPathExist(movie.getImagePath())) {
                 input = new FileInputStream(movie.getImagePath());
             }
             else
