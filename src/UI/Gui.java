@@ -65,6 +65,7 @@ public class Gui extends Application {
     private DatePicker from;
     private DatePicker to;
     private Button blackList;
+    private IdManager idManager;
     private  MenuButtonManager sort;
     public static void main(String[] args) {
         launch(args);
@@ -161,7 +162,6 @@ public class Gui extends Application {
         stackPane.getChildren().add(textListView);
         textListView.getItems().add(new Text("dsadadadad"));
         setSerachHandler();
-        setting = new Setting(information,informationManagement,this);
         setMenuBarHandler();
         ContextMenuManager.gui = gui;
 //        stage.getIcons().add(new Image("file:icon.png"));
@@ -169,7 +169,8 @@ public class Gui extends Application {
         primaryStage.setTitle("Movie Manager");
         primaryStage.setScene(new Scene(root, 850, 600));
         primaryStage.show();
-
+        idManager = new IdManager(tabPane,loading);
+        setting = new Setting(information,informationManagement,this);
 
 
 //        final FlowPane mainPane= new FlowPane();
@@ -253,6 +254,10 @@ public class Gui extends Application {
                 stage.close();
             }
         });
+    }
+
+    public IdManager getIdManager() {
+        return idManager;
     }
 
     public ArrayList<MediaContent> getAllMediaContents() {
@@ -343,7 +348,7 @@ public class Gui extends Application {
         flowPane.setVgap(5);
         flowPane.setHgap(5);
         flowPane.setAlignment(Pos.CENTER);
-
+//        flowPane.setId("backGroundRepeat");
         final ScrollPane scroll = new ScrollPane();
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Horizontal scroll bar
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);    // Vertical scroll bar

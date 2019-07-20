@@ -1,8 +1,7 @@
 package UI;
 
-import com.company.InfoSaver;
-import com.company.Information;
-import com.company.InformationManagement;
+import com.company.*;
+import com.sun.jnlp.ApiDialog;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -17,6 +16,8 @@ import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -24,18 +25,21 @@ public class Setting {
 
     private TabPane settingPane;
     private BorderPane movieSetPathPane;
+    private BorderPane backGroundChoose;
     ListView<TextField>pathListView;
     private Stage stage;
+    private TextField backGroundTextField;
     private TextField pathFinder;
     private Information information;
     private InformationManagement informationManagement;
     private Gui gui;
+    private IdManager idManager;
     public Setting(Information information , InformationManagement informationManagement,Gui gui){
         this.gui = gui;
         this.information = information;
         this.informationManagement = informationManagement;
         stage = new Stage();
-
+        this.idManager = gui.getIdManager();
         settingPane = null;
         try {
             settingPane = FXMLLoader.load(getClass().getResource("setting.fxml"));
@@ -43,6 +47,7 @@ public class Setting {
             e.printStackTrace();
         }
         movieSetPathPane = (BorderPane)settingPane.getTabs().get(0).getContent();
+        backGroundChoose = (BorderPane)settingPane.getTabs().get(1).getContent();
 
 
         pathListView = new ListView<TextField>();
@@ -82,18 +87,67 @@ public class Setting {
 
     private void setSettingPaneHandler(){
         ToolBar toolBar = (ToolBar)movieSetPathPane.getBottom();
-        Button choose = (Button)toolBar.getItems().get(0);
+        final Button choose = (Button)toolBar.getItems().get(0);
         pathFinder = (TextField)toolBar.getItems().get(1);
+        ToolBar toolBar2 = (ToolBar)backGroundChoose.getBottom();
+        Button chooseBackGround = (Button)toolBar2.getItems().get(0);
+        backGroundTextField = (TextField)toolBar2.getItems().get(1);
+
         final File selectedDirectory=null;
         EventHandler<MouseEvent>mouseEventEventHandler = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if(mouseEvent.getClickCount()==1){
-                    addPath();
+                Button button = (Button) mouseEvent.getSource();
+                if(button.equals(choose)) {
+                    if (mouseEvent.getClickCount() == 1) {
+                        addPath();
+                    }
+                }
+                else {
+                    changeBackGround();
                 }
             }
         };
         choose.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
+        chooseBackGround.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
+
+    }
+    private void changeBackGround(){
+        String background = backGroundTextField.getText();
+        idManager.setBackGround(IdManager.pathHelper);
+        if(backGroundTextField.getText().equals("")){
+            backGroundChoose.setDisable(true);
+            FileChooser fileChooser = new FileChooser();
+            File selectedDirectory = fileChooser.showOpenDialog(new Stage());
+            try {
+                background = selectedDirectory.getAbsolutePath();
+            }
+            catch (NullPointerException e){
+                background =null;
+            }
+        }
+        if(background!=null && !background.equals("")){
+            if(Sorting.isPicture(new File(background))){
+                File file = new File("D:\\Projects\\JAVA\\MoviesManager\\src\\UI\\design.jpg");
+
+                if(file.exists())
+                    System.out.println("dsdasdadasdada");
+                try {
+                    Files.copy(new File(background).toPath(),
+                            (file.toPath()),
+                            StandardCopyOption.REPLACE_EXISTING);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("You should reset Program");
+//                    alert.setHeaderText("Look, an Information Dialog");
+                    alert.setContentText("Ok I will restart it");
+
+                    alert.showAndWait();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                idManager.setBackGround(IdManager.path);
+            }
+        }
     }
     private void addPath(){
         String choosePath=pathFinder.getText();

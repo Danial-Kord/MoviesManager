@@ -11,6 +11,9 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import java.util.ListResourceBundle;
 import javafx.scene.control.*;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.BoxBlur;
+import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -19,6 +22,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.MediaView;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import sun.security.util.Resources_fr;
@@ -40,11 +44,12 @@ public class MediaContent {
     public MediaContent(final Movie movie,Information information){
         this.movie = movie;
         this.information = information;
-        font = new Font("Times New Roman",12);
+        font = Font.font("Times New Roman", FontWeight.BOLD,12);
 
         summery = new Text(movie.getYear() +"\n"+movie.getName()+"\n genres : "+movie.getGenre()+"\n"+
                 "directors : \n"+  movie.getDirectors()+"\n"+"Actors :"+"\n"+movie.getActors()
         );
+
         summery.setId("bold");
         FileInputStream input= null;
         try {

@@ -64,7 +64,9 @@
                      <items>
                         <TextField prefHeight="17.0" prefWidth="187.0" promptText="Search here..." style="-fx-background-radius: 25;" />
                         <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0" style="-fx-background-radius: 15;" text="ok">
-                        </Button>
+                           <effect>
+                              <Glow level="0.28" />
+                           </effect></Button>
                         <Button mnemonicParsing="false" prefHeight="22.0" prefWidth="65.0" style="-fx-background-radius: 10 10 10 10;" text="find all" />
                         <MenuButton mnemonicParsing="false" style="-fx-background-radius: 10 10 10 10;" text="Sort by">
                           <items>

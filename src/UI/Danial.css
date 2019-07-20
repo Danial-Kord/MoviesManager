@@ -32,8 +32,14 @@
 #shouldBeLight{
     -fx-opacity: 1;
 }
+
 #backGroundRepeat{
     -fx-background-image: url("design.jpg");
+    -fx-background-size: 200px 100px;
+    -fx-background-repeat: repeat;
+}
+#backGroundRepeatChange{
+    -fx-background-image: url("design2.jpg");
     -fx-background-size: 200px 100px;
     -fx-background-repeat: repeat;
 }

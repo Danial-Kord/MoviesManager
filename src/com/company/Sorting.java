@@ -169,6 +169,13 @@ public class Sorting {
                     return true;
                 return false;
         }
+    public static boolean isPicture(File file){
+        if(file.getName().toLowerCase().endsWith(".jpg") || file.getName().toLowerCase().endsWith(".png")
+                || file.getName().toLowerCase().endsWith(".jpeg") ||
+                file.getName().toLowerCase().endsWith(".gif") )
+            return true;
+        return false;
+    }
         public static String findName(File file) {
             if (isMovie(file)) {
                 String temp1 = file.getName().substring(0, index(stringConditions, file.getName()));

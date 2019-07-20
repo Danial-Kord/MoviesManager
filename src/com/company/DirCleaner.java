@@ -40,7 +40,12 @@ public class DirCleaner {
         deletDirs(folder);
         return path;
     }
-
+    public static void cutAndPaste(File destination ,File start){
+        if (start.renameTo(destination)) {
+            start.delete();
+            System.out.println("why");
+        }
+    }
     public static ArrayList<File> getMovies(File dad,ArrayList<File>files){
         File[] fileList = dad.listFiles();
         if(fileList == null)
