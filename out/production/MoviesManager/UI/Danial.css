@@ -43,6 +43,11 @@
     -fx-background-size: 200px 100px;
     -fx-background-repeat: repeat;
 }
+#IMDBPic{
+    -fx-image: url("IMDB.jpg");
+    /*-fx-background-size: 200px 100px;*/
+    /*-fx-background-repeat: repeat;*/
+}
 #bold{
     -fx-font-style: bold;
 }

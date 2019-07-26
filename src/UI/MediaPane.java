@@ -2,6 +2,7 @@ package UI;
 
 import com.company.Information;
 import com.company.Movie;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.NodeOrientation;
@@ -131,7 +132,7 @@ public class MediaPane {
             }
             menuItem.setGraphic(radioButton);
             categories.getItems().add(0,menuItem);
-            setRadioButtonHandler(radioButton);
+            setRadioButtonHandler(radioButton,menuItem);
         }
         if(!movie.isFavoriteMovie())
         like.setId("shouldBeDark");
@@ -176,20 +177,18 @@ public class MediaPane {
         primaryStage.show();
 
     }
-    private void setRadioButtonHandler(final RadioButton radioButtonHanler){
-        EventHandler<MouseEvent>mouseEventEventHandler = new EventHandler<MouseEvent>() {
+    private void setRadioButtonHandler(final RadioButton radioButtonHanler,MenuItem menuItem){
+        EventHandler<Event>mouseEventEventHandler = new EventHandler<Event>() {
             @Override
-            public void handle(MouseEvent mouseEvent) {
+            public void handle(Event mouseEvent) {
 //                if (mouseEvent.getClickCount() == 1 && mouseEvent.getButton().equals(0) && mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
-                    if(movie.getFavorites().contains(radioButtonHanler.getText())){
-                        movie.getFavorites().remove(radioButtonHanler.getText());
-                    }
-                    else
                     movie.getFavorites().add(radioButtonHanler.getText());
-//                }
+                radioButtonHanler.setSelected(true);
+
             }
         };
-        radioButtonHanler.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
+        menuItem.addEventHandler(Event.ANY,mouseEventEventHandler);
+//        radioButtonHanler.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEventEventHandler);
     }
     public void setHandler(){
         EventHandler<MouseEvent>mouseEventEventHandler = new EventHandler<MouseEvent>() {

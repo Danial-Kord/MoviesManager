@@ -316,20 +316,29 @@ public class Gui extends Application {
                                 check = true;
                             }
                         } else if (sort.equals("IMDB score")) {
-                            if(mediaContents.get(j).getMovie().getIMDBrating()!=null)
-                            if (mediaContents.get(i).getMovie().getIMDBrating().compareTo(mediaContents.get(j).getMovie().getIMDBrating()) < 0) {
-                                check = true;
-                            }
-                        } else if (sort.equals("number of votes")) {
                             try {
-                                if (mediaContents.get(j).getMovie().getNumberOfVotes() != null)
-                                    if (Integer.parseInt(mediaContents.get(i).getMovie().getNumberOfVotes().replace(",", ""))
-                                            < Integer.parseInt(mediaContents.get(j).getMovie().getNumberOfVotes().replace(",", ""))) {
+                                if (mediaContents.get(j).getMovie().getIMDBrating() != null && !mediaContents.get(j).getMovie().getIMDBrating().equals(""))
+                                    if (mediaContents.get(i).getMovie().getIMDBrating().compareTo(mediaContents.get(j).getMovie().getIMDBrating()) < 0) {
                                         check = true;
                                     }
                             }
-                            catch (NumberFormatException e){
-                                System.out.println("numberformat exeption");
+                            catch (NumberFormatException  | NullPointerException e){
+                                System.out.println(mediaContents.get(i).getMovie().getIMDBrating());
+                                System.out.println("numberformat exeption or null" );
+                            }
+                        } else if (sort.equals("number of votes")) {
+                            try {
+                                if (mediaContents.get(j).getMovie().getNumberOfVotes() != null && !mediaContents.get(j).getMovie().getNumberOfVotes().equals("")) {
+
+                                    if (Integer.parseInt(mediaContents.get(i).getMovie().getNumberOfVotes().replaceAll(",", ""))
+                                            < Integer.parseInt(mediaContents.get(j).getMovie().getNumberOfVotes().replaceAll(",", ""))) {
+                                        check = true;
+                                    }
+                                }
+                            }
+                            catch (NumberFormatException | NullPointerException e){
+                                System.out.println(mediaContents.get(i).getMovie().getNumberOfVotes());
+                                System.out.println("numberformat exeption or null" );
                             }
                         }
                         if (check) {
@@ -501,13 +510,17 @@ public class Gui extends Application {
             String favorite="";
             if(categories.getSelected()!=null) {
                 favorite = categories.getSelected();
+                System.out.println(favorite);
             }
             if(!favorite.equals("") && !favorite.equals("none"))
             for(int i=0;i<mediaContents.size();i++) {
-                if (mediaContents.get(i).getMovie().getFavorites().contains(favorite)) {//TODO
-                    MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(), information);
-                    mediaContents1.add(mediaContent);
-                }
+                for (String favorite1 : mediaContents.get(i).getMovie().getFavorites())
+                    if (favorite1.toLowerCase().equals(favorite.toLowerCase())) {//TODO
+
+                        MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(), information);
+                        mediaContents1.add(mediaContent);
+                        break;
+                    }
             }
             else
             return mediaContents;
