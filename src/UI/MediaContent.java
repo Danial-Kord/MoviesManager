@@ -9,6 +9,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ListResourceBundle;
 import javafx.scene.control.*;
 import javafx.scene.effect.BlurType;
@@ -56,9 +60,16 @@ public class MediaContent {
             if( Information.isPathExist(movie.getImagePath())) {
                 input = new FileInputStream(movie.getImagePath());
             }
-            else
-            input = new FileInputStream("src\\IMDB.jpg");
+            else if(Information.isPathExist((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+movie.getName()+"image"+".jpg")){
+                input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+movie.getName()+"image"+".jpg");
+            }
+            else {
+                input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\images.png");
+//                 input = new FileInputStream("src\\IMDB.jpg");
+            }
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }catch (IOException e) {
             e.printStackTrace();
         }
         progressIndicator = new ProgressIndicator();
@@ -82,6 +93,7 @@ public class MediaContent {
 //        });
 
         Image image1 = new Image(input);
+
          image =new ImageView(image1);
          summery.setVisible(false);
          setImageSize(172,275);
@@ -189,8 +201,14 @@ public class MediaContent {
                 try {
                     input = new FileInputStream(movie.getImagePath());
                     if(input!=null)
+                    if(Information.isPathExist((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+movie.getName()+"image"+".jpg")){
+                        input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+movie.getName()+"image"+".jpg");
+                    }
+                    if(input!=null)
                     image.setImage(new Image(input));
                 } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }

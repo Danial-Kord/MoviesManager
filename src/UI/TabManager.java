@@ -5,6 +5,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
 public class TabManager {
@@ -31,7 +32,9 @@ public class TabManager {
                     tab.setText("tab"+mainPane.getTabs().size());
                     mainPane.getTabs().add(new Tab("+"));
                     mainPane.getTabs().get(mainPane.getTabs().size()-1).setId("add");
-                    mainPane.getTabs().get(mainPane.getTabs().size()-1).setContent(new StackPane());
+                    BorderPane borderPane = new BorderPane();
+                    borderPane.setCenter(new StackPane());
+                    mainPane.getTabs().get(mainPane.getTabs().size()-1).setContent(borderPane);
                     eventHandler(mainPane.getTabs().get(mainPane.getTabs().size()-1));
             }
                 else if(tab.getId().equals("deActiveTab")){

@@ -9,6 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class FindInfoFromNet {
     public static Movie searchResults(Movie movie) {
@@ -130,9 +132,26 @@ public class FindInfoFromNet {
         String path = movie.getFolderPath()+"\\"+name+"image"+".jpg";
 
         if(file.exists()) {
+
+            try {
+                Files.copy(file.toPath(), new File((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+name+"image"+".jpg").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             movie.setImagePath(path);
             movie.setUpdatetFromNet(true);
             return;
+        }
+        else {
+            File file1 = null;
+            try {
+                file1 = new File((new File( "." ).getCanonicalPath())+"\\images"+"\\"+name+"image"+".jpg");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if(file1.exists()){
+                return;
+            }
         }
         System.out.println(path);
 
@@ -198,6 +217,11 @@ public class FindInfoFromNet {
         }
         try {
             fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            Files.copy(file.toPath(), new File((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+name+"image"+".jpg").toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }

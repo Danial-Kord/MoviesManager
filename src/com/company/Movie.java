@@ -6,28 +6,28 @@ import java.util.Date;
 import java.util.HashSet;
 
 public class Movie implements Serializable {
-    private String name;
-    private String year;
-    private String IMDBscore;
-    private String IMDBrating;
-    private String fullSummery;
-    private String summery;
-    private String actors;
-    private String directors;
-    private String path;
-    private String genre;
-    private String imagePath;
-    private String folderPath;
+    private String name="";
+    private String year="";
+    private String IMDBscore="";
+    private String IMDBrating="";
+    private String fullSummery="";
+    private String summery="";
+    private String actors="";
+    private String directors="";
+    private String path="";
+    private String genre="";
+    private String imagePath="";
+    private String folderPath="";
     private boolean show=true;
     private boolean isUpdatedFromNet = false;
     private Date lastUpdate = null;
     private boolean favoriteMovie = false;
-    private String duration;
-    private String enSummery;
-    private String numberOfVotes;
+    private String duration="";
+    private String enSummery="";
+    private String numberOfVotes="";
     private boolean isUpdated2=false;
-    private String sorce;
-    private String sorce2;
+    private String sorce="";
+    private String sorce2="";
     private HashSet<String>favorite;//choose some categories for your movie that you want to add that shortcut in there.
     public Movie(String name, String year,String path) {
         this.name = name;

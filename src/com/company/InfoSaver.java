@@ -36,6 +36,7 @@ public class InfoSaver {//TODO default
                 try {
                     ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
                     information = (Information) (objectInputStream.readObject());
+                    information.setMovies((ArrayList<Movie>) information.getMovies().clone());
                     objectInputStream.close();
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -47,6 +48,7 @@ public class InfoSaver {//TODO default
             }
             System.out.println("?????");
         }
+
         return information;
     }
 }

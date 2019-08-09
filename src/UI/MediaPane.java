@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 public class MediaPane {
     private Movie movie;
@@ -109,10 +111,14 @@ public class MediaPane {
             if(movie.isUpdatedFromNet() && Information.isPathExist(movie.getImagePath())) {
                 input = new FileInputStream(movie.getImagePath());
             }
-            else
-                input = new FileInputStream("src\\IMDB.jpg");
+            else {
+                input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\IMDB.jpg");
+               // input = new FileInputStream("src\\IMDB.jpg");
+            }
 //            input2 = new FileInputStream("src\\like.jpg");
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         Image image = new Image(input);
@@ -150,6 +156,7 @@ public class MediaPane {
 
 //        if(movie.getEnSummery()!=null && movie.getEnSummery()!="") {
         enSummery.setText(movie.getSummery());
+
         enSummery.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
 
 //        }
@@ -182,8 +189,14 @@ public class MediaPane {
             @Override
             public void handle(Event mouseEvent) {
 //                if (mouseEvent.getClickCount() == 1 && mouseEvent.getButton().equals(0) && mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
+                if(radioButtonHanler.isSelected()) {
                     movie.getFavorites().add(radioButtonHanler.getText());
-                radioButtonHanler.setSelected(true);
+                    radioButtonHanler.setSelected(true);
+                }
+                else {
+                    movie.getFavorites().remove(radioButtonHanler.getText());
+                    radioButtonHanler.setSelected(false);
+                }
 
             }
         };

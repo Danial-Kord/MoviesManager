@@ -42,7 +42,8 @@ public class Gui extends Application {
     ToolBar serach;
     ToolBar findFavorite;
     TabPane tabPane;
-    StackPane mainPane;
+    boolean firstTimeFindAllMovie=false;
+    //StackPane mainPane;
     public static BorderPane root;
     TabManager tabManager;
     private InformationManagement informationManagement;
@@ -133,8 +134,12 @@ public class Gui extends Application {
         tabManager = new TabManager(tabPane);
         lastTab = tabPane.getTabs().get(0);
         Node mainNode =  tabPane.getTabs().get(0).getContent();
-        mainPane = (StackPane) (mainNode);
-
+      //  mainPane = (StackPane) (mainNode);
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
+        primaryStage.setTitle("Movie Manager");
+        primaryStage.setScene(new Scene(root, 850, 600));
+        System.out.println("show");
+        primaryStage.show();
         Sorting.buildConditions();
         information = InfoSaver.read();
 //        System.out.println(information.getMovies().get(0).getGenre());
@@ -157,18 +162,15 @@ public class Gui extends Application {
         from.getEditor().setDisable(true);
         to.getEditor().setDisable(true);
 
-        StackPane stackPane = (StackPane) tabPane.getTabs().get(1).getContent();
-        ListView<Text> textListView = new ListView<Text>();
-        stackPane.getChildren().add(textListView);
-        textListView.getItems().add(new Text("dsadadadad"));
+//        StackPane stackPane = (StackPane) tabPane.getTabs().get(1).getContent();
+//        ListView<Text> textListView = new ListView<Text>();
+//        stackPane.getChildren().add(textListView);
+//        textListView.getItems().add(new Text("dsadadadad"));
         setSerachHandler();
         setMenuBarHandler();
         ContextMenuManager.gui = gui;
 //        stage.getIcons().add(new Image("file:icon.png"));
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
-        primaryStage.setTitle("Movie Manager");
-        primaryStage.setScene(new Scene(root, 850, 600));
-        primaryStage.show();
+
         idManager = new IdManager(tabPane,loading);
         setting = new Setting(information,informationManagement,this);
 
@@ -277,10 +279,32 @@ public class Gui extends Application {
     }
 
     public void findAll(){
-        for (int i=0;i<information.getMovies().size();i++){
-            updateOrAddMediaContent(information.getMovies().get(i));
-        }
-        setActivePaneContent(allMediaContents);
+
+
+
+        Task<Parent> yourTaskName = new Task<Parent>() {
+            @Override
+            public Parent call() {
+                for (int i=0;i<information.getMovies().size();i++){
+                    updateOrAddMediaContent(information.getMovies().get(i));
+                }
+                return null;
+            }
+
+
+        };
+//
+        yourTaskName.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+
+            @Override
+            public void handle(WorkerStateEvent event) {
+                setActivePaneContent(allMediaContents);
+            }
+        });
+
+        Thread loadingThread = new Thread(yourTaskName);
+        loadingThread.start();
+
     }
 
     public Information getInformation() {
@@ -351,7 +375,10 @@ public class Gui extends Application {
             }
         }
         Tab activeTab = tabPane.getTabs().get(tab);
-        StackPane stackPane = (StackPane) activeTab.getContent();
+//        StackPane stackPane = (StackPane) activeTab.getContent();
+//        AnchorPane anchorPane = (AnchorPane)stackPane.getChildren().get(0);
+        BorderPane borderPane = (BorderPane) activeTab.getContent();
+        StackPane stackPane = (StackPane)borderPane.getChildren().get(0);
         final FlowPane flowPane = new FlowPane();
         flowPane.setPadding(new Insets(5, 5, 5, 5));
         flowPane.setVgap(5);
@@ -370,13 +397,15 @@ public class Gui extends Application {
             }
         });
         stackPane.getChildren().addAll(scroll);
-        for (int i = 0; i < mediaContents.size(); i++) {
-            flowPane.getChildren().add(mediaContents.get(i).getStackPane());
-//            mediaContent.getSummery().setX(mediaContent.getImage().getX());
-//            mediaContent.getSummery().setY(mediaContent.getImage().getY());
-//            mediaContent.getSummery().setLayoutX(mediaContent.getImage().getLayoutX());
-//            mediaContent.getSummery().setLayoutY(mediaContent.getImage().getLayoutY());
-        }
+        PaginationManager paginationManager = new PaginationManager(mediaContents,borderPane);
+
+//        for (int i = 0; i < mediaContents.size(); i++) {
+//            flowPane.getChildren().add(mediaContents.get(i).getStackPane());
+////            mediaContent.getSummery().setX(mediaContent.getImage().getX());
+////            mediaContent.getSummery().setY(mediaContent.getImage().getY());
+////            mediaContent.getSummery().setLayoutX(mediaContent.getImage().getLayoutX());
+////            mediaContent.getSummery().setLayoutY(mediaContent.getImage().getLayoutY());
+//        }
     }
     public void setActivePaneContent(ArrayList<MediaContent>mediaContents) {
 
@@ -387,7 +416,7 @@ public class Gui extends Application {
                     setActivePaneContent(mediaContents, i);
                     System.out.println("holy shit");
                     System.out.println(information.getMovies().size());
-                    break;
+                    return;
                 }
                 else {
                     lastTab = tabPane.getTabs().get(i);
@@ -397,7 +426,7 @@ public class Gui extends Application {
                     }
                     setActivePaneContent(mediaContents1, i);
                     System.out.println("holy shit");
-                    break;
+                    return;
                 }
             }
         }
@@ -495,13 +524,16 @@ public class Gui extends Application {
             String from = "";
             to = this.from.getEditor().getText();
             from = this.to.getEditor().getText();
-            if(!to.equals("") && !from.equals(""))
-            for(int i=0;i<mediaContents.size();i++){
-                    if(mediaContents.get(i).getMovie().getYear().compareTo(to.substring(to.length()-4))<=0 &&
-                        mediaContents.get(i).getMovie().getYear().compareTo(from.substring(from.length()-4))>=0){
-                        MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(),information);
+            if(!to.equals("") && !from.equals("")) {
+                for (int i = 0; i < mediaContents.size(); i++) {
+                    if (mediaContents.get(i).getMovie().getYear().compareTo(to.substring(to.length() - 4)) <= 0 &&
+                            mediaContents.get(i).getMovie().getYear().compareTo(from.substring(from.length() - 4)) >= 0) {
+                        MediaContent mediaContent = new MediaContent(mediaContents.get(i).getMovie(), information);
                         mediaContents1.add(mediaContent);
                     }
+                }
+                this.from.getEditor().setText("");
+                this.to.getEditor().setText("");
             }
             else
             return mediaContents;

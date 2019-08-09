@@ -18,12 +18,20 @@
         <tabs>
           <Tab text="Home">
                <content>
-                  <StackPane prefHeight="150.0" prefWidth="200.0" />
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
                </content>
             </Tab>
             <Tab text="+">
                <content>
-                  <StackPane prefHeight="150.0" prefWidth="200.0" />
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
                </content>
             </Tab>
         </tabs>
@@ -79,7 +87,7 @@
                         </MenuButton>
                      </items>
                   </ToolBar>
-                  <ToolBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="2000.0" style="-fx-padding: ;">
+                  <ToolBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="2000.0" >
                      <items>
                         <ImageView fitHeight="29.0" fitWidth="27.0" pickOnBounds="true">
                            <image>

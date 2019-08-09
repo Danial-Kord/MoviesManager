@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class InformationManagement {
+    private boolean isReading = false;
     private ArrayList<Movie> getMovies(String path,Information information) {
 
         System.out.println("movie numbers" + information.getMovies().size());
@@ -63,29 +64,44 @@ public class InformationManagement {
     }
 
     public void checkNewMovies(final Information information, final Gui gui){
-        for (int i=0;i<information.getPaths().size();i++) {
-            String path = information.getPaths().get(i);
+
+//        for (int i=0;i<information.getMovies().size();i++){
+//            gui.updateOrAddMediaContent(information.getMovies().get(i));
+//        }
+//        gui.setActivePaneContent(gui.getAllMediaContents());
+
+//        gui.findAll();
+
+        for (int i=information.getPaths().size()-1;i>=0;i--) {
+            final String path = information.getPaths().get(i);
             if(!information.isPathExist(path) || path.equals("") || path==null) {
 //                information.getPaths().remove(information.getPaths().get(i));
 //                i--;
                 continue;
             }
-            System.out.println("path numbers" + information.getPaths().size());
 
-            final ArrayList<Movie> movies = getMovies(path,information);
-            information.addMovies(movies);
-            System.out.println("final movie add size " +movies.size());
-            gui.findAll();
+           // gui.findAll();
+//            if(true)
+//                return;
 //             ProgressPane pBar = new ProgressPane(movies.size());
 //             final ProgressBar progressBar = pBar.getProgressBar();
             Task<Parent> yourTaskName = new Task<Parent>() {
                 @Override
                 public Parent call() {
+                    System.out.println("path numbers" + information.getPaths().size());
+
+                    final ArrayList<Movie> movies = getMovies(path,information);
+
+                    information.addMovies(movies);
+                    System.out.println("final movie add size " +movies.size());
+
+//                    gui.findAll();
                     int i=0;
                     for (Movie movie : information.getMovies()) {//TODO changed movies
                         System.out.println("<><><>"+movie.getName()+"     "+movie.isShow());
                         if(!Sorting.isPathExist(movie.getFolderPath()) || !movie.isShow())
                             continue;
+
                         System.out.println("is here");
                         System.out.println(movie.getName());
                         System.out.println(movie.getYear());
@@ -94,9 +110,10 @@ public class InformationManagement {
 
                         updateProgress(i,movies.size());
                         i++;
-                        i++;
+                        if(i%5 == 1) {
+                            i=0;
                             gui.updateOrAddMediaContent(movie);
-                            i = 0;
+                        }
                     }
                     System.out.println("end of process");
                     return null;
@@ -109,13 +126,14 @@ public class InformationManagement {
             };
 //
             yourTaskName.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+
                 @Override
                 public void handle(WorkerStateEvent event) {
-                    Gui.root.setDisable(false);
+//                    Gui.root.setDisable(false);
 //                    gui.setActivePaneContent(mediaContents,0);
                     gui.getLoadingText().setVisible(false);
                     gui.getProgressBar().setVisible(false);
-                    gui.findAll();
+//                    gui.findAll();
                     InfoSaver.save(information);
                     System.out.println("absoulotly finished");
                 }
@@ -158,6 +176,7 @@ public class InformationManagement {
         }
     }
     public void addInformation(String path, final Information information) {
+
 //        Sorting.userInput(path);
         if(!information.samePath(path)) {
             information.addPath(path);
