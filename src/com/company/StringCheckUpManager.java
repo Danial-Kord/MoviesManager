@@ -39,6 +39,13 @@ public class StringCheckUpManager {
 
 
     }
+    public static String getNewSite(String sorce){
+        String out = sorce.substring(sorce.indexOf("https://30nama"));
+        out = out.substring(0,out.indexOf("\""));
+        System.out.println("wtf");
+        System.out.println(out);
+        return out;
+    }
     public static String getIMDBscore(String sorce)throws IndexOutOfBoundsException{
 
         return sorce.substring(sorce.indexOf("<span><i class=\"fa fa-star\"></i>") ,sorce.indexOf("<span><i class=\"fa fa-star\"></i>") +sorce.substring(sorce.indexOf("<span><i class=\"fa fa-star\"></i>")).indexOf("</span>"))

@@ -38,7 +38,7 @@ public class FindInfoFromNet {
         System.out.println(name);
         try {
             if(!movie.isUpdatedFromNet()) {
-                sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource("https://30nama.digital/?s=" + name));
+                sorce = StringCheckUpManager.buildTarget(UrlManager.getURLSource(Information.siteURL+"?s=" + name));
                 movie.setSorce(sorce);
             }
             else {
@@ -122,6 +122,19 @@ public class FindInfoFromNet {
             }
         }
         return movie;
+    }
+    public static void siteChange(){
+        String url = "https://www.google.com/search?source=hp&ei=9SpPXZHOC-TJrgSy3qD4BA&q=30nama%27&oq=30nama%27&gs_l=psy-ab.3..35i39j0l9.1096.4088..4112...3.0..0.243.1754.2-8......0....1..gws-wiz.....10..0i67j0i10.dca13BoB8Lg&ved=0ahUKEwjRnO-JlPnjAhXkpIsKHTIvCE8Q4dUDCAU&uact=5";
+        try {
+            String sorce= null;
+            sorce = UrlManager.getURLSource(url);
+            String newOne = StringCheckUpManager.getNewSite(sorce);
+            if(newOne!=null)
+                if(!newOne.equals(""))
+                    Information.siteURL = newOne;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     private static void saveImage(String urlString,Movie movie){
         System.out.println("writing image");

@@ -14,9 +14,12 @@ public class Information implements Serializable {
     private  ArrayList<String> paths ;
     private  ArrayList<Boolean>thisPathIsdone ;//TODO
     public static final String path =  System.getProperty("user.home");
+    public static  String path2;
+    public static String siteURL="https://30nama.digital/";
     public static String categoriesPath = path+"\\categories";
     public  HashSet<String>categoriesTyps = new HashSet<String>();;
     public Information() {
+        initialPAth2();
         categoriesTyps = new HashSet<String>();
         categoriesPath = path+"\\categories";
         movies = new ArrayList<Movie>();
@@ -24,7 +27,14 @@ public class Information implements Serializable {
        paths = new ArrayList<String>();
        thisPathIsdone = new ArrayList<Boolean>();
     }
-
+    public static String initialPAth2(){
+        try {
+            path2 = (new File( "." ).getCanonicalPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return path2;
+    }
     public  ArrayList<Movie> getMovies() {
         return movies;
     }

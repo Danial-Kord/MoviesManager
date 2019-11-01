@@ -28,17 +28,20 @@ public class Movie implements Serializable {
     private boolean isUpdated2=false;
     private String sorce="";
     private String sorce2="";
+    private HashSet<String>paths;
     private HashSet<String>favorite;//choose some categories for your movie that you want to add that shortcut in there.
     public Movie(String name, String year,String path) {
         this.name = name;
         this.year = year;
-        setPath(path);
         favorite = new HashSet<String>();
+        paths = new HashSet<String>();
+        setPath(path);
     }
 
 
     public Movie(String name, String year, String IMDBscore, String IMDBrating, String fullSummery, String summery, String actors) {
         favorite = new HashSet<String>();
+        paths = new HashSet<String>();
         this.name = name;
         this.year = year;
         this.IMDBscore = IMDBscore;
@@ -49,6 +52,10 @@ public class Movie implements Serializable {
     }
     public void addCategory(String path){
         favorite.add(path);
+    }
+
+    public HashSet<String> getPaths() {
+        return paths;
     }
 
     public HashSet<String> getFavorites() {
@@ -175,9 +182,8 @@ public class Movie implements Serializable {
     public void setPath(String path) {
         this.path = path;
         folderPath = path.substring(0,path.lastIndexOf("\\"));
-
+        paths.add(folderPath);
     }
-
     public String getPath() {
         return path;
     }

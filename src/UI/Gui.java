@@ -33,6 +33,8 @@ import javafx.scene.control.ScrollBar;
 import javafx.stage.WindowEvent;
 
 
+import javax.swing.filechooser.FileSystemView;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -82,7 +84,6 @@ public class Gui extends Application {
     }
     @Override
     public void start(Stage primaryStage) {
-
 
     gui=this;
     stage = primaryStage;
@@ -141,13 +142,15 @@ public class Gui extends Application {
         System.out.println("show");
         primaryStage.show();
         Sorting.buildConditions();
+
         information = InfoSaver.read();
 //        System.out.println(information.getMovies().get(0).getGenre());
         informationManagement = new InformationManagement();
+        informationManagement.findAvailablePaths();
 //    informationManagment.addInformation("",information);
         informationManagement.checkNewMovies(information,this);
 //        information.buildShortCuts();
-        InfoSaver.save(information);
+//        InfoSaver.save(information);
         categories = new MenuButtonManager((MenuButton)findFavorite.getItems().get(2),information);
         generes = new MenuButtonManager((MenuButton)findFavorite.getItems().get(3),information);
         find250IMDB = (ImageView) findFavorite.getItems().get(1);
@@ -580,7 +583,7 @@ public class Gui extends Application {
         else if (condition.equals("folder")){
             String folder="";
             if(folders.getSelected()!=null) {
-                folder = folders.getSelected();
+                folder = folders.getSelected().substring(folders.getSelected().indexOf(":"));
             }
             if(!folder.equals("") && !folder.equals("all"))
             for(int i=0;i<mediaContents.size();i++) {
@@ -632,19 +635,19 @@ public class Gui extends Application {
         EventHandler<Event>eventHandler = new EventHandler<Event>() {
             @Override
             public void handle(Event mouseEvent) {
-                if(mouseEvent.getSource().equals(setting1)){
-                    setting.setVisibale(true);
+                try {
+                    if (mouseEvent.getSource().equals(setting1)) {
+                        setting.setVisibale(true);
+                    } else if (mouseEvent.getSource().equals(save)) {
+                        InfoSaver.save(information);
+                    } else if (mouseEvent.getSource().equals(exit)) {
+                        InfoSaver.save(information);
+                        stage.close();
+                    } else if (mouseEvent.getSource().equals(update)) {
+                        informationManagement.checkNewMovies(information, gui);
+                    }
                 }
-                else if(mouseEvent.getSource().equals(save)){
-                    InfoSaver.save(information);
-                }
-                else if(mouseEvent.getSource().equals(exit)){
-                    InfoSaver.save(information);
-                    stage.close();
-                }
-                else if(mouseEvent.getSource().equals(update)){
-                    informationManagement.checkNewMovies(information,gui);
-                }
+                catch (NullPointerException e){}
             }
         };
         setting1.addEventHandler(Event.ANY,eventHandler);

@@ -1,6 +1,7 @@
 package UI;
 
 import com.company.Information;
+import com.company.InformationManagement;
 import com.company.Movie;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -60,13 +61,27 @@ public class MediaPane {
         openFolder.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                File folder = new File(movie.getFolderPath());
-                if(folder.exists()) {
-                    try {
-                        Desktop.getDesktop().open(folder);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                for (String path : movie.getPaths()) {
+                    File folder = new File(path);
+                    if (folder.exists()) {
+                        try {
+                            Desktop.getDesktop().open(folder);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+                    else
+                        for(String temp : InformationManagement.getAvailableDrivers()) {
+                            File folder2 = new File(path.replace(temp,path.substring(0,path.indexOf(":"))));
+                            if (folder2.exists()) {
+                                try {
+                                    Desktop.getDesktop().open(folder2);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+                            }
+                        }
                 }
             }
         });
@@ -111,9 +126,12 @@ public class MediaPane {
             if(movie.isUpdatedFromNet() && Information.isPathExist(movie.getImagePath())) {
                 input = new FileInputStream(movie.getImagePath());
             }
+            else if(Information.isPathExist((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+movie.getName()+"image"+".jpg")) {
+                input = new FileInputStream((new java.io.File(".").getCanonicalPath()) + "\\images" + "\\" + movie.getName() + "image" + ".jpg");
+            }
             else {
                 input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\IMDB.jpg");
-               // input = new FileInputStream("src\\IMDB.jpg");
+//                input = new FileInputStream("src\\IMDB.jpg");
             }
 //            input2 = new FileInputStream("src\\like.jpg");
         } catch (FileNotFoundException e) {

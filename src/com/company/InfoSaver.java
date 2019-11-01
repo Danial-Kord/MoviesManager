@@ -10,6 +10,8 @@ public class InfoSaver {//TODO default
         return save(information,Information.path);
     }
     public static boolean save(Information information,String path) {
+        if(information == null)
+            return false;
         File save = new File(path + "\\" + "MovieManager.DMM");
         try (FileOutputStream fileOutputStream = new FileOutputStream(save.getPath())) {
             try {
@@ -29,8 +31,19 @@ public class InfoSaver {//TODO default
         return true;
     }
     public static Information read(){
-        File save = new File(Information.path + "\\" + "MovieManager.DMM");
         Information information = new Information();
+        File save = null;
+        File save2 = new File(Information.path2 + "\\" + "MovieManager.DMM");
+
+        File save1 = new File(Information.path + "\\" + "MovieManager.DMM");
+
+        if(save1.exists()){
+            save = save1;
+        }
+        else if(save2.exists()){
+            save = save2;
+        }
+        if(save != null)
         if(save.exists()) {
             try (FileInputStream fileInputStream = new FileInputStream(save.getPath())) {
                 try {
@@ -38,6 +51,7 @@ public class InfoSaver {//TODO default
                     information = (Information) (objectInputStream.readObject());
                     information.setMovies((ArrayList<Movie>) information.getMovies().clone());
                     objectInputStream.close();
+                    save(information,Information.initialPAth2());
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -48,7 +62,6 @@ public class InfoSaver {//TODO default
             }
             System.out.println("?????");
         }
-
         return information;
     }
 }

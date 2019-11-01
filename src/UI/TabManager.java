@@ -4,6 +4,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -25,6 +26,19 @@ public class TabManager {
         EventHandler<Event>eventHandler = new EventHandler<Event>() {
             @Override
             public void handle(Event event) {
+                MouseEvent m = null;
+                try {
+                    m = (MouseEvent) event;
+                }
+                catch (ClassCastException e){
+                    System.out.println("didi");
+                }
+                if(m!=null)
+                if(m.getButton().equals(MouseButton.SECONDARY)){
+                    ContextMenuManager.onTabPane(mainPane, tab,m.getScreenX(),m.getScreenY());
+
+                    return;
+                }
                 boolean hit = false;
                 if(tab.getId().equals("add")){
                     hit = true;

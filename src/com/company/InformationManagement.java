@@ -1,29 +1,53 @@
 package com.company;
 
 import UI.Gui;
-import UI.MediaContent;
 import UI.ProgressPane;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.VBox;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class InformationManagement {
     private boolean isReading = false;
-    private ArrayList<Movie> getMovies(String path,Information information) {
+    private static HashSet<String> availableDrivers = new HashSet<String>();
+    public static void findAvailablePaths(){
+        //FileSystemView fsv = FileSystemView.getFileSystemView();
+        File[] drives = File.listRoots();
+        for (int i= drives.length-1;i>=0;i--){
+            availableDrivers.add(""+drives[i].getAbsolutePath().substring(0,drives[i].getAbsolutePath().indexOf(":")));
+
+        }
+    }
+
+    public static HashSet<String> getAvailableDrivers() {
+        return availableDrivers;
+    }
+
+    private ArrayList<Movie> getMovies(String path, Information information) {
 
         System.out.println("movie numbers" + information.getMovies().size());
 
+        boolean dan = true;
         File folder = new File(path);
+        if(!Information.isPathExist(path)) {
+            dan = false;
+            for (String temp : availableDrivers){
+                path = path.replace(path.substring(0,path.indexOf(":")),temp);
+                System.out.println("ddddddddddddddddiiiiiiiiiiiiiiiiiiiiiii");
+                System.out.println(path);
+                folder = new File(path);
+                if(Information.isPathExist(path)) {
+                    folder = new File(path);
+                    break;
+                }
+            }
+        }
+      //  if(true)
+      //  return null;
         if (folder.isDirectory()) {
             ArrayList<File>files = new ArrayList<File>();
             files = DirCleaner.getMovies(folder,files);
@@ -50,6 +74,7 @@ public class InformationManagement {
                         catch (IndexOutOfBoundsException e)
                         {
                             flag = true;
+                            break;
                         } }
                     if(!flag)
                         movies.add(new Movie(Sorting.findName(file), Sorting.getYear(file.getName()), file.getAbsolutePath()));
@@ -74,7 +99,7 @@ public class InformationManagement {
 
         for (int i=information.getPaths().size()-1;i>=0;i--) {
             final String path = information.getPaths().get(i);
-            if(!information.isPathExist(path) || path.equals("") || path==null) {
+            if( path.equals("") || path==null) {
 //                information.getPaths().remove(information.getPaths().get(i));
 //                i--;
                 continue;
@@ -97,7 +122,10 @@ public class InformationManagement {
 
 //                    gui.findAll();
                     int i=0;
-                    for (Movie movie : information.getMovies()) {//TODO changed movies
+                    FindInfoFromNet.siteChange();
+                    for (int v=information.getMovies().size()-1;v>=0;v--) {
+                        //TODO changed movies
+                        Movie movie = information.getMovies().get(v);
                         System.out.println("<><><>"+movie.getName()+"     "+movie.isShow());
                         if(!Sorting.isPathExist(movie.getFolderPath()) || !movie.isShow())
                             continue;
