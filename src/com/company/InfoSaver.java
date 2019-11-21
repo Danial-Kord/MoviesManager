@@ -1,7 +1,12 @@
 package com.company;
 
+import dataBase.DBCoonection;
+import dataBase.InsertManager;
+import dataBase.SQLDmlManager;
+
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class InfoSaver {//TODO default
     //TODO save movies that couldn't find their info
@@ -62,6 +67,12 @@ public class InfoSaver {//TODO default
             }
             System.out.println("?????");
         }
+
+        DBCoonection.connect();
+        InsertManager.insertMovie(information.getMovies().get(0));
+
+        Scanner scanner = new Scanner(System.in);
+        scanner.next();
         return information;
     }
 }

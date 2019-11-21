@@ -15,7 +15,7 @@ public class UrlManager
             URL url = new URL(url1);
             HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 //        httpCon.addRequestProperty("Host", "www.cumhuriyet.com.tr");
-//        httpCon.addRequestProperty("Connection", "keep-alive");
+//        httpCon.addRequestProperty("DBCoonection", "keep-alive");
 //        httpCon.addRequestProperty("Cache-Control", "max-age=0");
 //        httpCon.addRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
             httpCon.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36");

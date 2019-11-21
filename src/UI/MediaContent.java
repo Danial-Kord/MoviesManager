@@ -64,8 +64,8 @@ public class MediaContent {
                 input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+movie.getName()+"image"+".jpg");
             }
             else {
-                input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\images.png");
-//                 input = new FileInputStream("src\\IMDB.jpg");
+//                input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\images.png");
+                 input = new FileInputStream("src\\IMDB.jpg");
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
