@@ -6,8 +6,16 @@ public class InsertManager extends RequestManager{
     //private static String instruction = "insert into "+{type}+" values("+{values}+")";
     public static void insertMovie(Movie movie){
         String values = "";
-        values += "('"+movie.getName()+"','"+movie.getYear()+"','"+movie.getIMDBscore()+"','"+movie.getIMDBrating()+"','"+movie.getDuration()+"','"+
-                movie.getNumberOfVotes()+"','"+movie.getSummery()+"')";
+        int score =0;
+        try {
+            score = Integer.parseInt(movie.getIMDBscore());
+        }
+        catch (NumberFormatException e){
+            System.out.println("num exp");
+        }
+
+        values += "('"+movie.getName()+"','"+movie.getYear()+"','"+score+"','"+"0"+"','"+"00:00:00"+"','"+
+                "0"+"','"+movie.getSummery()+"')";
         String req = "insert into movies values" + values;
         DBCoonection.myExcuteUpdate(req);
         values = "";

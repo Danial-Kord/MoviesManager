@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 
 public class Movie implements Serializable {
+
     private String name="";
     private String year="";
     private String IMDBscore="";
@@ -57,7 +58,19 @@ public class Movie implements Serializable {
     public HashSet<String> getPaths() {
         return paths;
     }
-
+//    public String getAllInfo(){
+//        String out = name+"@DKM"+year+"@DKM"+IMDBscore+"@DKM"+IMDBrating+"@DKM"+fullSummery+"@DKM"+summery+"@DKM"+
+//                actors+"@DKM"+directors+"@DKM"+path+"@DKM"+genre+"@DKM"+imagePath+"@DKM"+folderPath+"@DKM"+show+"@DKM"+isUpdatedFromNet
+//                +lastUpdate+"@DKM"+favoriteMovie+"@DKM"+duration+"@DKM"+numberOfVotes+"@DKM"+isUpdated2+"@DKM"+sorce+"@DKM"+sorce2;
+//        for (String temp : paths) {
+//            out+="@DKM"+temp;
+//        }
+//        for (String temp : favorite) {
+//            out+="@DKM"+temp;
+//        }
+//        out+="\n";
+//        return out;
+//    }
     public HashSet<String> getFavorites() {
         return favorite;
     }
@@ -247,4 +260,5 @@ public class Movie implements Serializable {
         System.out.println(path);
         System.out.println(genre);
     }
+
 }
