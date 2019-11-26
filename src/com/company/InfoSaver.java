@@ -52,6 +52,7 @@ public class InfoSaver {//TODO default
         for (String temp : movie.getFavorites()) {
             out+="@DKM"+temp;
         }
+        out = movie.getSorce2()+"@DKM";
         out+="\n";
         return out;
     }
@@ -82,6 +83,7 @@ public class InfoSaver {//TODO default
             outputStream.write(strToBytes);
             for (int i=0;i<information.getMovies().size();i++){
                 outputStream.write(getAllInfo(information.getMovies().get(i)).getBytes());
+                break;
             }
             temp = "\nMovies info ended\n";
             strToBytes = temp.getBytes();
@@ -94,6 +96,7 @@ public class InfoSaver {//TODO default
                 temp = information.getPaths().get(i)+"@DKM";
                 strToBytes = temp.getBytes();
                 outputStream.write(strToBytes);
+
             }
             temp = "\npaths info ended\n";
             strToBytes = temp.getBytes();

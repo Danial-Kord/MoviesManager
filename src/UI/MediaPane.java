@@ -130,8 +130,8 @@ public class MediaPane {
                 input = new FileInputStream((new java.io.File(".").getCanonicalPath()) + "\\images" + "\\" + movie.getName() + "image" + ".jpg");
             }
             else {
-                input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\IMDB.jpg");
-//                input = new FileInputStream("src\\IMDB.jpg");
+//                input = new FileInputStream((new java.io.File( "." ).getCanonicalPath())+"\\IMDB.jpg");
+                input = new FileInputStream("src\\IMDB.jpg");
             }
 //            input2 = new FileInputStream("src\\like.jpg");
         } catch (FileNotFoundException e) {

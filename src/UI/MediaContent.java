@@ -1,5 +1,6 @@
 package UI;
 
+import com.company.FindInfoFromNet;
 import com.company.Information;
 import com.company.Movie;
 import com.company.Sorting;
@@ -171,6 +172,8 @@ public class MediaContent {
                 }
                 if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED) && mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                     new MediaPane(movie,information);
+                    System.out.println(movie.getSorce2());
+                    FindInfoFromNet.searchResults(movie);
                 }
                 else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED) && mouseEvent.getButton().equals(MouseButton.SECONDARY)){
                     ContextMenuManager.onMediaContent(mediaContent,stackPane,mouseEvent.getScreenX(),mouseEvent.getScreenY());

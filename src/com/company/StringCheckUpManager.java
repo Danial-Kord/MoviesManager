@@ -54,7 +54,10 @@ public class StringCheckUpManager {
     public static String getMoreDetails(String sorce)throws IndexOutOfBoundsException{
         String temp =  sorce.substring(0,sorce.indexOf("\" class=\"post-more\">"));
         temp = temp.substring(temp.lastIndexOf("<a href=\""));
-        return temp.replace("<a href=\"","").replace("#p","");
+        temp = temp.replace("<a href=\"","").replace("#p","");
+        temp = temp.substring(temp.indexOf("30nama"));
+        temp = temp.replaceFirst(temp.substring(0,temp.indexOf("/")-1),Information.siteURL);
+        return temp;
     }
     public static String getDirectors(String sorce){
         String in = sorce.substring(sorce.indexOf("کارگردان"));

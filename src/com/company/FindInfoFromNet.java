@@ -55,10 +55,14 @@ public class FindInfoFromNet {
         }
 
         System.out.println(movie.isUpdated2());
-        if (sorce != null && !movie.isUpdated2()) {
+        if (!sorce.equals(null) && !movie.isUpdated2()) {
             try {
-                if(movie.getSorce2()==null || movie.getSorce2().equals("")) {
+                if(movie.getSorce2()==null || movie.getSorce2().equals("") || !movie.isUpdated2()) {
+                    System.out.println(StringCheckUpManager.getMoreDetails(sorce));
                     moreDetails = UrlManager.getURLSource(StringCheckUpManager.getMoreDetails(sorce));
+                    System.out.println(".....>>>>>>>>>>>>\n\n");
+                    System.out.println(moreDetails);
+                    System.out.println(".....<<<<<<<<<<<<<\n\n");
                 }
                 else {
                     moreDetails = movie.getSorce2();
@@ -124,11 +128,14 @@ public class FindInfoFromNet {
         return movie;
     }
     public static void siteChange(){
-        String url = "https://www.google.com/search?source=hp&ei=9SpPXZHOC-TJrgSy3qD4BA&q=30nama%27&oq=30nama%27&gs_l=psy-ab.3..35i39j0l9.1096.4088..4112...3.0..0.243.1754.2-8......0....1..gws-wiz.....10..0i67j0i10.dca13BoB8Lg&ved=0ahUKEwjRnO-JlPnjAhXkpIsKHTIvCE8Q4dUDCAU&uact=5";
+        String url = "http://filtering.ninja/link.txt";
         try {
             String sorce= null;
             sorce = UrlManager.getURLSource(url);
-            String newOne = StringCheckUpManager.getNewSite(sorce);
+            String newOne = sorce.replaceAll(" ","");
+            if(!newOne.endsWith("/"))
+                newOne+="/";
+            System.out.println(newOne);
             if(newOne!=null)
                 if(!newOne.equals(""))
                     Information.siteURL = newOne;
