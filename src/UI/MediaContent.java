@@ -173,7 +173,7 @@ public class MediaContent {
                 if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED) && mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                     new MediaPane(movie,information);
                     System.out.println(movie.getSorce2());
-                    FindInfoFromNet.searchResults(movie);
+                   // FindInfoFromNet.searchResults(movie);
                 }
                 else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED) && mouseEvent.getButton().equals(MouseButton.SECONDARY)){
                     ContextMenuManager.onMediaContent(mediaContent,stackPane,mouseEvent.getScreenX(),mouseEvent.getScreenY());

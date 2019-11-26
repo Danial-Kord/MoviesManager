@@ -52,11 +52,13 @@ public class StringCheckUpManager {
                 .replace("<span><i class=\"fa fa-star\"></i>","");
     }
     public static String getMoreDetails(String sorce)throws IndexOutOfBoundsException{
+        System.out.println(".....\n"+sorce.length());
         String temp =  sorce.substring(0,sorce.indexOf("\" class=\"post-more\">"));
         temp = temp.substring(temp.lastIndexOf("<a href=\""));
         temp = temp.replace("<a href=\"","").replace("#p","");
         temp = temp.substring(temp.indexOf("30nama"));
         temp = temp.replaceFirst(temp.substring(0,temp.indexOf("/")-1),Information.siteURL);
+        System.out.println("\n"+temp.length()+"......<<<<<<\n");
         return temp;
     }
     public static String getDirectors(String sorce){
@@ -173,9 +175,18 @@ public class StringCheckUpManager {
         return sorce.substring(sorce.indexOf("<div class=\"imdb-top-rated-old-style\">") ,sorce.indexOf("<div class=\"imdb-top-rated-old-style\">") +sorce.substring(sorce.indexOf("<div class=\"imdb-top-rated-old-style\">")).indexOf("</div> "))
                 .replace("<div class=\"imdb-top-rated-old-style\">","");
     }
-    public static String moreDetaildSummery(String sorce)throws IndexOutOfBoundsException{
+    public static String moreDetaildSummery(String sorce){
 //        System.out.println(sorce);
-        return sorce.substring(sorce.indexOf("<!-- Post -->"),sorce.indexOf("<!-- //Post -->"));
+        if(sorce.contains("�"))
+            return "";
+        System.out.println(sorce);
+        try {
+            String temp = sorce.substring(sorce.indexOf("<!-- Post -->"), sorce.indexOf("<script>"));
+            return temp;
+        }
+        catch (IndexOutOfBoundsException e){
+            return sorce;
+        }
    }
     public static String findingActors (String sorce1)throws IndexOutOfBoundsException{
         String sorce="";

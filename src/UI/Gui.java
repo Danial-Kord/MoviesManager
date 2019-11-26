@@ -283,12 +283,11 @@ public class Gui extends Application {
 
     public void findAll(){
 
-
-
         Task<Parent> yourTaskName = new Task<Parent>() {
             @Override
             public Parent call() {
                 for (int i=0;i<information.getMovies().size();i++){
+
                     updateOrAddMediaContent(information.getMovies().get(i));
                 }
                 return null;

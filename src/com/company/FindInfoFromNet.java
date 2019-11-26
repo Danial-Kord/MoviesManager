@@ -69,11 +69,11 @@ public class FindInfoFromNet {
                 }
                 if(moreDetails!=null){
                     try {
-//                        moreDetails = StringCheckUpManager.moreDetaildSummery(moreDetails);
+
                         movie.setSorce2(moreDetails);//TODO
 
                         System.out.println("more details:");
-//                        moreDetails = StringCheckUpManager.getMoreDetails(moreDetails);
+                       // moreDetails = StringCheckUpManager.getMoreDetails(moreDetails);
                         movie.setActors(StringCheckUpManager.findingActors(moreDetails));
                         System.out.println("actors finished");
                         movie.setDirectors(StringCheckUpManager.getDirectors(moreDetails));
@@ -84,7 +84,10 @@ public class FindInfoFromNet {
                         System.out.println("numberOfVotes");
 //                        movie.setEnSummery(StringCheckUpManager.getSummeryEn(moreDetails));
 //                        System.out.println("summery en finished");
+                        movie.setSorce2(StringCheckUpManager.moreDetaildSummery(moreDetails));
                         movie.setUpdated2(true);
+
+                        movie.setSorce2("");
                     }
                     catch (IndexOutOfBoundsException | NumberFormatException e) {
                         System.out.println("site formating2 has been changed!");
@@ -154,7 +157,9 @@ public class FindInfoFromNet {
         if(file.exists()) {
 
             try {
-                Files.copy(file.toPath(), new File((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+name+"image"+".jpg").toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                Files.move(file.toPath(), new File((new java.io.File( "." ).getCanonicalPath())+"\\images"+"\\"+name+"image"+".jpg").toPath(), StandardCopyOption.REPLACE_EXISTING);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
