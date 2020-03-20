@@ -62,21 +62,26 @@ public class StringCheckUpManager {
         return temp;
     }
     public static String getDirectors(String sorce){
-        String in = sorce.substring(sorce.indexOf("کارگردان"));
-        in = in .substring(0,in.indexOf("</div>"));
+        try {
+            String in = sorce.substring(sorce.indexOf("کارگردان"));
 
-        String out="";
-        String[] regex = in.split(",");
-        for (int i=0;i<regex.length;i++){
-            out+=regex[i].substring(regex[i].indexOf("blank\">"),regex[i].indexOf("</a>")).replaceFirst("blank\">","")+" ";
+            in = in.substring(0, in.indexOf("</div>"));
 
+            String out = "";
+            String[] regex = in.split(",");
+            for (int i = 0; i < regex.length; i++) {
+                out += regex[i].substring(regex[i].indexOf("blank\">"), regex[i].indexOf("</a>")).replaceFirst("blank\">", "") + ",";
+
+            }
+            System.out.println(out);
+
+
+            return out;
         }
-        System.out.println(out);
-
-
-
-
-        return out;
+        catch (IndexOutOfBoundsException e){
+            System.out.println(sorce);
+        }
+        return null;
     }
     public static String getNumberOfVotes(String sorce){
         String in = sorce.substring(sorce.indexOf("امتیاز IMDb"));
@@ -84,7 +89,25 @@ public class StringCheckUpManager {
         return in.substring(in.indexOf("<em>"),in.indexOf("</em>")).replaceFirst("<em>","");
     }
     public static String getGenre(String sorce)throws IndexOutOfBoundsException{
-        String out = ",";
+
+
+
+        String out = "";
+
+        try {
+            if (!sorce.contains("class=\"genre\" target=\"_blank\">")) {
+                System.out.println(sorce);
+            }
+        }
+        catch (NullPointerException e){
+            System.out.println(sorce);
+        }
+        String [] generes = sorce.split("class=\"genre\" target=\"_blank\">");
+        for (int i=1;i<generes.length;i++){
+            out+=generes[i].substring(0,generes[i].indexOf("</a>")).replace("</a>","")+",";
+        }
+        if (true)
+            return out;
         if(sorce.contains("هیجان انگیز"))
             out += "Exciting,";
         if(sorce.contains("درام"))
@@ -104,30 +127,30 @@ public class StringCheckUpManager {
 
 
         if(sorce.contains("علمی-تخیلی"))
-            out += "Science-Fiction";
+            out += "Science-Fiction,";
         if(sorce.contains("معمایی"))
-            out += "Mystery";
+            out += "Mystery,";
         if(sorce.contains("فانتزی"))
-            out += "Fantasy";
+            out += "Fantasy,";
 
         if(sorce.contains("خانوادگی"))
-            out += "Family";
+            out += "Family,";
         if(sorce.contains("مستند"))
-            out += "Documentary";
+            out += "Documentary,";
         if(sorce.contains("انیمیشن"))
-            out += "Animation";
+            out += "Animation,";
         if(sorce.contains("زندگینامه"))
-            out += "Biography";
+            out += "Biography,";
         if(sorce.contains("موزیکال"))
-            out += "Musical";
+            out += "Musical,";
         if(sorce.contains("جنگی"))
-            out += "War";
+            out += "War,";
         if(sorce.contains("تاریخی"))
-            out += "History";
+            out += "History,";
         if(sorce.contains("کوتاه"))
-            out += "Short";
+            out += "Short,";
         if(sorce.contains("وسترن"))
-            out += "Western";
+            out += "Western,";
         if(sorce.contains("نوآر"))
             out += "Noir";
         if(sorce.contains("ورزشی"))

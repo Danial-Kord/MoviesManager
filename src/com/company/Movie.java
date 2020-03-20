@@ -51,6 +51,8 @@ public class Movie implements Serializable {
         this.summery = summery;
         this.actors = actors;
     }
+
+
     public void addCategory(String path){
         favorite.add(path);
     }
