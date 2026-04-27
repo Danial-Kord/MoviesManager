@@ -50,6 +50,34 @@ public class UrlManager
 
     }
 
+    /**
+     * HTTP GET for JSON API responses (TMDb, OMDb, etc.).
+     */
+    public static String getUrlJson(String url1) throws IOException, UnknownHostException {
+        try {
+            java.lang.System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+            URL url = new URL(url1);
+            HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+            httpCon.addRequestProperty("Accept", "application/json");
+            httpCon.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            httpCon.setConnectTimeout(60_000);
+            httpCon.setReadTimeout(120_000);
+            int code = httpCon.getResponseCode();
+            InputStream in = code < 400 ? httpCon.getInputStream() : httpCon.getErrorStream();
+            if (in == null) {
+                httpCon.disconnect();
+                return null;
+            }
+            String out = toString(in);
+            in.close();
+            httpCon.disconnect();
+            return out;
+        } catch (NoRouteToHostException | UnknownHostException e) {
+            System.out.println("offline");
+            throw e;
+        }
+    }
+
     private static String toString(InputStream inputStream) throws IOException
     {
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8")))

@@ -7,6 +7,8 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 
+import com.company.metadata.MovieMetadataProviders;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -122,7 +124,7 @@ public class InformationManagement {
 
 //                    gui.findAll();
                     int i=0;
-                    FindInfoFromNet.siteChange();
+                    MovieMetadataProviders.beforeEnrichmentBatch();
                     for (int v=information.getMovies().size()-1;v>=0;v--) {
                         //TODO changed movies
                         Movie movie = information.getMovies().get(v);
