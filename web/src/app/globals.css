@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0d0d0d;
+  --surface: #1a1a1a;
+  --text: #f5f5f5;
+  --muted: #9ca3af;
+  --accent-imdb: #f5c518;
+  --accent-netflix: #e50914;
+  --ring: rgba(245, 197, 24, 0.35);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply min-h-screen antialiased;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer utilities {
+  .text-shadow-hero {
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+  }
+}
+
+/* horizontal scroll without ugly scrollbar (webkit) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

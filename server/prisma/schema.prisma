@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model LibraryPath {
+  id        String   @id @default(cuid())
+  path      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id     String          @id @default(cuid())
+  name   String
+  movies MovieCategory[]
+
+  @@unique([name])
+}
+
+model MovieCategory {
+  movieId    String
+  categoryId String
+  movie      Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, categoryId])
+}
+
+/// Mirrors com.company.Movie; paths are host absolute paths.
+model Movie {
+  id     String @id @default(cuid())
+  name   String
+  year   String?
+
+  filePath   String @unique
+  folderPath String
+
+  imdbScore   String?
+  imdbRating  String?
+  summary     String?
+  fullSummary String?
+  actors      String?
+  directors   String?
+  genre       String?
+  imagePath   String?
+  duration    String?
+  numberOfVotes String?
+
+  tmdbId   Int?
+  show     Boolean @default(true)
+  isFavorite Boolean @default(false)
+  /// none | partial | full
+  enrichmentState String @default("none")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categories MovieCategory[]
+
+  @@index([name])
+  @@index([year])
+  @@index([show])
+  @@index([isFavorite])
+}
