@@ -10,6 +10,7 @@ import {
   posterUrlForMovieId,
   scanLibrary,
 } from "@/lib/api";
+import { PlayLocalButton } from "@/components/PlayLocalButton";
 
 const PAGE_SIZE = 24;
 
@@ -27,6 +28,22 @@ export function HomeClient() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  /** null = unknown until first check */
+  const [apiReachable, setApiReachable] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/health")
+      .then((r) => {
+        if (!cancelled) setApiReachable(r.ok);
+      })
+      .catch(() => {
+        if (!cancelled) setApiReachable(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const load = useCallback(
     async (pageOverride?: number) => {
@@ -97,6 +114,15 @@ export function HomeClient() {
 
   return (
     <div className="min-h-screen">
+      {apiReachable === false && (
+        <div className="border-b border-red-500/50 bg-red-950/90 px-4 py-3 text-center text-sm text-red-100">
+          <strong className="font-semibold">Local API not running.</strong> Next.js proxies{" "}
+          <code className="rounded bg-black/30 px-1">/api</code> to{" "}
+          <code className="rounded bg-black/30 px-1">127.0.0.1:4000</code>. From the repo root run{" "}
+          <code className="rounded bg-black/30 px-1">npm run dev</code> (starts web + API), or in another
+          terminal run <code className="rounded bg-black/30 px-1">npm run dev:api</code>.
+        </div>
+      )}
       {busy && (
         <div className="pointer-events-none fixed bottom-4 right-4 z-50 rounded bg-black/80 px-4 py-2 text-sm text-amber-200">
           {busy}
@@ -131,12 +157,12 @@ export function HomeClient() {
             )}
             {feature.genre && <p className="mt-2 text-sm text-gray-300">{feature.genre}</p>}
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link
-                href={"/watch/" + feature.id}
+              <PlayLocalButton
+                movieId={feature.id}
                 className="rounded bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-gray-200"
               >
                 Play
-              </Link>
+              </PlayLocalButton>
               <Link
                 href={"/movie/" + feature.id}
                 className="rounded border border-white/30 bg-black/30 px-4 py-2 text-sm hover:bg-white/10"

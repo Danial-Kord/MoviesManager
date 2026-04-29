@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MovieDetailActions } from "@/components/MovieDetailActions";
 import { MovieImage } from "@/components/MovieImage";
+import { PlayLocalButton } from "@/components/PlayLocalButton";
 
 type Movie = {
   id: string;
@@ -71,12 +72,12 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
           )}
           {m.summary && <p className="mt-6 text-base leading-relaxed text-gray-200">{m.summary}</p>}
           <div className="mt-6 flex flex-wrap gap-2">
-            <Link
-              href={"/watch/" + m.id}
+            <PlayLocalButton
+              movieId={m.id}
               className="inline-flex rounded bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-gray-200"
             >
               Play
-            </Link>
+            </PlayLocalButton>
             <MovieDetailActions id={m.id} isFavorite={m.isFavorite} show={m.show} />
           </div>
         </div>

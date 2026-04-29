@@ -44,6 +44,17 @@ export function posterUrlForMovieId(id: string) {
   return `${BASE}/api/poster/${id}`;
 }
 
-export function streamUrlForMovieId(id: string) {
-  return `${BASE}/api/stream/${id}`;
+/** Ask local API to open the video file with the OS default app (VLC, Movies & TV, etc.). */
+export async function playLocal(movieId: string): Promise<void> {
+  const r = await fetch(`${BASE}/api/movies/${movieId}/play-local`, { method: "POST" });
+  if (!r.ok) {
+    let msg = await r.text();
+    try {
+      const j = JSON.parse(msg) as { error?: string };
+      if (j.error) msg = j.error;
+    } catch {
+      /* raw text */
+    }
+    throw new Error(msg || r.statusText);
+  }
 }

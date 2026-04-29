@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import { createReadStream, stat as statCb } from "fs";
 import { dirname, extname, resolve } from "path";
+import { stat } from "fs/promises";
 import { pipeline } from "stream/promises";
 import { promisify } from "util";
 import { lookup } from "mime-types";
@@ -9,6 +10,7 @@ import { API_HOST, API_PORT, TMDB_API_KEY } from "./config.js";
 import { prisma } from "./prisma.js";
 import { collectVideoFiles, pathExists } from "./scan.js";
 import { downloadPosterToImagesDir, enrichWithTmdb } from "./tmdb.js";
+import { openFileWithDefaultApp } from "./openLocal.js";
 
 const statAsync = promisify(statCb);
 
@@ -185,6 +187,26 @@ app.patch("/api/movies/:id", async (req, res) => {
     include: { categories: { include: { category: true } } },
   });
   res.json(m);
+});
+
+/** Open video file with the system default application (not in-browser). */
+app.post("/api/movies/:id/play-local", async (req, res) => {
+  const m = await prisma.movie.findUnique({ where: { id: req.params.id } });
+  if (!m) {
+    res.status(404).json({ error: "not found" });
+    return;
+  }
+  try {
+    const st = await stat(m.filePath);
+    if (!st.isFile()) {
+      res.status(404).json({ error: "file missing on disk" });
+      return;
+    }
+    await openFileWithDefaultApp(m.filePath);
+    res.json({ ok: true });
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
 });
 
 // --- categories list (distinct for filters)

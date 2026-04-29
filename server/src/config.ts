@@ -7,20 +7,26 @@ export const DATA_DIR = join(homedir(), ".moviemanager");
 export const IMAGES_DIR = join(DATA_DIR, "images");
 
 /**
- * Set DATABASE_URL to host SQLite under ~/.moviemanager (must run before @prisma/client import).
+ * Resolve SQLite URL to %USERPROFILE%/.moviemanager/movies.db
+ * unless DATABASE_URL is set to a real path (not a template placeholder).
  */
 export function ensureDataDirAndDatabaseUrl() {
   mkdirSync(DATA_DIR, { recursive: true });
   mkdirSync(IMAGES_DIR, { recursive: true });
-  if (!process.env.DATABASE_URL) {
-    const dbFile = join(DATA_DIR, "movies.db");
-    const urlPath = dbFile.split("\\").join("/");
-    // Prisma on Windows: file:C:/... or file:///C:/... (file:/C:/ is invalid for sqlite)
-    if (urlPath.match(/^[A-Za-z]:/)) {
-      process.env.DATABASE_URL = `file:${urlPath}`;
-    } else {
-      process.env.DATABASE_URL = `file:${urlPath}`;
-    }
+
+  const dbFile = join(DATA_DIR, "movies.db");
+  const urlPath = dbFile.split("\\").join("/");
+  const homeUrl = urlPath.match(/^[A-Za-z]:/) ? `file:${urlPath}` : `file:${urlPath}`;
+
+  const raw = (process.env.DATABASE_URL ?? "").trim();
+  const isPlaceholder =
+    !raw ||
+    /placeholder/i.test(raw) ||
+    raw.includes("../prisma/movies.db") ||
+    raw === "file:./dev.db";
+
+  if (isPlaceholder) {
+    process.env.DATABASE_URL = homeUrl;
   }
 }
 
