@@ -44,6 +44,16 @@ export function posterUrlForMovieId(id: string) {
   return `${BASE}/api/poster/${id}`;
 }
 
+/** PATCH movie fields (favorite, visibility, …). */
+export async function patchMovie(id: string, body: { isFavorite?: boolean; show?: boolean }) {
+  const r = await fetch(`${BASE}/api/movies/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(await r.text());
+}
+
 /** Ask local API to open the video file with the OS default app (VLC, Movies & TV, etc.). */
 export async function playLocal(movieId: string): Promise<void> {
   const r = await fetch(`${BASE}/api/movies/${movieId}/play-local`, { method: "POST" });

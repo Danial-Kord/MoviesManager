@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MovieDetailActions } from "@/components/MovieDetailActions";
 import { MovieImage } from "@/components/MovieImage";
 import { PlayLocalButton } from "@/components/PlayLocalButton";
+import { formatScore } from "@/lib/formatScore";
 
 type Movie = {
   id: string;
@@ -33,52 +34,53 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
   const m = await getMovie(id);
   if (!m) notFound();
 
+  const ratingLabel = formatScore(m.imdbRating);
+
   return (
-    <div className="mx-auto max-w-[1200px] px-4 py-8">
-      <div className="mb-4">
-        <Link href="/" className="text-sm text-gray-400 hover:text-white">
-          ← Back
-        </Link>
-      </div>
-      <div className="grid gap-8 md:grid-cols-[240px,1fr]">
-        <div className="relative aspect-[2/3] w-full max-w-xs overflow-hidden rounded-lg bg-surface">
-          <MovieImage id={m.id} name={m.name} />
+    <div className="min-h-[70vh] bg-imdb-canvas px-4 py-8 font-imdb md:px-8">
+      <div className="mx-auto max-w-[1200px]">
+        <div className="mb-6">
+          <Link href="/" className="text-[14px] font-medium text-imdb-muted underline-offset-4 hover:text-imdb-text hover:underline">
+            ← Back to library
+          </Link>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-white">
-            {m.name}{" "}
-            {m.year && <span className="text-xl font-normal text-gray-400">({m.year})</span>}
-          </h1>
-          {m.imdbRating && (
-            <p className="mt-2 text-2xl font-bold text-[#F5C518]">
-              {m.imdbRating}
-              <span className="ml-1 text-sm font-normal text-gray-500">/10</span>
-            </p>
-          )}
-          {m.genre && <p className="mt-2 text-sm text-amber-100/80">{m.genre}</p>}
-          {m.duration && <p className="text-sm text-gray-500">Runtime: {m.duration}</p>}
-          <p className="mt-2 text-sm text-gray-500 break-all">File: {m.filePath}</p>
-          {m.directors && (
-            <p className="mt-4 text-sm text-gray-300">
-              <span className="text-gray-500">Directors: </span>
-              {m.directors}
-            </p>
-          )}
-          {m.actors && (
-            <p className="mt-2 text-sm text-gray-300">
-              <span className="text-gray-500">Cast: </span>
-              {m.actors}
-            </p>
-          )}
-          {m.summary && <p className="mt-6 text-base leading-relaxed text-gray-200">{m.summary}</p>}
-          <div className="mt-6 flex flex-wrap gap-2">
-            <PlayLocalButton
-              movieId={m.id}
-              className="inline-flex rounded bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-gray-200"
-            >
-              Play
-            </PlayLocalButton>
-            <MovieDetailActions id={m.id} isFavorite={m.isFavorite} show={m.show} />
+        <div className="overflow-hidden rounded-imdb-card border border-imdb-border bg-imdb-elevated p-6 shadow-lg shadow-black/30 md:grid md:grid-cols-[minmax(200px,280px),1fr] md:gap-10 md:p-8">
+          <div className="relative mx-auto mb-8 aspect-[2/3] w-full max-w-[280px] overflow-hidden rounded-imdb-card bg-imdb-surface md:mb-0">
+            <MovieImage id={m.id} name={m.name} />
+          </div>
+          <div>
+            <h1 className="text-[1.75rem] font-bold tracking-tight text-imdb-text md:text-3xl" style={{ letterSpacing: "-1.2px" }}>
+              {m.name}{" "}
+              {m.year && <span className="text-xl font-normal text-imdb-muted">({m.year})</span>}
+            </h1>
+            {ratingLabel && (
+              <p className="mt-3 text-2xl font-bold text-imdb-gold">
+                {ratingLabel}
+                <span className="ml-1 text-sm font-normal text-imdb-muted">/10</span>
+              </p>
+            )}
+            {m.genre && <p className="mt-2 text-[14px] text-imdb-muted">{m.genre}</p>}
+            {m.duration && <p className="text-[14px] text-imdb-subtle">Runtime: {m.duration}</p>}
+            <p className="mt-2 break-all text-[12px] text-imdb-subtle">File: {m.filePath}</p>
+            {m.directors && (
+              <p className="mt-5 text-[14px] leading-relaxed text-imdb-text">
+                <span className="text-imdb-muted">Directors: </span>
+                {m.directors}
+              </p>
+            )}
+            {m.actors && (
+              <p className="mt-2 text-[14px] leading-relaxed text-imdb-text">
+                <span className="text-imdb-muted">Cast: </span>
+                {m.actors}
+              </p>
+            )}
+            {m.summary && (
+              <p className="mt-6 text-[16px] leading-relaxed text-imdb-text">{m.summary}</p>
+            )}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <PlayLocalButton movieId={m.id}>Play</PlayLocalButton>
+              <MovieDetailActions id={m.id} isFavorite={m.isFavorite} show={m.show} />
+            </div>
           </div>
         </div>
       </div>

@@ -2,14 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Dark IMDb-inspired tokens — see DESIGN.md
+ */
 :root {
-  --bg: #0d0d0d;
-  --surface: #1a1a1a;
-  --text: #f5f5f5;
-  --muted: #9ca3af;
-  --accent-imdb: #f5c518;
-  --accent-netflix: #e50914;
-  --ring: rgba(245, 197, 24, 0.35);
+  --imdb-canvas: #141414;
+  --imdb-surface: #191919;
+  --imdb-elevated: #1f1f1f;
+  --imdb-panel: #262626;
+  --imdb-rail: #333333;
+  --imdb-border: #404040;
+  --imdb-text: #f5f5f1;
+  --imdb-muted: #b3b3b3;
+  --imdb-subtle: #a3a3a3;
+  --imdb-dim: #808080;
+  --imdb-gold: #f5c518;
+  --imdb-gold-hover: #be9500;
+  --imdb-focus: #5799ef;
+  --imdb-error: #f87171;
+  --imdb-footer: #0d0d0d;
+  --imdb-hover: rgba(255, 255, 255, 0.08);
 }
 
 html {
@@ -18,18 +30,18 @@ html {
 
 body {
   @apply min-h-screen antialiased;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--imdb-canvas);
+  color: var(--imdb-text);
+  font-family: -apple-system, system-ui, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 @layer utilities {
-  .text-shadow-hero {
-    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+  .text-shadow-hero-dark {
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.9);
   }
 }
 
-/* horizontal scroll without ugly scrollbar (webkit) */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

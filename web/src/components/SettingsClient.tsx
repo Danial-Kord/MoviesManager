@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { IconFolder } from "@/components/icons";
 
 type PathRow = { id: string; path: string; createdAt: string };
 
@@ -48,17 +49,17 @@ export function SettingsClient() {
   }
 
   return (
-    <div className="space-y-8 text-sm text-gray-300">
-      <p className="text-gray-500">
-        Add one or more folders on this PC that contain your video files. The local API (port 4000) scans
-        them when you use <strong className="text-gray-300">Rescan</strong> on the home page.
+    <div className="space-y-8 rounded-imdb-card border border-imdb-border bg-imdb-elevated p-6 text-[14px] text-imdb-text shadow-sm md:p-8">
+      <p className="text-imdb-muted">
+        Add one or more folders on this PC that contain your video files. The local API (port 4000) scans them when you use{" "}
+        <strong className="font-semibold text-imdb-text">Rescan</strong> on the home page.
       </p>
 
       <div className="space-y-2">
-        <label className="text-xs text-gray-500">New folder (absolute path, e.g. D:\Movies)</label>
-        <div className="flex gap-2">
+        <label className="text-[12px] font-medium text-imdb-muted">New folder (absolute path, e.g. D:\Movies)</label>
+        <div className="flex flex-wrap gap-2">
           <input
-            className="min-w-0 flex-1 rounded border border-white/10 bg-black/40 px-3 py-2"
+            className="min-w-0 flex-1 rounded-imdb border border-imdb-border bg-imdb-elevated px-3 py-[11px] text-[16px] text-imdb-text outline-none focus:border-imdb-focus focus:ring-2 focus:ring-imdb-focus/25"
             value={newPath}
             onChange={(e) => setNewPath(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addPath()}
@@ -67,27 +68,30 @@ export function SettingsClient() {
           <button
             type="button"
             onClick={addPath}
-            className="shrink-0 rounded bg-[#F5C518] px-4 py-2 font-semibold text-black hover:bg-[#e4b800]"
+            className="shrink-0 rounded-imdb bg-imdb-gold px-[14px] py-[6px] text-[12px] font-semibold text-black transition hover:brightness-95"
           >
             Add
           </button>
         </div>
-        {ok && <p className="text-xs text-emerald-400">{ok}</p>}
-        {err && <p className="text-xs text-red-400">{err}</p>}
+        {ok && <p className="text-[12px] text-imdb-muted">{ok}</p>}
+        {err && <p className="text-[12px] text-imdb-error">{err}</p>}
       </div>
 
       <ul className="space-y-2">
-        {paths.length === 0 && <li className="text-gray-500">No library paths yet.</li>}
+        {paths.length === 0 && <li className="text-imdb-subtle">No library paths yet.</li>}
         {paths.map((p) => (
           <li
             key={p.id}
-            className="flex items-center justify-between gap-2 rounded border border-white/5 bg-surface/60 px-3 py-2"
+            className="flex items-start gap-3 rounded-imdb border border-imdb-border bg-imdb-canvas/50 px-3 py-3 md:items-center md:justify-between"
           >
-            <span className="min-w-0 break-all text-xs sm:text-sm">{p.path}</span>
+            <span className="flex min-w-0 items-start gap-2">
+              <IconFolder className="mt-0.5 shrink-0 text-imdb-subtle" size={18} />
+              <span className="break-all text-[13px] leading-snug text-imdb-text sm:text-sm">{p.path}</span>
+            </span>
             <button
               type="button"
               onClick={() => removePath(p.id)}
-              className="shrink-0 text-xs text-red-400 hover:underline"
+              className="shrink-0 rounded-imdb px-2 py-1 text-[12px] font-semibold text-imdb-error hover:bg-imdb-hover"
             >
               Remove
             </button>
@@ -95,13 +99,14 @@ export function SettingsClient() {
         ))}
       </ul>
 
-      <div className="border-t border-white/10 pt-6">
-        <h2 className="mb-2 font-semibold text-white">Import legacy JSON</h2>
-        <p className="mb-3 text-xs text-gray-500">
-          Export your library with the Java tool, then choose the JSON file. Format: an array of movie objects
-          (with <code>path</code> or <code>filePath</code>).
+      <div className="border-t border-imdb-border pt-8">
+        <h2 className="mb-3 text-[16px] font-bold text-imdb-text">Import legacy JSON</h2>
+        <p className="mb-4 text-[13px] leading-relaxed text-imdb-muted">
+          Export your library with the Java tool, then choose the JSON file. Format: an array of movie objects (with{" "}
+          <code className="rounded bg-imdb-panel px-1 font-mono text-[12px] text-imdb-text">path</code> or{" "}
+          <code className="rounded bg-imdb-panel px-1 font-mono text-[12px] text-imdb-text">filePath</code>).
         </p>
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded border border-white/20 px-3 py-2 hover:bg-white/5">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-imdb border border-imdb-border px-4 py-2 text-[12px] font-semibold text-imdb-text transition hover:bg-imdb-hover">
           <input
             type="file"
             accept="application/json"
@@ -135,12 +140,12 @@ export function SettingsClient() {
         </label>
       </div>
 
-      <div className="border-t border-white/10 pt-4 text-xs text-gray-500">
+      <div className="border-t border-imdb-border pt-6 text-[12px] text-imdb-subtle">
         <p>
-          Set <code className="text-gray-400">TMDB_API_KEY</code> in the server process environment (e.g.{" "}
-          <code className="text-gray-400">server/.env</code>) to enable TMDb enrichment. Create a key at{" "}
-          <a className="text-amber-500 hover:underline" href="https://www.themoviedb.org/settings/api" target="_blank" rel="noreferrer">
-            themoviedb.org
+          Set <code className="rounded bg-imdb-canvas px-1 font-mono text-imdb-text">TMDB_API_KEY</code> in{" "}
+          <code className="rounded bg-imdb-canvas px-1 font-mono text-imdb-text">server/.env</code> for TMDb enrichment.{" "}
+          <a className="font-medium text-imdb-text underline underline-offset-2 hover:text-imdb-gold" href="https://www.themoviedb.org/settings/api" target="_blank" rel="noreferrer">
+            Create a key
           </a>
           .
         </p>

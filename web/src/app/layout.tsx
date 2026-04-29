@@ -1,36 +1,23 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Suspense } from "react";
+import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Movie Manager",
-  description: "Local movie library — Netflix + IMDb style",
+  description: "Local movie library — dark IMDb-inspired catalog for your files",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>
-        <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0d0d0d]/90 backdrop-blur">
-          <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-3">
-            <Link href="/" className="text-xl font-bold tracking-tight">
-              <span className="text-[#E50914]">M</span>
-              <span>ovie</span>
-              <span className="ml-0.5 text-[#F5C518]">Manager</span>
-            </Link>
-            <nav className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
-              <Link href="/" className="hover:text-white">
-                Home
-              </Link>
-              <Link href="/settings" className="hover:text-white">
-                Settings
-              </Link>
-            </nav>
-          </div>
-        </header>
+      <body className="font-imdb">
+        <Suspense fallback={<header className="h-[57px] border-b border-imdb-border bg-imdb-surface" />}>
+          <SiteHeader />
+        </Suspense>
         {children}
-        <footer className="mt-20 border-t border-white/5 py-8 text-center text-xs text-gray-500">
-          Local API — for use on 127.0.0.1 only
+        <footer className="mt-16 border-t border-imdb-border/60 bg-imdb-footer py-10 text-center">
+          <p className="text-[12px] text-imdb-subtle">Local API — for use on 127.0.0.1 only</p>
         </footer>
       </body>
     </html>

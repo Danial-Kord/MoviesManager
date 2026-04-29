@@ -1,5 +1,7 @@
 "use client";
 
+import { IconHeart } from "@/components/icons";
+import { patchMovie } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -19,17 +21,14 @@ export function MovieDetailActions({
 
   async function patch(body: { isFavorite?: boolean; show?: boolean }) {
     setBusy(true);
-    const r = await fetch(`/api/movies/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (r.ok) {
+    try {
+      await patchMovie(id, body);
       if (body.isFavorite != null) setFav(body.isFavorite);
       if (body.show != null) setVis(body.show);
       router.refresh();
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   return (
@@ -38,15 +37,16 @@ export function MovieDetailActions({
         type="button"
         disabled={busy}
         onClick={() => patch({ isFavorite: !fav })}
-        className="rounded border border-white/20 bg-transparent px-4 py-2 text-sm text-white hover:bg-white/5"
+        aria-label={fav ? "Remove from favorites" : "Add to favorites"}
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-imdb bg-imdb-panel text-imdb-text transition hover:bg-imdb-border/90 disabled:opacity-50"
       >
-        {fav ? "Unfavorite" : "Favorite"}
+        <IconHeart size={20} filled={fav} className={fav ? "text-imdb-gold" : undefined} />
       </button>
       <button
         type="button"
         disabled={busy}
         onClick={() => patch({ show: !vis })}
-        className="rounded border border-white/20 bg-transparent px-4 py-2 text-sm text-white hover:bg-white/5"
+        className="rounded-imdb border border-imdb-border bg-transparent px-[14px] py-[6px] text-[12px] font-semibold text-imdb-text transition hover:bg-imdb-hover"
       >
         {vis ? "Hide (blacklist)" : "Unhide"}
       </button>

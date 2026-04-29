@@ -7,7 +7,7 @@ export function MovieImage({ id, name }: { id: string; name: string }) {
   const [ok, setOk] = useState(true);
   if (!ok) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 p-4 text-center text-sm text-gray-500">
+      <div className="flex h-full w-full items-center justify-center bg-imdb-rail p-4 text-center text-[14px] text-imdb-muted">
         {name}
       </div>
     );
