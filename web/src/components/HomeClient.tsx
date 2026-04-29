@@ -347,7 +347,7 @@ export function HomeClient() {
             return (
               <div
                 key={m.id}
-                className="group mb-4 break-inside-avoid overflow-hidden rounded-imdb-card bg-imdb-elevated shadow-sm ring-1 ring-imdb-border transition hover:ring-2 hover:ring-imdb-gold/50"
+                className="group mb-4 break-inside-avoid overflow-hidden rounded-imdb-card bg-imdb-elevated shadow-sm ring-1 ring-imdb-border transition hover:ring-2 hover:ring-imdb-gold/50 [container-type:inline-size]"
               >
                 <div className="relative aspect-[2/3] w-full bg-imdb-surface">
                   <Link href={"/movie/" + m.id} className="absolute inset-0 block outline-none ring-imdb-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-imdb-canvas">
@@ -365,6 +365,16 @@ export function HomeClient() {
                       </div>
                     )}
                   </Link>
+                  {scoreLabel && (
+                    <div
+                      className="pointer-events-none absolute bottom-2 left-2 z-10 flex h-9 max-w-[calc(100%-3.75rem)] items-center rounded-full bg-black/55 px-2.5 shadow-md ring-1 ring-white/15 backdrop-blur-sm"
+                      aria-hidden
+                    >
+                      <span className="truncate tabular-nums font-semibold leading-none text-imdb-gold [font-size:clamp(10px,3.2cqw,12px)]">
+                        ★ {scoreLabel}
+                      </span>
+                    </div>
+                  )}
                   <button
                     type="button"
                     disabled={favoriteBusyId === m.id}
@@ -383,10 +393,12 @@ export function HomeClient() {
                   href={"/movie/" + m.id}
                   className="block border-t border-imdb-border bg-imdb-elevated px-2 py-2 hover:bg-imdb-panel/80"
                 >
-                  <p className="line-clamp-2 min-h-[2.75em] text-[14px] font-medium leading-snug text-imdb-text">{m.name}</p>
-                  {scoreLabel && (
-                    <p className="mt-1 text-[12px] text-imdb-gold">★ {scoreLabel}</p>
-                  )}
+                  <p
+                    className="truncate font-medium leading-tight text-imdb-text [font-size:clamp(0.625rem,min(4cqw,4cqh),0.875rem)]"
+                    title={m.name}
+                  >
+                    {m.name}
+                  </p>
                 </Link>
               </div>
             );
