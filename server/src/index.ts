@@ -147,6 +147,17 @@ app.get("/api/movies", async (req, res) => {
   res.json({ total, page, pageSize, items: rows });
 });
 
+/** Full table dump for local inspection (no pagination). Register before /api/movies/:id. */
+app.get("/api/movies/all-rows", async (_req, res) => {
+  const rows = await prisma.movie.findMany({
+    orderBy: [{ updatedAt: "desc" }],
+    include: {
+      categories: { include: { category: true } },
+    },
+  });
+  res.json({ total: rows.length, items: rows });
+});
+
 app.get("/api/movies/:id", async (req, res) => {
   const m = await prisma.movie.findUnique({
     where: { id: req.params.id },

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { IconHome, IconPinLogo, IconSearch, IconSettings } from "@/components/icons";
+import { IconHome, IconPinLogo, IconSearch, IconSettings, IconTable } from "@/components/icons";
 
 export function SiteHeader() {
   const router = useRouter();
@@ -61,6 +61,13 @@ export function SiteHeader() {
           >
             <IconHome size={22} className="text-imdb-text" />
             <span className="hidden lg:inline">Home</span>
+          </Link>
+          <Link
+            href="/database"
+            className="flex items-center gap-2 rounded-full px-3 py-2 text-[14px] font-medium text-imdb-text transition hover:bg-imdb-hover md:px-4"
+          >
+            <IconTable size={22} className="text-imdb-text" />
+            <span className="hidden lg:inline">Database</span>
           </Link>
           <Link
             href="/settings"
