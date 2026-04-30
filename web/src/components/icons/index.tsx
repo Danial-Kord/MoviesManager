@@ -136,6 +136,15 @@ export function IconDatabase({ className, size = 18 }: IconProps) {
   );
 }
 
+export function IconDuplicates({ className, size = 20 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className} aria-hidden>
+      <rect x="8" y="8" width="13" height="13" rx="2" />
+      <rect x="3" y="3" width="13" height="13" rx="2" />
+    </svg>
+  );
+}
+
 export function IconTrash({ className, size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className} aria-hidden>

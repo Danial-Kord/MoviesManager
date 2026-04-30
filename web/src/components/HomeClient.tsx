@@ -404,7 +404,7 @@ export function HomeClient() {
                       href={"/series/" + row.id}
                       className="absolute inset-0 block outline-none ring-imdb-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-imdb-canvas"
                     >
-                      {row.imagePath ? (
+                      {row.imagePath || row.posterAvailable ? (
                         <Image
                           src={posterUrlForSeriesId(row.id)}
                           alt={title}
@@ -467,7 +467,7 @@ export function HomeClient() {
               >
                 <div className="relative aspect-[2/3] w-full bg-imdb-surface">
                   <Link href={"/movie/" + m.id} className="absolute inset-0 block outline-none ring-imdb-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-imdb-canvas">
-                    {m.imagePath ? (
+                    {m.imagePath || m.posterAvailable ? (
                       <Image
                         src={posterUrlForMovieId(m.id)}
                         alt={m.name}

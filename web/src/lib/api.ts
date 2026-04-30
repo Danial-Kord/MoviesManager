@@ -7,6 +7,8 @@ export type MovieListItem = {
   imdbRating: string | null;
   genre: string | null;
   imagePath: string | null;
+  /** Present on browse items when poster can be loaded (path or DB bytes). */
+  posterAvailable?: boolean;
   filePath: string;
   isFavorite: boolean;
   show: boolean;
@@ -25,6 +27,8 @@ export type BrowseSeriesItem = {
   title: string;
   year: string | null;
   imagePath: string | null;
+  /** True when a poster is available from disk path or DB blob (`GET /api/poster/…`). */
+  posterAvailable?: boolean;
   episodeCount: number;
   imdbRating: string | null;
   isFavorite: boolean;
@@ -60,6 +64,34 @@ export async function fetchLibraryBrowse(params: URLSearchParams) {
     pageSize: number;
     items: BrowseItem[];
   }>;
+}
+
+export type DuplicateGroupKind = "title_year" | "tmdb_id" | "episode_slot";
+
+export type DuplicateLibraryItem = {
+  id: string;
+  name: string;
+  year: string | null;
+  filePath: string;
+  folderPath: string;
+  mediaKind: string;
+  tmdbId: number | null;
+  seasonNumber: number | null;
+  episodeNumber: number | null;
+  seriesId: string | null;
+  seriesTitle: string | null;
+};
+
+export type DuplicateLibraryGroup = {
+  kind: DuplicateGroupKind;
+  label: string;
+  items: DuplicateLibraryItem[];
+};
+
+export async function fetchLibraryDuplicates() {
+  const r = await fetch(`${BASE}/api/library/duplicates`, { cache: "no-store" });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json() as Promise<{ groups: DuplicateLibraryGroup[]; duplicateRowCount: number }>;
 }
 
 export async function scanLibrary() {

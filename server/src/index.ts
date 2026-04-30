@@ -11,8 +11,9 @@ import { fileURLToPath } from "url";
 import { API_HOST, API_PORT, DATA_DIR, IMAGES_DIR, TMDB_API_KEY, getSqliteDatabaseFilePath } from "./config.js";
 import { prisma } from "./prisma.js";
 import { collectVideoFiles, pathExists } from "./scan.js";
-import { downloadPosterToImagesDir, enrichTvSeriesWithTmdb, enrichWithTmdb } from "./tmdb.js";
-import { omitTmdbFetchSnapshots } from "./omitTmdbPayload.js";
+import { enrichTvSeriesWithTmdb, enrichWithTmdb, fetchPosterForStorage } from "./tmdb.js";
+import { findLibraryDuplicates } from "./duplicates.js";
+import { omitTmdbFetchSnapshots, stripMovieRowForApi } from "./omitTmdbPayload.js";
 import { openFileWithDefaultApp } from "./openLocal.js";
 import { isDubbedFromPath } from "./parseFilename.js";
 import { parseLocaleFromRequest, resolveSummaryForLocale } from "./summaryLocale.js";
@@ -286,7 +287,15 @@ app.get("/api/movies", async (req, res) => {
       },
     }),
   ]);
-  res.json({ total, page, pageSize, items: rows.map((row) => omitTmdbFetchSnapshots(row)) });
+  res.json({
+    total,
+    page,
+    pageSize,
+    items: rows.map((row) => ({
+      ...omitTmdbFetchSnapshots(row as unknown as Record<string, unknown>),
+      posterAvailable: Boolean(row.imagePath || (row.posterBytes != null && row.posterBytes.byteLength > 0)),
+    })),
+  });
 });
 
 app.get("/api/library/browse", async (req, res) => {
@@ -474,6 +483,7 @@ app.get("/api/library/browse", async (req, res) => {
           title: s.title,
           year: s.year,
           imagePath: s.imagePath,
+          posterAvailable: Boolean(s.imagePath || (s.posterBytes != null && s.posterBytes.byteLength > 0)),
           episodeCount: s._count.episodes,
           imdbRating: s.imdbRating,
           isFavorite: s.isFavorite,
@@ -488,9 +498,13 @@ app.get("/api/library/browse", async (req, res) => {
       });
       if (!m) return null;
       const lite = omitTmdbFetchSnapshots(m as unknown as Record<string, unknown>);
+      const posterAvailable = Boolean(
+        m.imagePath || (m.posterBytes != null && m.posterBytes.byteLength > 0)
+      );
       return {
         kind: "movie" as const,
         ...lite,
+        posterAvailable,
         updatedAt: m.updatedAt.toISOString(),
       };
     })
@@ -498,6 +512,15 @@ app.get("/api/library/browse", async (req, res) => {
 
   const items = hydrated.filter(Boolean);
   res.json({ total, page, pageSize, items });
+});
+
+app.get("/api/library/duplicates", async (_req, res) => {
+  try {
+    const data = await findLibraryDuplicates(prisma);
+    res.json(data);
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
 });
 
 app.get("/api/series/:id", async (req, res) => {
@@ -538,7 +561,7 @@ app.patch("/api/series/:id", async (req, res) => {
       where: { id: req.params.id },
       data,
     });
-    res.json(s);
+    res.json(omitTmdbFetchSnapshots(s as unknown as Record<string, unknown>));
   } catch {
     res.status(404).json({ error: "not found" });
   }
@@ -561,8 +584,11 @@ app.post("/api/series/:id/enrich", async (req, res) => {
       return;
     }
     let imagePath: string | null = s.imagePath;
+    let posterBuf: Buffer | null = null;
     if (t.posterPath) {
-      imagePath = await downloadPosterToImagesDir(t.posterPath, s.title);
+      const p = await fetchPosterForStorage(t.posterPath, s.title);
+      if (p.posterBytes) posterBuf = p.posterBytes;
+      if (p.diskPath) imagePath = p.diskPath;
     }
     const updated = await prisma.tvSeries.update({
       where: { id: s.id },
@@ -578,6 +604,7 @@ app.post("/api/series/:id/enrich", async (req, res) => {
         actors: t.actors,
         directors: t.directors,
         tmdbTvId: t.tmdbTvId,
+        ...(posterBuf ? { posterBytes: new Uint8Array(posterBuf) } : {}),
         imagePath: imagePath ?? s.imagePath,
         enrichmentState: t.enrichmentState,
         tmdbSearchJson: t.searchJson,
@@ -585,7 +612,7 @@ app.post("/api/series/:id/enrich", async (req, res) => {
         tmdbCreditsJson: t.creditsJson,
       },
     });
-    res.json(updated);
+    res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -600,7 +627,10 @@ app.get("/api/movies/all-rows", async (_req, res) => {
       series: true,
     },
   });
-  res.json({ total: rows.length, items: rows });
+  res.json({
+    total: rows.length,
+    items: rows.map((row) => stripMovieRowForApi(row as unknown as Record<string, unknown>)),
+  });
 });
 
 app.get("/api/movies/:id", async (req, res) => {
@@ -614,7 +644,7 @@ app.get("/api/movies/:id", async (req, res) => {
   }
   const locale = parseLocaleFromRequest(req);
   if (locale !== "fa") {
-    res.json(m);
+    res.json(stripMovieRowForApi(m as unknown as Record<string, unknown>));
     return;
   }
   const summary = await resolveSummaryForLocale({
@@ -623,7 +653,7 @@ app.get("/api/movies/:id", async (req, res) => {
     tmdbId: m.tmdbId,
     tmdbKind: "movie",
   });
-  res.json({ ...m, summary });
+  res.json({ ...stripMovieRowForApi(m as unknown as Record<string, unknown>), summary });
 });
 
 app.patch("/api/movies/:id", async (req, res) => {
@@ -653,10 +683,8 @@ app.patch("/api/movies/:id", async (req, res) => {
     data,
     include: { categories: { include: { category: true } } },
   });
-  res.json(m);
+  res.json(omitTmdbFetchSnapshots(m as unknown as Record<string, unknown>));
 });
-
-/** Open video file with the system default application (not in-browser). */
 app.post("/api/movies/:id/play-local", async (req, res) => {
   const m = await prisma.movie.findUnique({ where: { id: req.params.id } });
   if (!m) {
@@ -706,8 +734,11 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
         return;
       }
       let imagePath: string | null = series.imagePath;
+      let posterBuf: Buffer | null = null;
       if (t.posterPath) {
-        imagePath = await downloadPosterToImagesDir(t.posterPath, series.title);
+        const p = await fetchPosterForStorage(t.posterPath, series.title);
+        if (p.posterBytes) posterBuf = p.posterBytes;
+        if (p.diskPath) imagePath = p.diskPath;
       }
       const updated = await prisma.tvSeries.update({
         where: { id: series.id },
@@ -723,6 +754,7 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
           actors: t.actors,
           directors: t.directors,
           tmdbTvId: t.tmdbTvId,
+          ...(posterBuf ? { posterBytes: new Uint8Array(posterBuf) } : {}),
           imagePath: imagePath ?? series.imagePath,
           enrichmentState: t.enrichmentState,
           tmdbSearchJson: t.searchJson,
@@ -730,7 +762,7 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
           tmdbCreditsJson: t.creditsJson,
         },
       });
-      res.json(updated);
+      res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
     } catch (e: unknown) {
       res.status(500).json({ error: (e as Error).message });
     }
@@ -743,8 +775,11 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
       return;
     }
     let imagePath: string | null = m.imagePath;
+    let posterBuf: Buffer | null = null;
     if (t.posterPath) {
-      imagePath = await downloadPosterToImagesDir(t.posterPath, m.name);
+      const p = await fetchPosterForStorage(t.posterPath, m.name);
+      if (p.posterBytes) posterBuf = p.posterBytes;
+      if (p.diskPath) imagePath = p.diskPath;
     }
     const updated = await prisma.movie.update({
       where: { id: m.id },
@@ -760,6 +795,7 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
         actors: t.actors,
         directors: t.directors,
         tmdbId: t.tmdbId,
+        ...(posterBuf ? { posterBytes: new Uint8Array(posterBuf) } : {}),
         imagePath: imagePath ?? m.imagePath,
         enrichmentState: t.enrichmentState,
         tmdbSearchJson: t.searchJson,
@@ -767,7 +803,7 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
         tmdbCreditsJson: t.creditsJson,
       },
     });
-    res.json(updated);
+    res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
   } catch (e: unknown) {
     const err = e as Error;
     res.status(500).json({ error: err.message });
@@ -797,8 +833,11 @@ app.post("/api/enrich-bulk", async (req, res) => {
         continue;
       }
       let imagePath: string | null = s.imagePath;
+      let posterBuf: Buffer | null = null;
       if (t.posterPath) {
-        imagePath = await downloadPosterToImagesDir(t.posterPath, s.title);
+        const p = await fetchPosterForStorage(t.posterPath, s.title);
+        if (p.posterBytes) posterBuf = p.posterBytes;
+        if (p.diskPath) imagePath = p.diskPath;
       }
       await prisma.tvSeries.update({
         where: { id: s.id },
@@ -814,6 +853,7 @@ app.post("/api/enrich-bulk", async (req, res) => {
           actors: t.actors,
           directors: t.directors,
           tmdbTvId: t.tmdbTvId,
+          ...(posterBuf ? { posterBytes: new Uint8Array(posterBuf) } : {}),
           imagePath: imagePath ?? s.imagePath,
           enrichmentState: t.enrichmentState,
           tmdbSearchJson: t.searchJson,
@@ -842,8 +882,11 @@ app.post("/api/enrich-bulk", async (req, res) => {
         continue;
       }
       let imagePath: string | null = m.imagePath;
+      let posterBuf: Buffer | null = null;
       if (t.posterPath) {
-        imagePath = await downloadPosterToImagesDir(t.posterPath, m.name);
+        const p = await fetchPosterForStorage(t.posterPath, m.name);
+        if (p.posterBytes) posterBuf = p.posterBytes;
+        if (p.diskPath) imagePath = p.diskPath;
       }
       await prisma.movie.update({
         where: { id: m.id },
@@ -859,6 +902,7 @@ app.post("/api/enrich-bulk", async (req, res) => {
           actors: t.actors,
           directors: t.directors,
           tmdbId: t.tmdbId,
+          ...(posterBuf ? { posterBytes: new Uint8Array(posterBuf) } : {}),
           imagePath: imagePath ?? m.imagePath,
           enrichmentState: t.enrichmentState,
           tmdbSearchJson: t.searchJson,
@@ -986,10 +1030,48 @@ app.get("/api/stream/:id", async (req, res) => {
   }
 });
 
-// serve series poster (local path)
+function posterMimeFromBytes(buf: Buffer): string {
+  if (
+    buf.length >= 8 &&
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47 &&
+    buf[4] === 0x0d &&
+    buf[5] === 0x0a &&
+    buf[6] === 0x1a &&
+    buf[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+  if (
+    buf.length >= 12 &&
+    buf.subarray(0, 4).toString("latin1") === "RIFF" &&
+    buf.subarray(8, 12).toString("latin1") === "WEBP"
+  ) {
+    return "image/webp";
+  }
+  return "image/jpeg";
+}
+
+// serve series poster — DB bytes first, then disk
 app.get("/api/poster/series/:seriesId", async (req, res) => {
-  const s = await prisma.tvSeries.findUnique({ where: { id: req.params.seriesId } });
-  if (!s?.imagePath) {
+  const s = await prisma.tvSeries.findUnique({
+    where: { id: req.params.seriesId },
+    select: { imagePath: true, posterBytes: true },
+  });
+  if (!s) {
+    res.status(404).end();
+    return;
+  }
+  if (s.posterBytes != null && s.posterBytes.byteLength > 0) {
+    const buf = Buffer.from(s.posterBytes);
+    res.setHeader("Content-Type", posterMimeFromBytes(buf));
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(buf);
+    return;
+  }
+  if (!s.imagePath) {
     res.status(404).end();
     return;
   }
@@ -1009,10 +1091,23 @@ app.get("/api/poster/series/:seriesId", async (req, res) => {
   }
 });
 
-// serve poster: local path
 app.get("/api/poster/:id", async (req, res) => {
-  const m = await prisma.movie.findUnique({ where: { id: req.params.id } });
-  if (!m?.imagePath) {
+  const m = await prisma.movie.findUnique({
+    where: { id: req.params.id },
+    select: { imagePath: true, posterBytes: true },
+  });
+  if (!m) {
+    res.status(404).end();
+    return;
+  }
+  if (m.posterBytes != null && m.posterBytes.byteLength > 0) {
+    const buf = Buffer.from(m.posterBytes);
+    res.setHeader("Content-Type", posterMimeFromBytes(buf));
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(buf);
+    return;
+  }
+  if (!m.imagePath) {
     res.status(404).end();
     return;
   }

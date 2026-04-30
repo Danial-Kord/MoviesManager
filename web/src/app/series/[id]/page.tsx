@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PlayLocalButton } from "@/components/PlayLocalButton";
+import { SeriesSeasonsTabs } from "@/components/SeriesSeasonsTabs";
 import { SeriesDetailPoster } from "@/components/SeriesDetailPoster";
 import { formatScore } from "@/lib/formatScore";
 import { getLocale } from "@/lib/i18n/getLocale";
@@ -35,11 +35,6 @@ async function getSeries(id: string, locale: string): Promise<TvSeriesDetail | n
   if (r.status === 404) return null;
   if (!r.ok) return null;
   return r.json() as Promise<TvSeriesDetail>;
-}
-
-function seasonEpisodeLabel(s: number | null, e: number | null): string {
-  if (s == null || e == null) return "—";
-  return `S${String(s).padStart(2, "0")}E${String(e).padStart(2, "0")}`;
 }
 
 function groupEpisodesBySeason(episodes: EpisodeRow[]): Map<number | null, EpisodeRow[]> {
@@ -77,6 +72,12 @@ export default async function SeriesPage({ params }: { params: Promise<{ id: str
       ? interpolate(t.diskEpisodeLineSingular, { seasons: seasons.length, episodes: s.episodes.length })
       : interpolate(t.diskEpisodesLine, { seasons: seasons.length, episodes: s.episodes.length });
 
+  const tabs = seasons.map((season) => ({
+    id: season === null ? "unknown" : String(season),
+    title: season === null ? t.seasonUnknown : season === 0 ? t.specials : `${t.seasonPrefix}${season}`,
+    episodes: grouped.get(season) ?? [],
+  }));
+
   return (
     <div className="min-h-[70vh] bg-imdb-canvas px-4 py-8 font-imdb md:px-8">
       <div className="mx-auto max-w-[1200px]">
@@ -111,67 +112,17 @@ export default async function SeriesPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        <section className="mt-12 space-y-12">
-          <h2 className="border-b border-imdb-border pb-4 text-[1.35rem] font-bold tracking-tight text-imdb-text">{t.seasonsTitle}</h2>
-
-          {seasons.map((season) => {
-            const eps = grouped.get(season) ?? [];
-            const title =
-              season === null ? t.seasonUnknown : season === 0 ? t.specials : `${t.seasonPrefix}${season}`;
-            return (
-              <div key={season === null ? "unknown" : String(season)}>
-                <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
-                  <h3 className="text-lg font-semibold tracking-tight text-imdb-text">{title}</h3>
-                  <span className="text-[13px] text-imdb-muted">
-                    {eps.length === 1
-                      ? interpolate(t.episodeCardEpisode, { n: eps.length })
-                      : interpolate(t.episodeCardEpisodes, { n: eps.length })}
-                  </span>
-                </div>
-                <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {eps.map((ep) => {
-                    const label = seasonEpisodeLabel(ep.seasonNumber, ep.episodeNumber);
-                    const score = formatScore(ep.imdbRating);
-                    return (
-                      <article
-                        key={ep.id}
-                        className="w-[min(92vw,280px)] shrink-0 snap-start rounded-imdb-card border border-imdb-border bg-imdb-elevated p-4 shadow-sm"
-                      >
-                        <p className="font-semibold text-imdb-text">
-                          <span className="text-imdb-gold">{label}</span>
-                          {ep.episodeTitle ? <span className="text-imdb-muted"> · {ep.episodeTitle}</span> : null}
-                        </p>
-                        <p className="mt-1 truncate text-[12px] text-imdb-muted" title={ep.name}>
-                          {ep.name}
-                        </p>
-                        {score ? (
-                          <p className="mt-2 text-[12px] font-medium text-imdb-gold">★ {score}</p>
-                        ) : null}
-                        {ep.dubbed ? (
-                          <span className="mt-2 inline-flex items-center justify-center rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide text-imdb-gold ring-1 ring-imdb-gold/50">
-                            {t.badgeDubbed}
-                          </span>
-                        ) : null}
-                        <p className="mt-2 line-clamp-2 break-all font-mono text-[10px] leading-snug text-imdb-subtle">
-                          {ep.filePath}
-                        </p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <PlayLocalButton movieId={ep.id}>{t.heroPlay}</PlayLocalButton>
-                          <Link
-                            href={"/movie/" + ep.id}
-                            className="inline-flex items-center justify-center rounded-imdb bg-imdb-panel px-[14px] py-[6px] text-[12px] font-semibold text-imdb-text transition hover:bg-imdb-rail"
-                          >
-                            {t.details}
-                          </Link>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </section>
+        <SeriesSeasonsTabs
+          seasonsSectionTitle={t.seasonsTitle}
+          tabs={tabs}
+          strings={{
+            episodeCardEpisode: t.episodeCardEpisode,
+            episodeCardEpisodes: t.episodeCardEpisodes,
+            badgeDubbed: t.badgeDubbed,
+            heroPlay: t.heroPlay,
+            details: t.details,
+          }}
+        />
       </div>
     </div>
   );

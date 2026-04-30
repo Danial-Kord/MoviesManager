@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isDubbedFromPath, normalizeSeriesKey, parseVideoFile } from "./parseFilename.js";
+import { isDubbedFromPath, normalizeMovieDuplicateKey, normalizeSeriesKey, parseVideoFile } from "./parseFilename.js";
 
 test("parseVideoFile: movie without episode token", () => {
   const r = parseVideoFile("D:/films/Some.Movie.2020.1080p.mkv");
@@ -63,4 +63,12 @@ test("normalizeSeriesKey: stable lowercase key", () => {
 test("normalizeSeriesKey: folder/year variants map to one series", () => {
   assert.equal(normalizeSeriesKey("Young Justice", "2010"), normalizeSeriesKey("Young Justice", "2019"));
   assert.equal(normalizeSeriesKey("Young Justice", ""), normalizeSeriesKey("Young Justice", "2020"));
+});
+
+test("normalizeMovieDuplicateKey: stable title+year", () => {
+  assert.equal(
+    normalizeMovieDuplicateKey("The Matrix", "1999"),
+    normalizeMovieDuplicateKey("the.matrix", "1999")
+  );
+  assert.notEqual(normalizeMovieDuplicateKey("The Matrix", "1999"), normalizeMovieDuplicateKey("The Matrix", "2003"));
 });

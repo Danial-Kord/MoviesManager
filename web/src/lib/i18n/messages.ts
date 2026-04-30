@@ -8,6 +8,7 @@ export const messagesEn = {
   brandTitle: "Movie Manager",
   navHome: "Home",
   navDatabase: "Database",
+  navDuplicates: "Duplicates",
   navSettings: "Settings",
   searchPlaceholder: "Search titles…",
   searchAria: "Search titles",
@@ -89,12 +90,24 @@ export const messagesEn = {
   episodeCardEpisodes: "{n} episodes",
   episodeCardEpisode: "{n} episode",
   details: "Details",
+
+  duplicatesTitle: "Duplicate finder",
+  duplicatesIntro:
+    "Groups show extra copies of the same logical movie or episode. Only paths on disk are listed—compare files and remove extras outside this app if needed.",
+  duplicatesKindTitleYear: "Same title & year",
+  duplicatesKindTmdbId: "Same TMDb ID",
+  duplicatesKindEpisodeSlot: "Same series episode",
+  duplicatesNoGroups: "No duplicates detected with current rules.",
+  duplicatesPathsHeading: "File paths",
+  duplicatesOpen: "Open",
+  duplicatesStats: "{groups} groups · {rows} duplicate rows",
 } as const;
 
 export const messagesFa = {
   brandTitle: "مدیریت فیلم",
   navHome: "خانه",
   navDatabase: "پایگاه داده",
+  navDuplicates: "تکراری‌ها",
   navSettings: "تنظیمات",
   searchPlaceholder: "جستجوی عنوان…",
   searchAria: "جستجوی عنوان",
@@ -176,6 +189,17 @@ export const messagesFa = {
   episodeCardEpisodes: "{n} قسمت",
   episodeCardEpisode: "{n} قسمت",
   details: "جزئیات",
+
+  duplicatesTitle: "یافتن نسخه‌های تکراری",
+  duplicatesIntro:
+    "هر گروه چند نسخه از یک فیلم یا قسمت یک سریال را نشان می‌دهد. فقط مسیر فایل‌ها نمایش داده می‌شود؛ برای حذف نسخه‌های اضافی خودتان روی دیسک تصمیم بگیرید.",
+  duplicatesKindTitleYear: "همان عنوان و سال",
+  duplicatesKindTmdbId: "همان شناسهٔ TMDb",
+  duplicatesKindEpisodeSlot: "همان قسمت سریال",
+  duplicatesNoGroups: "با قوانین فعلی موردی یافت نشد.",
+  duplicatesPathsHeading: "مسیر فایل‌ها",
+  duplicatesOpen: "باز کردن",
+  duplicatesStats: "{groups} گروه · {rows} ردیف تکراری",
 } as const;
 
 export type MessageKey = keyof typeof messagesEn;

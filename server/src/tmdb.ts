@@ -1,10 +1,7 @@
 import type { Prisma } from "@prisma/client";
-import { createWriteStream } from "fs";
 import { join } from "path";
-import { pipeline } from "stream/promises";
-import { Readable } from "stream";
+import { mkdir, writeFile } from "fs/promises";
 import { TMDB_API_KEY, TMDB_IMAGE_BASE, IMAGES_DIR } from "./config.js";
-import { mkdir } from "fs/promises";
 
 const BASE = "https://api.themoviedb.org/3";
 
@@ -100,10 +97,7 @@ export interface TmdbEnrichment {
   creditsJson: Prisma.InputJsonValue;
 }
 
-export async function enrichWithTmdb(
-  name: string,
-  year: string
-): Promise<TmdbEnrichment | null> {
+export async function enrichWithTmdb(name: string, year: string): Promise<TmdbEnrichment | null> {
   if (!TMDB_API_KEY) {
     throw new Error("Set TMDB_API_KEY in the server environment or .env");
   }
@@ -125,14 +119,11 @@ export async function enrichWithTmdb(
   const rel = (details.release_date as string) || "";
   const y = rel.length >= 4 ? rel.slice(0, 4) : year;
   const va = details.vote_average;
-  const voteAvg =
-    typeof va === "number" ? String(va) : "0";
+  const voteAvg = typeof va === "number" ? String(va) : "0";
   const vc = details.vote_count;
-  const votes =
-    typeof vc === "number" ? String(vc) : "";
+  const votes = typeof vc === "number" ? String(vc) : "";
   const rt = details.runtime;
-  const runtime =
-    typeof rt === "number" ? `${rt} min` : "";
+  const runtime = typeof rt === "number" ? `${rt} min` : "";
   const overview = (details.overview as string) || "";
   const title = (details.title as string) || name;
   const poster = details.poster_path as string | null;
@@ -182,10 +173,7 @@ function creatorsFromTv(details: Record<string, unknown>): string | null {
   return names.length ? names.join(", ") : null;
 }
 
-export async function enrichTvSeriesWithTmdb(
-  title: string,
-  year: string
-): Promise<TmdbTvEnrichment | null> {
+export async function enrichTvSeriesWithTmdb(title: string, year: string): Promise<TmdbTvEnrichment | null> {
   if (!TMDB_API_KEY) {
     throw new Error("Set TMDB_API_KEY in the server environment or .env");
   }
@@ -241,17 +229,38 @@ export async function enrichTvSeriesWithTmdb(
   };
 }
 
-export async function downloadPosterToImagesDir(
-  posterUrl: string,
-  fileBaseName: string
-): Promise<string> {
-  await mkdir(IMAGES_DIR, { recursive: true });
-  const safe = fileBaseName.replace(/[/\\?%*:|"<>]/g, "_");
-  const dest = join(IMAGES_DIR, `${safe}image.jpg`);
+export async function fetchPosterBuffer(posterUrl: string): Promise<Buffer> {
   const res = await fetch(posterUrl);
   if (!res.ok) throw new Error("Poster download failed");
-  if (!res.body) throw new Error("No body");
-  const nodeStream = Readable.fromWeb(res.body as import("stream/web").ReadableStream);
-  await pipeline(nodeStream, createWriteStream(dest));
-  return dest;
+  return Buffer.from(await res.arrayBuffer());
+}
+
+/** Best-effort mirror next to the data dir; returns `null` if the folder cannot be written. */
+export async function tryWritePosterToDisk(fileBaseName: string, buf: Buffer): Promise<string | null> {
+  try {
+    await mkdir(IMAGES_DIR, { recursive: true });
+    const safe = fileBaseName.replace(/[/\\?%*:|"<>]/g, "_");
+    const dest = join(IMAGES_DIR, `${safe}image.jpg`);
+    await writeFile(dest, buf);
+    return dest;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Download poster from TMDb; store bytes for SQLite. Optionally mirrors to `images/` when writable.
+ */
+export async function fetchPosterForStorage(
+  posterUrl: string | null | undefined,
+  fileBaseName: string
+): Promise<{ posterBytes: Buffer | null; diskPath: string | null }> {
+  if (!posterUrl) return { posterBytes: null, diskPath: null };
+  try {
+    const buf = await fetchPosterBuffer(posterUrl);
+    const diskPath = await tryWritePosterToDisk(fileBaseName, buf);
+    return { posterBytes: buf, diskPath };
+  } catch {
+    return { posterBytes: null, diskPath: null };
+  }
 }

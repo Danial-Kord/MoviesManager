@@ -47,6 +47,7 @@ model TvSeries {
   directors       String?
   genre           String?
   imagePath       String?
+  posterBytes     Bytes?
   duration        String?
   numberOfVotes   String?
 
@@ -97,6 +98,7 @@ model Movie {
   directors   String?
   genre       String?
   imagePath   String?
+  posterBytes Bytes?
   duration    String?
   numberOfVotes String?
 

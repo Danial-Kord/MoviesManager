@@ -154,6 +154,16 @@ export function normalizeSeriesKey(seriesTitle: string, _year: string): string {
   return t;
 }
 
+/** Group standalone movies that likely refer to the same title (year distinguishes remakes). */
+export function normalizeMovieDuplicateKey(name: string, year: string | null | undefined): string {
+  const y = (year ?? "").trim();
+  const t = normalizeDotsUnderscores(name)
+    .toLowerCase()
+    .replace(/[^\w\s\-'.]/g, "")
+    .slice(0, 240);
+  return `${t}||${y}`;
+}
+
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }

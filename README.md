@@ -10,6 +10,7 @@
 - **Play locally**: **Play** asks the local API to open the file in your OS default app (VLC, Movies & TV, etc.), not inside the browser.
 - **Languages**: English / فارسی from the header. Persian plot text prefers TMDb’s Persian overview; optional **Ollama** fallback for translation (`OLLAMA_URL`, `OLLAMA_MODEL` in `server/.env` — see `.env.example`).
 - **Settings**: Library folders to scan, SQLite/poster paths, legacy Java export JSON import, and destructive database reset. The Settings UI also summarizes how the library behaves.
+- **Duplicate finder**: **`/duplicates`** lists likely duplicate **file paths** — same normalized movie title+year, same TMDb movie ID, or the same TV episode slot under one series.
 
 ## Web app (Next.js + local API)
 
