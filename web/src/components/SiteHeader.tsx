@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { IconDuplicates, IconHome, IconPinLogo, IconSearch, IconSettings, IconTable } from "@/components/icons";
+import { IconDuplicates, IconHome, IconPinLogo, IconRename, IconSearch, IconSettings, IconTable } from "@/components/icons";
 import { useLocale } from "@/lib/i18n/context";
 
 export function SiteHeader() {
@@ -76,6 +76,13 @@ export function SiteHeader() {
           >
             <IconDuplicates size={22} className="text-imdb-text" />
             <span className="hidden lg:inline">{t("navDuplicates")}</span>
+          </Link>
+          <Link
+            href="/needs-rename"
+            className="flex items-center gap-2 rounded-full px-3 py-2 text-[14px] font-medium text-imdb-text transition hover:bg-imdb-hover md:px-4"
+          >
+            <IconRename size={22} className="text-imdb-text" />
+            <span className="hidden lg:inline">{t("navNeedsRename")}</span>
           </Link>
           <Link
             href="/settings"

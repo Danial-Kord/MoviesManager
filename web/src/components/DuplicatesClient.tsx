@@ -56,6 +56,7 @@ export function DuplicatesClient() {
             {t("duplicatesTitle")}
           </h1>
           <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-imdb-muted">{t("duplicatesIntro")}</p>
+          <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-imdb-subtle">{t("duplicatesExcludeRename")}</p>
           {groups && (
             <p className="mt-3 text-[13px] font-medium text-imdb-subtle">
               {interpolate(t("duplicatesStats"), { groups: groups.length, rows: duplicateRowCount })}

@@ -9,6 +9,7 @@ export const messagesEn = {
   navHome: "Home",
   navDatabase: "Database",
   navDuplicates: "Duplicates",
+  navNeedsRename: "Needs rename",
   navSettings: "Settings",
   searchPlaceholder: "Search titles…",
   searchAria: "Search titles",
@@ -95,6 +96,8 @@ export const messagesEn = {
   duplicatesTitle: "Duplicate finder",
   duplicatesIntro:
     "Groups show extra copies of the same logical movie or episode. Only paths on disk are listed—compare files and remove extras outside this app if needed.",
+  duplicatesExcludeRename:
+    "Titles listed under Needs rename (no TMDb match) are excluded here until you rename or enrich successfully and clear that flag.",
   duplicatesKindTitleYear: "Same title & year",
   duplicatesKindTmdbId: "Same TMDb ID",
   duplicatesKindEpisodeSlot: "Same series episode",
@@ -102,6 +105,15 @@ export const messagesEn = {
   duplicatesPathsHeading: "File paths",
   duplicatesOpen: "Open",
   duplicatesStats: "{groups} groups · {rows} duplicate rows",
+
+  needsRenameTitle: "Needs rename",
+  needsRenameIntro:
+    "These titles had no TMDb match during enrichment. Rename files or folders on disk, rescan, then run Enrich again. Use Resolved after you have fixed the naming so they count in duplicate detection again.",
+  needsRenameSeries: "TV series",
+  needsRenameMovies: "Movies",
+  needsRenameResolved: "Resolved",
+  needsRenameEmpty: "Nothing here yet — run enrichment, or every title matched.",
+  needsRenameEpisodesHint: "{n} episodes · sample paths:",
 } as const;
 
 export const messagesFa = {
@@ -109,6 +121,7 @@ export const messagesFa = {
   navHome: "خانه",
   navDatabase: "پایگاه داده",
   navDuplicates: "تکراری‌ها",
+  navNeedsRename: "نیاز به تغییر نام",
   navSettings: "تنظیمات",
   searchPlaceholder: "جستجوی عنوان…",
   searchAria: "جستجوی عنوان",
@@ -195,6 +208,8 @@ export const messagesFa = {
   duplicatesTitle: "یافتن نسخه‌های تکراری",
   duplicatesIntro:
     "هر گروه چند نسخه از یک فیلم یا قسمت یک سریال را نشان می‌دهد. فقط مسیر فایل‌ها نمایش داده می‌شود؛ برای حذف نسخه‌های اضافی خودتان روی دیسک تصمیم بگیرید.",
+  duplicatesExcludeRename:
+    "عناوین در صف «نیاز به تغییر نام» (بدون نتیجهٔ TMDb) در اینجا لحاظ نمی‌شوند تا پس از اصلاح نام یا غنی‌سازی موفق، آن وضعیت برداشته شود.",
   duplicatesKindTitleYear: "همان عنوان و سال",
   duplicatesKindTmdbId: "همان شناسهٔ TMDb",
   duplicatesKindEpisodeSlot: "همان قسمت سریال",
@@ -202,6 +217,15 @@ export const messagesFa = {
   duplicatesPathsHeading: "مسیر فایل‌ها",
   duplicatesOpen: "باز کردن",
   duplicatesStats: "{groups} گروه · {rows} ردیف تکراری",
+
+  needsRenameTitle: "نیاز به تغییر نام",
+  needsRenameIntro:
+    "این عناوین در غنی‌سازی TMDb نتیجه‌ای نداشتند. پوشه یا نام فایل را روی دیسک اصلاح کنید، دوباره اسکن و سپس غنی‌سازی را اجرا کنید. پس از اصلاح، «حل شد» را بزنید تا دوباره در تکراری‌ها لحاظ شوند.",
+  needsRenameSeries: "سریال تلویزیونی",
+  needsRenameMovies: "فیلم‌ها",
+  needsRenameResolved: "حل شد",
+  needsRenameEmpty: "موردی نیست — هنوز غنی‌سازی نشده یا همه مطابقت داشتند.",
+  needsRenameEpisodesHint: "{n} قسمت · نمونه مسیرها:",
 } as const;
 
 export type MessageKey = keyof typeof messagesEn;

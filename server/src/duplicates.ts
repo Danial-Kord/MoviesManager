@@ -60,7 +60,7 @@ export async function findLibraryDuplicates(prisma: PrismaClient): Promise<{
   duplicateRowCount: number;
 }> {
   const movies = await prisma.movie.findMany({
-    where: { mediaKind: "movie" },
+    where: { mediaKind: "movie", needsRename: false },
     select: {
       id: true,
       name: true,
@@ -82,6 +82,8 @@ export async function findLibraryDuplicates(prisma: PrismaClient): Promise<{
       seriesId: { not: null },
       seasonNumber: { not: null },
       episodeNumber: { not: null },
+      needsRename: false,
+      series: { needsRename: false },
     },
     select: {
       id: true,

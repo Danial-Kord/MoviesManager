@@ -553,6 +553,54 @@ app.get("/api/library/duplicates", async (_req, res) => {
   }
 });
 
+app.get("/api/library/needs-rename", async (_req, res) => {
+  try {
+    const [seriesRows, movieRows] = await Promise.all([
+      prisma.tvSeries.findMany({
+        where: { needsRename: true },
+        orderBy: { title: "asc" },
+        include: {
+          _count: { select: { episodes: true } },
+          episodes: {
+            take: 12,
+            orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }],
+            select: {
+              id: true,
+              filePath: true,
+              folderPath: true,
+              seasonNumber: true,
+              episodeNumber: true,
+            },
+          },
+        },
+      }),
+      prisma.movie.findMany({
+        where: { mediaKind: "movie", needsRename: true },
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          year: true,
+          filePath: true,
+          folderPath: true,
+        },
+      }),
+    ]);
+    res.json({
+      series: seriesRows.map((s) => ({
+        id: s.id,
+        title: s.title,
+        year: s.year,
+        episodeCount: s._count.episodes,
+        sampleEpisodes: s.episodes,
+      })),
+      movies: movieRows,
+    });
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
 app.get("/api/series/:id", async (req, res) => {
   const s = await prisma.tvSeries.findUnique({
     where: { id: req.params.id },
@@ -582,10 +630,15 @@ app.get("/api/series/:id", async (req, res) => {
 });
 
 app.patch("/api/series/:id", async (req, res) => {
-  const { isFavorite, show } = req.body as { isFavorite?: boolean; show?: boolean };
+  const { isFavorite, show, needsRename } = req.body as {
+    isFavorite?: boolean;
+    show?: boolean;
+    needsRename?: boolean;
+  };
   const data: import("@prisma/client").Prisma.TvSeriesUpdateInput = {};
   if (typeof isFavorite === "boolean") data.isFavorite = isFavorite;
   if (typeof show === "boolean") data.show = show;
+  if (typeof needsRename === "boolean") data.needsRename = needsRename;
   try {
     const s = await prisma.tvSeries.update({
       where: { id: req.params.id },
@@ -610,6 +663,10 @@ app.post("/api/series/:id/enrich", async (req, res) => {
   try {
     const t = await enrichTvSeriesWithTmdb(s.title, s.year ?? "");
     if (!t) {
+      await prisma.tvSeries.update({
+        where: { id: s.id },
+        data: { needsRename: true },
+      });
       res.status(400).json({ error: "no tmdb result" });
       return;
     }
@@ -640,6 +697,7 @@ app.post("/api/series/:id/enrich", async (req, res) => {
         tmdbSearchJson: t.searchJson,
         tmdbDetailsJson: t.detailsJson,
         tmdbCreditsJson: t.creditsJson,
+        needsRename: false,
       },
     });
     res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
@@ -687,14 +745,16 @@ app.get("/api/movies/:id", async (req, res) => {
 });
 
 app.patch("/api/movies/:id", async (req, res) => {
-  const { isFavorite, show, categoryNames } = req.body as {
+  const { isFavorite, show, categoryNames, needsRename } = req.body as {
     isFavorite?: boolean;
     show?: boolean;
     categoryNames?: string[];
+    needsRename?: boolean;
   };
   const data: import("@prisma/client").Prisma.MovieUpdateInput = {};
   if (typeof isFavorite === "boolean") data.isFavorite = isFavorite;
   if (typeof show === "boolean") data.show = show;
+  if (typeof needsRename === "boolean") data.needsRename = needsRename;
   if (Array.isArray(categoryNames)) {
     const cats = await Promise.all(
       categoryNames
@@ -760,6 +820,10 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
     try {
       const t = await enrichTvSeriesWithTmdb(series.title, series.year ?? "");
       if (!t) {
+        await prisma.tvSeries.update({
+          where: { id: series.id },
+          data: { needsRename: true },
+        });
         res.status(400).json({ error: "no tmdb result" });
         return;
       }
@@ -790,6 +854,7 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
           tmdbSearchJson: t.searchJson,
           tmdbDetailsJson: t.detailsJson,
           tmdbCreditsJson: t.creditsJson,
+          needsRename: false,
         },
       });
       res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
@@ -801,6 +866,10 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
   try {
     const t = await enrichWithTmdb(m.name, m.year ?? "");
     if (!t) {
+      await prisma.movie.update({
+        where: { id: m.id },
+        data: { needsRename: true },
+      });
       res.status(400).json({ error: "no tmdb result" });
       return;
     }
@@ -831,6 +900,7 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
         tmdbSearchJson: t.searchJson,
         tmdbDetailsJson: t.detailsJson,
         tmdbCreditsJson: t.creditsJson,
+        needsRename: false,
       },
     });
     res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
@@ -852,13 +922,20 @@ app.post("/api/enrich-bulk", async (req, res) => {
   const results: { id: string; kind: "series" | "movie"; ok: boolean; error?: string }[] = [];
 
   const seriesBatch = await prisma.tvSeries.findMany({
-    where: { OR: [{ enrichmentState: "none" }, { enrichmentState: "partial" }] },
+    where: {
+      needsRename: false,
+      OR: [{ enrichmentState: "none" }, { enrichmentState: "partial" }],
+    },
     take: half,
   });
   for (const s of seriesBatch) {
     try {
       const t = await enrichTvSeriesWithTmdb(s.title, s.year ?? "");
       if (!t) {
+        await prisma.tvSeries.update({
+          where: { id: s.id },
+          data: { needsRename: true },
+        });
         results.push({ id: s.id, kind: "series", ok: false, error: "no match" });
         continue;
       }
@@ -889,6 +966,7 @@ app.post("/api/enrich-bulk", async (req, res) => {
           tmdbSearchJson: t.searchJson,
           tmdbDetailsJson: t.detailsJson,
           tmdbCreditsJson: t.creditsJson,
+          needsRename: false,
         },
       });
       results.push({ id: s.id, kind: "series", ok: true });
@@ -900,6 +978,7 @@ app.post("/api/enrich-bulk", async (req, res) => {
   const movieBatch = await prisma.movie.findMany({
     where: {
       mediaKind: "movie",
+      needsRename: false,
       OR: [{ enrichmentState: "none" }, { enrichmentState: "partial" }],
     },
     take: take - seriesBatch.length,
@@ -908,6 +987,10 @@ app.post("/api/enrich-bulk", async (req, res) => {
     try {
       const t = await enrichWithTmdb(m.name, m.year ?? "");
       if (!t) {
+        await prisma.movie.update({
+          where: { id: m.id },
+          data: { needsRename: true },
+        });
         results.push({ id: m.id, kind: "movie", ok: false, error: "no match" });
         continue;
       }
@@ -938,6 +1021,7 @@ app.post("/api/enrich-bulk", async (req, res) => {
           tmdbSearchJson: t.searchJson,
           tmdbDetailsJson: t.detailsJson,
           tmdbCreditsJson: t.creditsJson,
+          needsRename: false,
         },
       });
       results.push({ id: m.id, kind: "movie", ok: true });

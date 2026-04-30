@@ -59,6 +59,8 @@ model TvSeries {
   show            Boolean @default(true)
   isFavorite      Boolean @default(false)
   enrichmentState String  @default("none")
+  /// Set when TMDb enrichment finds no match — excluded from duplicate finder until cleared.
+  needsRename     Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -112,6 +114,8 @@ model Movie {
   isFavorite Boolean @default(false)
   /// none | partial | full
   enrichmentState String @default("none")
+  /// Standalone movies: no TMDb match. Episodes: use parent series.needsRename instead.
+  needsRename       Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

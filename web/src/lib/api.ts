@@ -100,6 +100,34 @@ export async function fetchLibraryDuplicates() {
   return r.json() as Promise<{ groups: DuplicateLibraryGroup[]; duplicateRowCount: number }>;
 }
 
+export type NeedsRenameSeriesRow = {
+  id: string;
+  title: string;
+  year: string | null;
+  episodeCount: number;
+  sampleEpisodes: Array<{
+    id: string;
+    filePath: string;
+    folderPath: string;
+    seasonNumber: number | null;
+    episodeNumber: number | null;
+  }>;
+};
+
+export type NeedsRenameMovieRow = {
+  id: string;
+  name: string;
+  year: string | null;
+  filePath: string;
+  folderPath: string;
+};
+
+export async function fetchLibraryNeedsRename() {
+  const r = await fetch(`${BASE}/api/library/needs-rename`, { cache: "no-store" });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json() as Promise<{ series: NeedsRenameSeriesRow[]; movies: NeedsRenameMovieRow[] }>;
+}
+
 export async function scanLibrary() {
   return fetch(`${BASE}/api/scan`, { method: "POST" });
 }
@@ -147,8 +175,8 @@ export function posterUrlForSeriesId(id: string) {
   return `${BASE}/api/poster/series/${id}`;
 }
 
-/** PATCH movie fields (favorite, visibility, …). */
-export async function patchMovie(id: string, body: { isFavorite?: boolean; show?: boolean }) {
+/** PATCH movie fields (favorite, visibility, needsRename, …). */
+export async function patchMovie(id: string, body: { isFavorite?: boolean; show?: boolean; needsRename?: boolean }) {
   const r = await fetch(`${BASE}/api/movies/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -157,7 +185,7 @@ export async function patchMovie(id: string, body: { isFavorite?: boolean; show?
   if (!r.ok) throw new Error(await r.text());
 }
 
-export async function patchSeries(id: string, body: { isFavorite?: boolean; show?: boolean }) {
+export async function patchSeries(id: string, body: { isFavorite?: boolean; show?: boolean; needsRename?: boolean }) {
   const r = await fetch(`${BASE}/api/series/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
