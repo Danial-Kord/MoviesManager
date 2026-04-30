@@ -8,12 +8,13 @@ import { pipeline } from "stream/promises";
 import { promisify } from "util";
 import { lookup } from "mime-types";
 import { fileURLToPath } from "url";
-import { API_HOST, API_PORT, DATA_DIR, IMAGES_DIR, TMDB_API_KEY, getSqliteDatabaseFilePath } from "./config.js";
+import { API_HOST, API_PORT, DATA_DIR, IMAGES_DIR, TMDB_API_KEY, TMDB_IMAGE_BASE, getSqliteDatabaseFilePath } from "./config.js";
 import { prisma } from "./prisma.js";
 import { collectVideoFiles, pathExists } from "./scan.js";
 import {
   enrichTvSeriesWithTmdb,
   enrichWithTmdb,
+  fetchPosterForStorage,
   resolvePosterForEnrichment,
   tryHydrateMovieEnrichmentFromRow,
   tryHydrateTvEnrichmentFromRow,
@@ -1518,6 +1519,71 @@ app.get("/api/stream/:id", async (req, res) => {
   }
 });
 
+function posterUrlFromStoredTmdbDetails(detailsJson: unknown): string | null {
+  const d = jsonRecord(detailsJson);
+  const p = d.poster_path;
+  if (typeof p !== "string" || !p.trim()) return null;
+  return `${TMDB_IMAGE_BASE}${p}`;
+}
+
+/** When poster bytes / disk file are missing but TMDb details JSON has poster_path — download once and persist. */
+async function lazyFetchPosterBufferForMovie(movieId: string): Promise<Buffer | null> {
+  const m = await prisma.movie.findUnique({
+    where: { id: movieId },
+    select: {
+      id: true,
+      mediaKind: true,
+      seriesId: true,
+      tmdbDetailsJson: true,
+    },
+  });
+  if (!m) return null;
+
+  let posterUrl = posterUrlFromStoredTmdbDetails(m.tmdbDetailsJson);
+  if (!posterUrl && m.mediaKind === "episode" && m.seriesId) {
+    const s = await prisma.tvSeries.findUnique({
+      where: { id: m.seriesId },
+      select: { tmdbDetailsJson: true },
+    });
+    if (s) posterUrl = posterUrlFromStoredTmdbDetails(s.tmdbDetailsJson);
+  }
+  if (!posterUrl) return null;
+
+  const fetched = await fetchPosterForStorage(posterUrl, `movie-${movieId}`);
+  if (!fetched.posterBytes) return null;
+
+  await prisma.movie.update({
+    where: { id: movieId },
+    data: {
+      posterBytes: new Uint8Array(fetched.posterBytes),
+      ...(fetched.diskPath ? { imagePath: fetched.diskPath } : {}),
+    },
+  });
+  return fetched.posterBytes;
+}
+
+async function lazyFetchPosterBufferForSeries(seriesId: string): Promise<Buffer | null> {
+  const s = await prisma.tvSeries.findUnique({
+    where: { id: seriesId },
+    select: { id: true, tmdbDetailsJson: true },
+  });
+  if (!s) return null;
+  const posterUrl = posterUrlFromStoredTmdbDetails(s.tmdbDetailsJson);
+  if (!posterUrl) return null;
+
+  const fetched = await fetchPosterForStorage(posterUrl, `series-${seriesId}`);
+  if (!fetched.posterBytes) return null;
+
+  await prisma.tvSeries.update({
+    where: { id: seriesId },
+    data: {
+      posterBytes: new Uint8Array(fetched.posterBytes),
+      ...(fetched.diskPath ? { imagePath: fetched.diskPath } : {}),
+    },
+  });
+  return fetched.posterBytes;
+}
+
 function posterMimeFromBytes(buf: Buffer): string {
   if (
     buf.length >= 8 &&
@@ -1601,6 +1667,17 @@ app.get("/api/poster/series/:seriesId", async (req, res) => {
     return;
   }
   if (!s.imagePath) {
+    try {
+      const buf = await lazyFetchPosterBufferForSeries(req.params.seriesId);
+      if (buf && buf.length > 0) {
+        res.setHeader("Content-Type", posterMimeFromBytes(buf));
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        res.send(buf);
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
     res.status(404).end();
     return;
   }
@@ -1608,6 +1685,13 @@ app.get("/api/poster/series/:seriesId", async (req, res) => {
   try {
     const st = await statAsync(filePath);
     if (!st.isFile()) {
+      const buf = await lazyFetchPosterBufferForSeries(req.params.seriesId);
+      if (buf && buf.length > 0) {
+        res.setHeader("Content-Type", posterMimeFromBytes(buf));
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        res.send(buf);
+        return;
+      }
       res.status(404).end();
       return;
     }
@@ -1616,6 +1700,17 @@ app.get("/api/poster/series/:seriesId", async (req, res) => {
     res.setHeader("Cache-Control", "public, max-age=3600");
     await pipeline(createReadStream(filePath), res);
   } catch {
+    try {
+      const buf = await lazyFetchPosterBufferForSeries(req.params.seriesId);
+      if (buf && buf.length > 0) {
+        res.setHeader("Content-Type", posterMimeFromBytes(buf));
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        res.send(buf);
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
     res.status(404).end();
   }
 });
@@ -1637,6 +1732,17 @@ app.get("/api/poster/:id", async (req, res) => {
     return;
   }
   if (!m.imagePath) {
+    try {
+      const buf = await lazyFetchPosterBufferForMovie(req.params.id);
+      if (buf && buf.length > 0) {
+        res.setHeader("Content-Type", posterMimeFromBytes(buf));
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        res.send(buf);
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
     res.status(404).end();
     return;
   }
@@ -1644,6 +1750,13 @@ app.get("/api/poster/:id", async (req, res) => {
   try {
     const st = await statAsync(filePath);
     if (!st.isFile()) {
+      const buf = await lazyFetchPosterBufferForMovie(req.params.id);
+      if (buf && buf.length > 0) {
+        res.setHeader("Content-Type", posterMimeFromBytes(buf));
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        res.send(buf);
+        return;
+      }
       res.status(404).end();
       return;
     }
@@ -1652,6 +1765,17 @@ app.get("/api/poster/:id", async (req, res) => {
     res.setHeader("Cache-Control", "public, max-age=3600");
     await pipeline(createReadStream(filePath), res);
   } catch {
+    try {
+      const buf = await lazyFetchPosterBufferForMovie(req.params.id);
+      if (buf && buf.length > 0) {
+        res.setHeader("Content-Type", posterMimeFromBytes(buf));
+        res.setHeader("Cache-Control", "public, max-age=3600");
+        res.send(buf);
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
     res.status(404).end();
   }
 });

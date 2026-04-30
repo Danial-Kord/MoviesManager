@@ -29,7 +29,6 @@ import {
   IconSlidersHorizontal,
   IconSparkles,
 } from "@/components/icons";
-import { PlayLocalButton } from "@/components/PlayLocalButton";
 import { useLocale } from "@/lib/i18n/context";
 import { interpolate } from "@/lib/i18n/messages";
 
@@ -207,10 +206,6 @@ export function HomeClient() {
     })();
   }, [loading, libraryBusy, apiReachable, items, load, runBrowsePageEnrich]);
 
-  const feature = items[0];
-  const heroRating = formatScore(feature ? feature.imdbRating : null);
-  const featureBusyKey = feature ? `${feature.kind}:${feature.id}` : "";
-
   async function onScan() {
     if (libraryBusy) return;
     setErr(null);
@@ -265,84 +260,7 @@ export function HomeClient() {
         </div>
       )}
 
-      {feature && !loading && (
-        <section className="relative mx-auto max-h-[min(50vh,520px)] min-h-[280px] max-w-[1600px] overflow-hidden rounded-b-[32px] bg-imdb-canvas">
-          <div className="absolute inset-0">
-            <Image
-              src={feature.kind === "series" ? posterUrlForSeriesId(feature.id) : posterUrlForMovieId(feature.id)}
-              alt=""
-              fill
-              unoptimized
-              className="object-cover opacity-90"
-              onError={() => undefined}
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-imdb-canvas via-black/55 to-transparent" />
-          {feature.kind === "movie" && feature.dubbed && (
-            <div
-              className="pointer-events-none absolute start-5 top-6 z-20 inline-flex h-8 shrink-0 items-center justify-center rounded-full bg-black/80 px-3 shadow-lg shadow-black/50 ring-2 ring-imdb-gold/70 backdrop-blur-sm md:start-8 md:top-8"
-              aria-hidden
-            >
-              <span className="text-[11px] font-bold uppercase leading-none tracking-wide text-imdb-gold">{t("badgeDubbed")}</span>
-            </div>
-          )}
-          <button
-            type="button"
-            disabled={favoriteBusyId === featureBusyKey}
-            onClick={(e) => {
-              e.preventDefault();
-              void toggleFavorite(feature, !feature.isFavorite);
-            }}
-            aria-label={feature.isFavorite ? t("favRemove") : t("favAdd")}
-            className="absolute bottom-6 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-imdb-text shadow-lg backdrop-blur-sm ring-1 ring-white/15 transition hover:bg-black/75 disabled:opacity-50 md:bottom-10 md:right-8"
-          >
-            <IconHeart
-              size={20}
-              filled={feature.isFavorite}
-              className={feature.isFavorite ? "text-imdb-gold" : "text-imdb-text"}
-            />
-          </button>
-          <div className="relative z-10 flex h-full min-h-[280px] max-w-2xl flex-col justify-end px-4 pb-10 pt-16 md:px-8">
-            <h1 className="text-3xl font-semibold tracking-tight text-imdb-text text-shadow-hero-dark md:text-5xl md:leading-tight">
-              {feature.kind === "series" ? feature.title : feature.name}
-            </h1>
-            {feature.kind === "series" && (
-              <p className="mt-2 text-sm text-imdb-muted">
-                {interpolate(feature.episodeCount === 1 ? t("heroEpisodesOne") : t("heroEpisodesMany"), {
-                  n: feature.episodeCount,
-                })}
-              </p>
-            )}
-            {heroRating && (
-              <p className="mt-2 flex items-baseline gap-2 text-imdb-muted">
-                <span className="text-2xl font-bold text-imdb-gold">{heroRating}</span>
-                <span className="text-sm">/ 10</span>
-              </p>
-            )}
-            {feature.genre && <p className="mt-2 text-sm text-imdb-muted">{feature.genre}</p>}
-            <div className="mt-5 flex flex-wrap gap-3">
-              {feature.kind === "movie" ? (
-                <PlayLocalButton movieId={feature.id}>{t("heroPlay")}</PlayLocalButton>
-              ) : (
-                <Link
-                  href={"/series/" + feature.id}
-                  className="inline-flex items-center justify-center rounded-imdb bg-imdb-gold px-[14px] py-[6px] text-[12px] font-semibold text-black transition hover:brightness-95"
-                >
-                  {t("heroEpisodes")}
-                </Link>
-              )}
-              <Link
-                href={feature.kind === "series" ? "/series/" + feature.id : "/movie/" + feature.id}
-                className="inline-flex items-center justify-center rounded-imdb bg-imdb-panel px-[14px] py-[6px] text-[12px] font-semibold text-imdb-text transition hover:bg-imdb-rail"
-              >
-                {t("heroMoreInfo")}
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 md:px-6">
+      <div className="mx-auto max-w-[1600px] space-y-6 px-4 pb-8 pt-6 md:px-6 md:pb-10 md:pt-8">
         <div className="rounded-imdb-card border border-imdb-border bg-imdb-elevated p-5 shadow-sm md:p-6">
           <div className="mb-4 flex items-center gap-2 border-b border-imdb-border pb-3">
             <IconSlidersHorizontal className="text-imdb-dim" size={22} />
