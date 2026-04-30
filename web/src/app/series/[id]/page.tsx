@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { SeriesSeasonsTabs } from "@/components/SeriesSeasonsTabs";
 import { SeriesDetailPoster } from "@/components/SeriesDetailPoster";
 import { CreditAvatarStrip } from "@/components/CreditAvatarStrip";
+import { SeriesDetailAutoEnrich } from "@/components/SeriesDetailAutoEnrich";
 import { formatScore } from "@/lib/formatScore";
 import type { CreditPerson } from "@/lib/api";
 import { getLocale } from "@/lib/i18n/getLocale";
@@ -32,6 +33,8 @@ type TvSeriesDetail = {
   creditsCast?: CreditPerson[];
   creditsDirectors?: CreditPerson[];
   episodes: EpisodeRow[];
+  enrichmentState?: string;
+  needsRename?: boolean;
 };
 
 async function getSeries(id: string, locale: string): Promise<TvSeriesDetail | null> {
@@ -89,6 +92,11 @@ export default async function SeriesPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="min-h-[70vh] bg-imdb-canvas px-4 py-8 font-imdb md:px-8">
+      <SeriesDetailAutoEnrich
+        seriesId={s.id}
+        needsRename={Boolean(s.needsRename)}
+        enrichmentState={s.enrichmentState ?? "none"}
+      />
       <div className="mx-auto max-w-[1200px]">
         <div className="mb-6 flex flex-wrap gap-3 text-[14px]">
           <Link href="/" className="font-medium text-imdb-muted underline-offset-4 hover:text-imdb-text hover:underline">

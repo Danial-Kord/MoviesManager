@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { LocaleProvider } from "@/lib/i18n/context";
+import { LibraryJobProvider } from "@/components/LibraryJobProvider";
 import { getMessages, type AppLocale } from "@/lib/i18n/messages";
 import "./globals.css";
 
@@ -24,14 +25,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} dir={locale === "fa" ? "rtl" : "ltr"}>
       <body className="font-imdb">
         <LocaleProvider locale={locale} messages={messages}>
-          <Suspense fallback={<header className="h-[57px] border-b border-imdb-border bg-imdb-surface" />}>
-            <SiteHeader />
-          </Suspense>
-          {children}
+          <LibraryJobProvider>
+            <Suspense fallback={<header className="h-[57px] border-b border-imdb-border bg-imdb-surface" />}>
+              <SiteHeader />
+            </Suspense>
+            {children}
+            <footer className="mt-16 border-t border-imdb-border/60 bg-imdb-footer py-10 text-center">
+              <p className="text-[12px] text-imdb-subtle">{messages.footerNote}</p>
+            </footer>
+          </LibraryJobProvider>
         </LocaleProvider>
-        <footer className="mt-16 border-t border-imdb-border/60 bg-imdb-footer py-10 text-center">
-          <p className="text-[12px] text-imdb-subtle">{messages.footerNote}</p>
-        </footer>
       </body>
     </html>
   );

@@ -3,18 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  enrichBulk,
+  ENRICH_BULK_DEFAULT,
+  ENRICH_BULK_MAX,
+  enrichMovieById,
+  enrichSeriesById,
   fetchLibraryBrowse,
   fetchLibraryGenres,
   patchMovie,
   patchSeries,
   type BrowseItem,
+  type BrowseMovieItem,
   posterUrlForMovieId,
   posterUrlForSeriesId,
-  scanLibrary,
 } from "@/lib/api";
+import { useLibraryJob } from "@/components/LibraryJobProvider";
 import { formatScore } from "@/lib/formatScore";
 import {
   IconArrowUpDown,
@@ -31,8 +35,42 @@ import { interpolate } from "@/lib/i18n/messages";
 
 const PAGE_SIZE = 24;
 
+function buildPageEnrichExecutors(pending: BrowseItem[]): Array<() => Promise<void>> {
+  const executors: Array<() => Promise<void>> = [];
+  const seenSeries = new Set<string>();
+  const addedKeys = new Set<string>();
+
+  for (const p of pending) {
+    if (p.kind === "series") {
+      const key = `s:${p.id}`;
+      if (addedKeys.has(key)) continue;
+      addedKeys.add(key);
+      executors.push(() => enrichSeriesById(p.id).then(() => undefined));
+      continue;
+    }
+    const m = p as BrowseMovieItem;
+    if (m.mediaKind === "episode" && m.seriesId) {
+      if (seenSeries.has(m.seriesId)) continue;
+      seenSeries.add(m.seriesId);
+      const sk = `s:${m.seriesId}`;
+      if (addedKeys.has(sk)) continue;
+      addedKeys.add(sk);
+      const sid = m.seriesId;
+      executors.push(() => enrichSeriesById(sid).then(() => undefined));
+    } else {
+      const mk = `m:${m.id}`;
+      if (addedKeys.has(mk)) continue;
+      addedKeys.add(mk);
+      const mid = m.id;
+      executors.push(() => enrichMovieById(mid).then(() => undefined));
+    }
+  }
+  return executors;
+}
+
 export function HomeClient() {
   const { t } = useLocale();
+  const { busy: libraryBusy, runScan, runEnrich, runBrowsePageEnrich } = useLibraryJob();
   const searchParams = useSearchParams();
   const q = searchParams.get("q")?.trim() ?? "";
 
@@ -47,11 +85,22 @@ export function HomeClient() {
   const [folder, setFolder] = useState("");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
+  const [enrichBatchLimit, setEnrichBatchLimit] = useState(ENRICH_BULK_DEFAULT);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [apiReachable, setApiReachable] = useState<boolean | null>(null);
   const [favoriteBusyId, setFavoriteBusyId] = useState<string | null>(null);
+
+  /** After changing browse page index, run page enrich overlay once load settles. */
+  const pendingPageEnrichRef = useRef(false);
+  const prevPageRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (prevPageRef.current !== null && prevPageRef.current !== page) {
+      pendingPageEnrichRef.current = true;
+    }
+    prevPageRef.current = page;
+  }, [page]);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,9 +137,12 @@ export function HomeClient() {
   }, [genre, genreOptions]);
 
   const load = useCallback(
-    async (pageOverride?: number) => {
-      setLoading(true);
-      setErr(null);
+    async (pageOverride?: number, opts?: { silent?: boolean }) => {
+      const silent = opts?.silent === true;
+      if (!silent) {
+        setLoading(true);
+        setErr(null);
+      }
       const pageNum = pageOverride ?? page;
       try {
         const p = new URLSearchParams();
@@ -112,9 +164,9 @@ export function HomeClient() {
         setItems(data.items);
         setTotal(data.total);
       } catch (e) {
-        setErr((e as Error).message);
+        if (!silent) setErr((e as Error).message);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     },
     [page, sort, q, filter, genre, folder, yearFrom, yearTo, browseKind]
@@ -124,36 +176,63 @@ export function HomeClient() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (loading || libraryBusy || apiReachable === false) return;
+    if (!pendingPageEnrichRef.current) return;
+    if (items.length === 0) {
+      pendingPageEnrichRef.current = false;
+      return;
+    }
+
+    const pending = items.filter((it) => {
+      if (it.needsRename === true) return false;
+      if (it.isEnriched === true) return false;
+      const es = it.enrichmentState ?? "none";
+      return es === "none" || es === "partial";
+    });
+
+    pendingPageEnrichRef.current = false;
+
+    if (pending.length === 0) return;
+
+    const executors = buildPageEnrichExecutors(pending);
+    if (executors.length === 0) return;
+
+    void (async () => {
+      try {
+        await runBrowsePageEnrich(executors);
+      } finally {
+        await load(undefined, { silent: true });
+      }
+    })();
+  }, [loading, libraryBusy, apiReachable, items, load, runBrowsePageEnrich]);
+
   const feature = items[0];
   const heroRating = formatScore(feature ? feature.imdbRating : null);
   const featureBusyKey = feature ? `${feature.kind}:${feature.id}` : "";
 
   async function onScan() {
-    setBusy(t("busyScanning"));
+    if (libraryBusy) return;
+    setErr(null);
     try {
-      const r = await scanLibrary();
-      if (!r.ok) throw new Error(await r.text());
+      await runScan();
       setPage(1);
       await refreshGenres();
       await load(1);
     } catch (e) {
       setErr((e as Error).message);
-    } finally {
-      setBusy(null);
     }
   }
 
   async function onEnrich() {
-    setBusy(t("busyEnriching"));
+    if (libraryBusy) return;
+    setErr(null);
     try {
-      const r = await enrichBulk(40);
-      if (!r.ok) throw new Error(await r.text());
+      await runEnrich(enrichBatchLimit);
       await refreshGenres();
       await load();
     } catch (e) {
       setErr((e as Error).message);
-    } finally {
-      setBusy(null);
     }
   }
 
@@ -183,11 +262,6 @@ export function HomeClient() {
       {apiReachable === false && (
         <div className="border-b border-imdb-error/40 bg-red-950/50 px-4 py-3 text-center text-sm text-imdb-error">
           <strong className="font-semibold">{t("apiOfflineBold")}</strong> {t("apiOfflineRest")}
-        </div>
-      )}
-      {busy && (
-        <div className="pointer-events-none fixed bottom-4 right-4 z-50 rounded-imdb border border-imdb-border bg-imdb-elevated px-4 py-2 text-sm text-imdb-muted shadow-lg shadow-black/40">
-          {busy}
         </div>
       )}
 
@@ -398,14 +472,32 @@ export function HomeClient() {
             </button>
             <button
               type="button"
+              disabled={libraryBusy}
               onClick={() => onScan()}
               className="inline-flex items-center gap-2 rounded-imdb bg-imdb-panel px-[14px] py-[6px] text-[12px] font-semibold text-imdb-text transition hover:bg-imdb-border/90"
             >
               <IconRefreshCw size={16} />
               {t("rescan")}
             </button>
+            <div>
+              <label className="mb-1 block text-[12px] font-medium text-imdb-muted">{t("enrichBatchLabel")}</label>
+              <input
+                type="number"
+                min={1}
+                max={ENRICH_BULK_MAX}
+                disabled={libraryBusy}
+                className="w-[4.5rem] rounded-imdb border border-imdb-border bg-imdb-elevated px-2 py-2 text-[14px] text-imdb-text outline-none focus:border-imdb-focus focus:ring-2 focus:ring-imdb-focus/25"
+                value={enrichBatchLimit}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  if (Number.isFinite(v)) setEnrichBatchLimit(Math.min(ENRICH_BULK_MAX, Math.max(1, v)));
+                }}
+                title={t("enrichBatchTitle")}
+              />
+            </div>
             <button
               type="button"
+              disabled={libraryBusy}
               onClick={() => onEnrich()}
               className="inline-flex items-center gap-2 rounded-imdb border border-imdb-border bg-transparent px-[14px] py-[6px] text-[12px] font-semibold text-imdb-text transition hover:bg-imdb-hover"
             >
@@ -437,6 +529,7 @@ export function HomeClient() {
                     <Link
                       href={"/series/" + row.id}
                       className="absolute inset-0 block outline-none ring-imdb-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-imdb-canvas"
+                      title={row.isEnriched ? t("browseTooltipEnriched") : t("browseTooltipNotEnriched")}
                     >
                       {row.imagePath || row.posterAvailable ? (
                         <Image
@@ -500,7 +593,11 @@ export function HomeClient() {
                 className="group mb-4 break-inside-avoid overflow-hidden rounded-imdb-card bg-imdb-elevated shadow-sm ring-1 ring-imdb-border transition hover:ring-2 hover:ring-imdb-gold/50 [container-type:inline-size]"
               >
                 <div className="relative aspect-[2/3] w-full bg-imdb-surface">
-                  <Link href={"/movie/" + m.id} className="absolute inset-0 block outline-none ring-imdb-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-imdb-canvas">
+                  <Link
+                    href={"/movie/" + m.id}
+                    className="absolute inset-0 block outline-none ring-imdb-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-imdb-canvas"
+                    title={m.isEnriched ? t("browseTooltipEnriched") : t("browseTooltipNotEnriched")}
+                  >
                     {m.imagePath || m.posterAvailable ? (
                       <Image
                         src={posterUrlForMovieId(m.id)}

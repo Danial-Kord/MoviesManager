@@ -7,6 +7,7 @@ import {
   parseVideoFile,
   type ParsedVideoFile,
 } from "./parseFilename.js";
+import { assertRenameMatchesTmdb } from "./tmdb.js";
 
 function isPathInsideLibraryRoot(childAbs: string, rootAbs: string): boolean {
   const root = resolve(rootAbs);
@@ -144,6 +145,8 @@ export async function renameMovieVideoOnDisk(
   if (destExists) {
     throw new Error("A file with that name already exists in this folder.");
   }
+
+  await assertRenameMatchesTmdb(parsed);
 
   await rename(oldPath, newPath);
 

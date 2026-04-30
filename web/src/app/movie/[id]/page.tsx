@@ -6,6 +6,7 @@ import { RenameMovieFileForm } from "@/components/RenameMovieFileForm";
 import { videoBasenameFromPath } from "@/lib/videoBasenameFromPath";
 import { CreditAvatarStrip } from "@/components/CreditAvatarStrip";
 import { PlayLocalButton } from "@/components/PlayLocalButton";
+import { MovieDetailAutoEnrich } from "@/components/MovieDetailAutoEnrich";
 import type { CreditPerson } from "@/lib/api";
 import { formatScore } from "@/lib/formatScore";
 import { getLocale } from "@/lib/i18n/getLocale";
@@ -33,6 +34,8 @@ type Movie = {
   dubbed: boolean;
   creditsCast?: CreditPerson[];
   creditsDirectors?: CreditPerson[];
+  enrichmentState?: string;
+  needsRename?: boolean;
 };
 
 async function getMovie(id: string, locale: string): Promise<Movie | null> {
@@ -63,6 +66,11 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="min-h-[70vh] bg-imdb-canvas px-4 py-8 font-imdb md:px-8">
+      <MovieDetailAutoEnrich
+        movieId={m.id}
+        needsRename={Boolean(m.needsRename)}
+        enrichmentState={m.enrichmentState ?? "none"}
+      />
       <div className="mx-auto max-w-[1200px]">
         <div className="mb-6">
           <Link href="/" className="text-[14px] font-medium text-imdb-muted underline-offset-4 hover:text-imdb-text hover:underline">

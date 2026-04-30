@@ -1,3 +1,5 @@
+import { readNdjsonResponse } from "./ndjsonStream";
+
 const BASE = typeof window === "undefined" ? "" : "";
 
 export type MovieListItem = {
@@ -18,7 +20,12 @@ export type MovieListItem = {
   duration: string | null;
   categories: { category: { id: string; name: string } }[];
   mediaKind?: string;
+  seriesId?: string | null;
   dubbed?: boolean;
+  enrichmentState?: string;
+  needsRename?: boolean;
+  /** True when enrichment is complete (full metadata + no pending rename). Episodes follow parent series. */
+  isEnriched?: boolean;
 };
 
 export type BrowseSeriesItem = {
@@ -35,6 +42,10 @@ export type BrowseSeriesItem = {
   summary: string | null;
   genre: string | null;
   updatedAt: string;
+  enrichmentState?: string;
+  needsRename?: boolean;
+  /** True when series enrichment is complete (full + no rename pending). */
+  isEnriched?: boolean;
 };
 
 export type BrowseMovieItem = MovieListItem & {
@@ -128,16 +139,92 @@ export async function fetchLibraryNeedsRename() {
   return r.json() as Promise<{ series: NeedsRenameSeriesRow[]; movies: NeedsRenameMovieRow[] }>;
 }
 
-export async function scanLibrary() {
-  return fetch(`${BASE}/api/scan`, { method: "POST" });
+export type ScanProgressEvent = {
+  type: "progress";
+  job: "scan";
+  scanPhase: "discover" | "import";
+  pathsDone: number;
+  pathsTotal: number;
+  filesDiscovered?: number;
+  filesDone?: number;
+  filesTotal?: number;
+  percent: number;
+};
+
+export type ScanSummary = {
+  scanned: number;
+  moviesUpserted: number;
+  episodesUpserted: number;
+  seriesOrphansRemoved: number;
+  seriesDistinct: number;
+};
+
+export async function scanLibraryStream(onProgress: (e: ScanProgressEvent) => void): Promise<ScanSummary> {
+  const r = await fetch(`${BASE}/api/scan`, { method: "POST" });
+  let complete: ScanSummary | undefined;
+  await readNdjsonResponse(r, (obj) => {
+    if (obj.type === "error") throw new Error(String((obj as { message?: string }).message ?? "Scan failed"));
+    if (obj.type === "complete") {
+      complete = {
+        scanned: Number((obj as { scanned?: number }).scanned ?? 0),
+        moviesUpserted: Number((obj as { moviesUpserted?: number }).moviesUpserted ?? 0),
+        episodesUpserted: Number((obj as { episodesUpserted?: number }).episodesUpserted ?? 0),
+        seriesOrphansRemoved: Number((obj as { seriesOrphansRemoved?: number }).seriesOrphansRemoved ?? 0),
+        seriesDistinct: Number((obj as { seriesDistinct?: number }).seriesDistinct ?? 0),
+      };
+      return;
+    }
+    if (obj.type === "progress") onProgress(obj as unknown as ScanProgressEvent);
+  });
+  if (!complete) throw new Error("Scan finished without summary");
+  return complete;
 }
 
-export async function enrichBulk(limit = 30) {
-  return fetch(`${BASE}/api/enrich-bulk`, {
+export type EnrichProgressEvent = {
+  type: "progress";
+  job: "enrich";
+  done: number;
+  total: number;
+  percent: number;
+};
+
+export type EnrichBulkResultRow = { id: string; kind: "series" | "movie"; ok: boolean; error?: string };
+
+export type EnrichSummary = {
+  processed: number;
+  results: EnrichBulkResultRow[];
+};
+
+/** Mirrors server `POST /api/enrich-bulk` (`limit` default and ceiling). */
+export const ENRICH_BULK_DEFAULT = 50;
+export const ENRICH_BULK_MAX = 200;
+
+export async function enrichBulkStream(
+  limit: number,
+  onProgress: (e: EnrichProgressEvent) => void
+): Promise<EnrichSummary> {
+  const clamped = Math.min(ENRICH_BULK_MAX, Math.max(1, Math.floor(Number(limit)) || ENRICH_BULK_DEFAULT));
+  const r = await fetch(`${BASE}/api/enrich-bulk`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit }),
+    body: JSON.stringify({ limit: clamped }),
   });
+  let complete: EnrichSummary | undefined;
+  await readNdjsonResponse(r, (obj) => {
+    if (obj.type === "error") throw new Error(String((obj as { message?: string }).message ?? "Enrich failed"));
+    if (obj.type === "complete") {
+      complete = {
+        processed: Number((obj as { processed?: number }).processed ?? 0),
+        results: Array.isArray((obj as { results?: unknown }).results)
+          ? ((obj as { results: EnrichBulkResultRow[] }).results)
+          : [],
+      };
+      return;
+    }
+    if (obj.type === "progress") onProgress(obj as unknown as EnrichProgressEvent);
+  });
+  if (!complete) throw new Error("Enrich finished without summary");
+  return complete;
 }
 
 /** Must match server `RESET_DATABASE_CONFIRM` — type this phrase to enable erase. */
@@ -184,6 +271,33 @@ export type CreditPerson = {
 
 export function personPhotoUrl(tmdbPersonId: number): string {
   return `${BASE}/api/person-photo/${tmdbPersonId}`;
+}
+
+/** Single-title TMDb enrich. Returns true only on HTTP 200. */
+export async function enrichMovieById(movieId: string): Promise<boolean> {
+  const r = await fetch(`${BASE}/api/movies/${movieId}/enrich`, { method: "POST" });
+  return r.ok;
+}
+
+/** Manual enrich from movie detail; throws with server error message on failure. */
+export async function postMovieEnrich(movieId: string): Promise<void> {
+  const r = await fetch(`${BASE}/api/movies/${movieId}/enrich`, { method: "POST" });
+  if (!r.ok) {
+    let msg = await r.text();
+    try {
+      const j = JSON.parse(msg) as { error?: string };
+      if (j.error) msg = j.error;
+    } catch {
+      /* raw */
+    }
+    throw new Error(msg || r.statusText);
+  }
+}
+
+/** Series-level TMDb enrich. Returns true only on HTTP 200. */
+export async function enrichSeriesById(seriesId: string): Promise<boolean> {
+  const r = await fetch(`${BASE}/api/series/${seriesId}/enrich`, { method: "POST" });
+  return r.ok;
 }
 
 export async function renameMovieFile(movieId: string, fileName: string): Promise<Record<string, unknown>> {

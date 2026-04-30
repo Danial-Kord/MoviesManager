@@ -23,6 +23,20 @@ export const messagesEn = {
   busyScanning: "Scanning…",
   busyEnriching: "Enriching TMDb…",
 
+  jobOverlayScanTitle: "Rescanning library",
+  jobOverlayEnrichTitle: "Enriching from TMDb",
+  jobOverlayPageEnrichTitle: "Enriching this page",
+  jobPhaseDiscover: "Scanning folders for video files…",
+  jobPhaseImport: "Updating library database…",
+  jobPhaseEnrich: "Fetching metadata for each title…",
+  jobPathsProgress: "Folders: {done} / {total}",
+  jobVideosFound: "Videos found: {n}",
+  jobImportProgress: "Files saved: {done} / {total}",
+  jobEnrichProgress: "Titles processed: {done} / {total}",
+
+  browseTooltipEnriched: "TMDb metadata complete",
+  browseTooltipNotEnriched: "Not enriched yet",
+
   heroPlay: "Play",
   heroMoreInfo: "More info",
   heroEpisodes: "Episodes",
@@ -61,6 +75,8 @@ export const messagesEn = {
   apply: "Apply",
   rescan: "Rescan",
   enrichTmdb: "Enrich TMDb",
+  enrichBatchLabel: "Per-run limit",
+  enrichBatchTitle: "Maximum titles enriched per click (mix of series + movies). Capped at 200 server-side.",
 
   yourLibrary: "Your library",
   loading: "Loading…",
@@ -84,6 +100,8 @@ export const messagesEn = {
 
   hideBlacklist: "Hide (blacklist)",
   unhide: "Unhide",
+  movieDetailEnrichRefresh: "Refresh metadata",
+  movieDetailEnrichTitle: "Re-run TMDb enrichment for this title (uses cache when possible)",
 
   seasonsTitle: "Seasons",
   seasonUnknown: "Episodes (season unknown)",
@@ -120,7 +138,7 @@ export const messagesEn = {
   renameFileLabel: "New filename",
   renameFileApply: "Rename on disk",
   renameFileHint:
-    "Only the file name changes (same folder). Parsed title/episode info updates from the new name; TMDb metadata is cleared so you can enrich again.",
+    "Same folder only. Before renaming, the server checks TMDb: standalone movies must include a 4-digit year (e.g. Title.2010.mkv). If there is no match, the rename is rejected and nothing on disk changes.",
 } as const;
 
 export const messagesFa = {
@@ -141,6 +159,20 @@ export const messagesFa = {
 
   busyScanning: "در حال اسکن…",
   busyEnriching: "در حال غنی‌سازی TMDb…",
+
+  jobOverlayScanTitle: "اسکن مجدد کتابخانه",
+  jobOverlayEnrichTitle: "غنی‌سازی از TMDb",
+  jobOverlayPageEnrichTitle: "غنی‌سازی همین صفحه",
+  jobPhaseDiscover: "در حال پیمایش پوشه‌ها برای فایل ویدیو…",
+  jobPhaseImport: "در حال به‌روزرسانی پایگاه دادهٔ کتابخانه…",
+  jobPhaseEnrich: "در حال دریافت متادیتا برای هر عنوان…",
+  jobPathsProgress: "پوشه‌ها: {done} / {total}",
+  jobVideosFound: "ویدیوهای یافت‌شده: {n}",
+  jobImportProgress: "فایل‌های ذخیره‌شده: {done} / {total}",
+  jobEnrichProgress: "عناوین پردازش‌شده: {done} / {total}",
+
+  browseTooltipEnriched: "متادیتای TMDb کامل است",
+  browseTooltipNotEnriched: "هنوز غنی‌سازی نشده",
 
   heroPlay: "پخش",
   heroMoreInfo: "اطلاعات بیشتر",
@@ -180,6 +212,8 @@ export const messagesFa = {
   apply: "اعمال",
   rescan: "اسکن مجدد",
   enrichTmdb: "غنی‌سازی TMDb",
+  enrichBatchLabel: "حد هر بار اجرا",
+  enrichBatchTitle: "حداکثر عنوان برای هر کلیک (ترکیب سریال و فیلم). سمت سرور حداکثر ۲۰۰ است.",
 
   yourLibrary: "کتابخانهٔ شما",
   loading: "در حال بارگذاری…",
@@ -203,6 +237,8 @@ export const messagesFa = {
 
   hideBlacklist: "مخفی (لیست سیاه)",
   unhide: "نمایش",
+  movieDetailEnrichRefresh: "به‌روزرسانی متادیتا",
+  movieDetailEnrichTitle: "اجرای دوبارهٔ غنی‌سازی TMDb (در صورت وجود از کش استفاده می‌شود)",
 
   seasonsTitle: "فصل‌ها",
   seasonUnknown: "قسمت‌ها (فصل نامشخص)",
@@ -239,7 +275,7 @@ export const messagesFa = {
   renameFileLabel: "نام جدید فایل",
   renameFileApply: "تغییر نام روی دیسک",
   renameFileHint:
-    "فقط نام فایل عوض می‌شود (همان پوشه). عنوان/قسمت از نام جدید استخراج می‌شود؛ دادهٔ TMDb پاک می‌شود تا دوباره غنی‌سازی کنید.",
+    "فقط در همان پوشه. پیش از تغییر نام، سرور TMDb را بررسی می‌کند: فیلم‌های سینمایی باید سال چهاررقمی در نام فایل داشته باشند (مثلاً Title.2010.mkv). بدون نتیجه در TMDb، تغییر نام رد می‌شود و چیزی روی دیسک عوض نمی‌شود.",
 } as const;
 
 export type MessageKey = keyof typeof messagesEn;
