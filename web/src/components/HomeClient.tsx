@@ -182,10 +182,10 @@ export function HomeClient() {
           <div className="absolute inset-0 bg-gradient-to-t from-imdb-canvas via-black/55 to-transparent" />
           {feature.kind === "movie" && feature.dubbed && (
             <div
-              className="pointer-events-none absolute left-4 top-20 z-20 rounded-full bg-black/55 px-2.5 py-1 shadow-md ring-1 ring-white/15 backdrop-blur-sm md:left-8 md:top-24"
+              className="pointer-events-none absolute start-5 top-6 z-20 inline-flex h-8 shrink-0 items-center justify-center rounded-full bg-black/80 px-3 shadow-lg shadow-black/50 ring-2 ring-imdb-gold/70 backdrop-blur-sm md:start-8 md:top-8"
               aria-hidden
             >
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-imdb-text">{t("badgeDubbed")}</span>
+              <span className="text-[11px] font-bold uppercase leading-none tracking-wide text-imdb-gold">{t("badgeDubbed")}</span>
             </div>
           )}
           <button
@@ -483,10 +483,10 @@ export function HomeClient() {
                   </Link>
                   {m.dubbed && (
                     <div
-                      className="pointer-events-none absolute left-2 top-2 z-10 rounded-full bg-black/55 px-2 py-1 shadow-md ring-1 ring-white/15 backdrop-blur-sm"
+                      className="pointer-events-none absolute start-2 top-2 z-10 inline-flex h-7 min-h-7 items-center justify-center rounded-full bg-black/80 px-2.5 shadow-md shadow-black/45 ring-2 ring-imdb-gold/65 backdrop-blur-sm"
                       aria-hidden
                     >
-                      <span className="font-semibold uppercase tracking-wide text-imdb-text [font-size:clamp(9px,2.8cqw,11px)]">
+                      <span className="text-center font-bold uppercase leading-none tracking-wide text-imdb-gold [font-size:clamp(9px,2.8cqw,11px)]">
                         {t("badgeDubbed")}
                       </span>
                     </div>

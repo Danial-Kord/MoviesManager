@@ -148,7 +148,9 @@ export default async function SeriesPage({ params }: { params: Promise<{ id: str
                           <p className="mt-2 text-[12px] font-medium text-imdb-gold">★ {score}</p>
                         ) : null}
                         {ep.dubbed ? (
-                          <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-imdb-muted">{t.badgeDubbed}</p>
+                          <span className="mt-2 inline-flex items-center justify-center rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide text-imdb-gold ring-1 ring-imdb-gold/50">
+                            {t.badgeDubbed}
+                          </span>
                         ) : null}
                         <p className="mt-2 line-clamp-2 break-all font-mono text-[10px] leading-snug text-imdb-subtle">
                           {ep.filePath}

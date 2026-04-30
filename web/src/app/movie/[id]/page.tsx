@@ -98,9 +98,16 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
             <p className="mt-2 break-all text-[12px] text-imdb-subtle">
               {t.fileLabel} {m.filePath}
             </p>
-            <p className="mt-1 text-[13px] text-imdb-muted">
-              {t.dubbedLabel} {m.dubbed ? t.dubbedYes : t.dubbedNo}
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px]">
+              <span className="text-imdb-muted">{t.dubbedLabel}</span>
+              {m.dubbed ? (
+                <span className="inline-flex h-6 items-center justify-center rounded-full bg-black/35 px-2.5 text-[11px] font-bold uppercase leading-none tracking-wide text-imdb-gold ring-2 ring-imdb-gold/55">
+                  {t.badgeDubbed}
+                </span>
+              ) : (
+                <span className="text-imdb-muted">{t.dubbedNo}</span>
+              )}
+            </div>
             {m.directors && (
               <p className="mt-5 text-[14px] leading-relaxed text-imdb-text">
                 <span className="text-imdb-muted">{t.directors} </span>
