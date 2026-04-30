@@ -23,7 +23,13 @@ import { omitTmdbFetchSnapshots, stripMovieRowForApi } from "./omitTmdbPayload.j
 import { renameMovieVideoOnDisk } from "./renameMovieFile.js";
 import { syncTitleCreditsFromTmdb, toCreditPersonDto } from "./creditsSync.js";
 import { openFileWithDefaultApp } from "./openLocal.js";
-import { isDubbedFromPath } from "./parseFilename.js";
+import {
+  compileDubbedRulesToCache,
+  isDubbedFromPath,
+  LIBRARY_SETTINGS_ROW_ID,
+  refreshUserDubbedRules,
+  validateAndNormalizeDubbedRules,
+} from "./parseFilename.js";
 import { parseLocaleFromRequest, resolveSummaryForLocale } from "./summaryLocale.js";
 
 const statAsync = promisify(statCb);
@@ -204,6 +210,75 @@ app.delete("/api/paths/:id", async (req, res) => {
   const { id } = req.params;
   await prisma.libraryPath.delete({ where: { id } });
   res.json({ ok: true });
+});
+
+// --- library settings (singleton SQLite row)
+app.get("/api/settings/library", async (_req, res) => {
+  try {
+    const row = await prisma.librarySettings.upsert({
+      where: { id: LIBRARY_SETTINGS_ROW_ID },
+      create: { id: LIBRARY_SETTINGS_ROW_ID, dubbedRules: [] },
+      update: {},
+    });
+    const parsed = validateAndNormalizeDubbedRules(row.dubbedRules);
+    res.json({ dubbedRules: parsed.ok ? parsed.rules : [] });
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+app.patch("/api/settings/library", async (req, res) => {
+  try {
+    const raw = (req.body as { dubbedRules?: unknown })?.dubbedRules;
+    const parsed = validateAndNormalizeDubbedRules(raw ?? []);
+    if (!parsed.ok) {
+      res.status(400).json({ error: parsed.error });
+      return;
+    }
+    const compiled = compileDubbedRulesToCache(parsed.rules);
+    if (!compiled.ok) {
+      res.status(400).json({ error: compiled.error });
+      return;
+    }
+    await prisma.librarySettings.upsert({
+      where: { id: LIBRARY_SETTINGS_ROW_ID },
+      create: { id: LIBRARY_SETTINGS_ROW_ID, dubbedRules: parsed.rules },
+      update: { dubbedRules: parsed.rules },
+    });
+    res.json({ dubbedRules: parsed.rules });
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+app.post("/api/library/recompute-dubbed", async (_req, res) => {
+  try {
+    const BATCH = 250;
+    let skip = 0;
+    let rowsUpdated = 0;
+    let rowsChecked = 0;
+    for (;;) {
+      const batch = await prisma.movie.findMany({
+        skip,
+        take: BATCH,
+        orderBy: { id: "asc" },
+        select: { id: true, filePath: true, dubbed: true },
+      });
+      if (batch.length === 0) break;
+      rowsChecked += batch.length;
+      skip += batch.length;
+      for (const m of batch) {
+        const next = isDubbedFromPath(m.filePath);
+        if (next !== m.dubbed) {
+          await prisma.movie.update({ where: { id: m.id }, data: { dubbed: next } });
+          rowsUpdated++;
+        }
+      }
+    }
+    res.json({ ok: true, rowsChecked, rowsUpdated });
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
 });
 
 // --- scan (NDJSON stream: progress lines + final complete)
@@ -1591,7 +1666,17 @@ app.get("/api/poster/:id", async (req, res) => {
 
 // I'll fix the handler in a separate patch
 
-app.listen(API_PORT, API_HOST, () => {
-  // eslint-disable-next-line no-console
-  console.log(`API http://${API_HOST}:${API_PORT}`);
-});
+async function startServer(): Promise<void> {
+  try {
+    await refreshUserDubbedRules(prisma);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn("[library settings] could not load dubbed rules:", (e as Error).message);
+  }
+  app.listen(API_PORT, API_HOST, () => {
+    // eslint-disable-next-line no-console
+    console.log(`API http://${API_HOST}:${API_PORT}`);
+  });
+}
+
+void startServer();

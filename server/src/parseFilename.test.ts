@@ -1,6 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isDubbedFromPath, normalizeMovieDuplicateKey, normalizeSeriesKey, parseVideoFile } from "./parseFilename.js";
+import {
+  compileDubbedRulesToCache,
+  isDubbedFromPath,
+  normalizeMovieDuplicateKey,
+  normalizeSeriesKey,
+  parseVideoFile,
+  resetUserDubbedRulesForTests,
+  validateAndNormalizeDubbedRules,
+} from "./parseFilename.js";
+
+test.afterEach(() => {
+  resetUserDubbedRulesForTests();
+});
 
 test("parseVideoFile: movie without episode token", () => {
   const r = parseVideoFile("D:/films/Some.Movie.2020.1080p.mkv");
@@ -71,4 +83,39 @@ test("normalizeMovieDuplicateKey: stable title+year", () => {
     normalizeMovieDuplicateKey("the.matrix", "1999")
   );
   assert.notEqual(normalizeMovieDuplicateKey("The Matrix", "1999"), normalizeMovieDuplicateKey("The Matrix", "2003"));
+});
+
+test("user dubbed rule: contains folder fragment", () => {
+  const v = validateAndNormalizeDubbedRules([{ pattern: "Persian Dub", mode: "contains" }]);
+  assert.equal(v.ok, true);
+  if (!v.ok) return;
+  const c = compileDubbedRulesToCache(v.rules);
+  assert.equal(c.ok, true);
+  assert.equal(isDubbedFromPath("D:/Movies/Persian Dub/Film.2020.mkv"), true);
+  assert.equal(isDubbedFromPath("D:/Movies/Other/Film.2020.mkv"), false);
+});
+
+test("user dubbed rule: regex", () => {
+  const v = validateAndNormalizeDubbedRules([{ pattern: "fan.?edit", mode: "regex" }]);
+  assert.equal(v.ok, true);
+  if (!v.ok) return;
+  const c = compileDubbedRulesToCache(v.rules);
+  assert.equal(c.ok, true);
+  assert.equal(isDubbedFromPath("D:/Fanedit/release.mkv"), true);
+});
+
+test("validateAndNormalizeDubbedRules rejects invalid regex compile", () => {
+  const v = validateAndNormalizeDubbedRules([{ pattern: "(unclosed", mode: "regex" }]);
+  assert.equal(v.ok, true);
+  if (!v.ok) return;
+  const c = compileDubbedRulesToCache(v.rules);
+  assert.equal(c.ok, false);
+});
+
+test("disabled rule does not match", () => {
+  const v = validateAndNormalizeDubbedRules([{ pattern: "zzzuniquefolderzzz", mode: "contains", enabled: false }]);
+  assert.equal(v.ok, true);
+  if (!v.ok) return;
+  compileDubbedRulesToCache(v.rules);
+  assert.equal(isDubbedFromPath("D:/zzzuniquefolderzzz/x.mkv"), false);
 });

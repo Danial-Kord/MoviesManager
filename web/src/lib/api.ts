@@ -83,6 +83,47 @@ export async function fetchLibraryGenres() {
   return r.json() as Promise<{ genres: string[] }>;
 }
 
+export type DubbedRuleDto = {
+  pattern: string;
+  mode: "contains" | "regex";
+  enabled?: boolean;
+};
+
+async function readHttpErrorMessage(r: Response): Promise<string> {
+  const raw = await r.text();
+  try {
+    const j = JSON.parse(raw) as { error?: unknown };
+    if (typeof j.error === "string" && j.error.trim()) return j.error;
+  } catch {
+    /* ignore */
+  }
+  return raw.trim() || `HTTP ${r.status}`;
+}
+
+export async function fetchLibrarySettings(): Promise<{ dubbedRules: DubbedRuleDto[] }> {
+  const r = await fetch(`${BASE}/api/settings/library`, { cache: "no-store" });
+  if (!r.ok) throw new Error(await readHttpErrorMessage(r));
+  return r.json() as Promise<{ dubbedRules: DubbedRuleDto[] }>;
+}
+
+export async function patchLibrarySettings(body: {
+  dubbedRules: DubbedRuleDto[];
+}): Promise<{ dubbedRules: DubbedRuleDto[] }> {
+  const r = await fetch(`${BASE}/api/settings/library`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(await readHttpErrorMessage(r));
+  return r.json() as Promise<{ dubbedRules: DubbedRuleDto[] }>;
+}
+
+export async function postRecomputeDubbed(): Promise<{ ok: boolean; rowsChecked: number; rowsUpdated: number }> {
+  const r = await fetch(`${BASE}/api/library/recompute-dubbed`, { method: "POST" });
+  if (!r.ok) throw new Error(await readHttpErrorMessage(r));
+  return r.json() as Promise<{ ok: boolean; rowsChecked: number; rowsUpdated: number }>;
+}
+
 export type DuplicateGroupKind = "title_year" | "tmdb_id" | "episode_slot";
 
 export type DuplicateLibraryItem = {

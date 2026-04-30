@@ -135,6 +135,39 @@ export const messagesEn = {
   needsRenameEmpty: "Nothing here yet — run enrichment, or every title matched.",
   needsRenameEpisodesHint: "{n} episodes · sample paths:",
 
+  settingsIntroTabs: "Use the tabs below to manage folders, dubbed detection, the database, and maintenance.",
+
+  settingsTabOverview: "Overview",
+  settingsTabLibrary: "Library",
+  settingsTabDubbed: "Dubbed",
+  settingsTabDatabase: "Database",
+  settingsTabMaintenance: "Maintenance",
+
+  settingsDubbedSectionTitle: "Custom dubbed detection",
+  settingsDubbedSectionDesc:
+    "Extra rules on top of built-in path/filename hints. Matching uses the full file path with slashes normalized, case-insensitive. \"Contains\" searches for that substring; \"Regex\" uses JavaScript regular expression syntax (always case-insensitive). Existing rows are not updated until you Rescan or use Re-apply below.",
+  settingsDubbedBuiltinsNote:
+    "Built-in hints (e.g. dual audio, multi audio, common dub keywords) always apply and are not listed here.",
+  settingsDubbedPatternPlaceholder: 'e.g. "Persian Dub" or fan.?edit',
+  settingsDubbedEmptyRules: "No custom rules yet. Add one below.",
+  settingsDubbedModeContains: "Contains",
+  settingsDubbedModeRegex: "Regex",
+  settingsDubbedEnabled: "On",
+  settingsDubbedAddRule: "Add rule",
+  settingsDubbedRemoveRow: "Remove",
+  settingsDubbedSave: "Save rules",
+  settingsDubbedSaving: "Saving…",
+  settingsDubbedLoadErr: "Could not load dubbed rules (is the API running?).",
+  settingsDubbedSaveOk: "Rules saved.",
+  settingsDubbedReapply: "Re-apply to all files",
+  settingsDubbedReapplyBusy: "Updating…",
+  settingsDubbedReapplyConfirm:
+    "Recompute the dubbed flag for every video using current rules (built-in plus yours). This may take a moment on large libraries.",
+  settingsDubbedReapplyDone: "Checked {checked} paths · updated {updated} rows.",
+
+  settingsOverviewDubbedTile:
+    "Dubbed is inferred from path and folder naming (heuristic only). Add substring or regex rules under the Dubbed tab; built-in hints always apply.",
+
   renameFileLabel: "New filename",
   renameFileApply: "Rename on disk",
   renameFileHint:
@@ -271,6 +304,40 @@ export const messagesFa = {
   needsRenameResolved: "حل شد",
   needsRenameEmpty: "موردی نیست — هنوز غنی‌سازی نشده یا همه مطابقت داشتند.",
   needsRenameEpisodesHint: "{n} قسمت · نمونه مسیرها:",
+
+  settingsIntroTabs:
+    "از زبانه‌های زیر برای پوشه‌ها، تشخیص دوبله، پایگاه داده و نگهداری استفاده کنید.",
+
+  settingsTabOverview: "مرور کلی",
+  settingsTabLibrary: "کتابخانه",
+  settingsTabDubbed: "دوبله",
+  settingsTabDatabase: "پایگاه داده",
+  settingsTabMaintenance: "نگهداری",
+
+  settingsDubbedSectionTitle: "قوانین سفارشی تشخیص دوبله",
+  settingsDubbedSectionDesc:
+    "قوانین اضافه روی الگوهای پیش‌فرض نام مسیر/فایل. تطبیق روی کل مسیر فایل با یکسان‌سازی اسلش‌ها، بدون تفاوت حروف است. «شامل» زیررشتهٔ مشخص را می‌جوید؛ «عبارت باقاعده» از گرامر RegExp جاوااسکریپت استفاده می‌کند (همیشه بدون تفاوت حروف). تا زمان اسکن مجدد یا اعمال مجدد زیر، ردیف‌های فعلی به‌روز نمی‌شوند.",
+  settingsDubbedBuiltinsNote:
+    "الگوهای پیش‌فرض (دو صدای هم‌زمان، چند صدا، کلمات رایج دوبله و غیره) همیشه اعمال می‌شوند و اینجا فهرست نمی‌شوند.",
+  settingsDubbedPatternPlaceholder: "مثلاً Persian Dub یا fan.?edit",
+  settingsDubbedEmptyRules: "هنوز قانون سفارشی نیست. از زیر یک مورد اضافه کنید.",
+  settingsDubbedModeContains: "شامل متن",
+  settingsDubbedModeRegex: "عبارت باقاعده",
+  settingsDubbedEnabled: "فعال",
+  settingsDubbedAddRule: "افزودن قانون",
+  settingsDubbedRemoveRow: "حذف",
+  settingsDubbedSave: "ذخیرهٔ قوانین",
+  settingsDubbedSaving: "در حال ذخیره…",
+  settingsDubbedLoadErr: "بارگذاری قوانین دوبله نشد (آیا API روشن است؟).",
+  settingsDubbedSaveOk: "قوانین ذخیره شد.",
+  settingsDubbedReapply: "اعمال مجدد روی همهٔ فایل‌ها",
+  settingsDubbedReapplyBusy: "در حال به‌روزرسانی…",
+  settingsDubbedReapplyConfirm:
+    "پرچم دوبله برای هر ویدیو با قوانین فعلی (پیش‌فرض به‌علاوهٔ شما) دوباره محاسبه شود؟ در کتابخانه‌های بزرگ کمی طول می‌کشد.",
+  settingsDubbedReapplyDone: "{checked} مسیر بررسی شد · {updated} ردیف به‌روز شد.",
+
+  settingsOverviewDubbedTile:
+    "«دوبله» از نام مسیر و پوشه‌ها حدس زده می‌شود (فقط کشف تقریبی). زیر زبانهٔ دوبله می‌توانید زیررشته یا عبارت باقاعده اضافه کنید؛ الگوهای پیش‌فرض همیشه اعمال می‌شوند.",
 
   renameFileLabel: "نام جدید فایل",
   renameFileApply: "تغییر نام روی دیسک",

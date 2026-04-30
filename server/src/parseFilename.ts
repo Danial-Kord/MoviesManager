@@ -1,6 +1,8 @@
 /**
  * Port of com.company.Sorting stringConditions + findName + getYear.
  */
+import type { PrismaClient } from "@prisma/client";
+
 const STRING_CONDITIONS: string[] = [
   "256",
   "264",
@@ -74,8 +76,8 @@ const VIDEO_EXTS = new Set([
   ".m4v",
 ]);
 
-/** Path/filename hints for a dubbed release (also checks parent folders). */
-const DUBBED_HINTS: RegExp[] = [
+/** Built-in path/filename hints for a dubbed release (also checks parent folders). User rules extend these. */
+export const BUILTIN_DUBBED_REGEXES: readonly RegExp[] = [
   /\bdubbed\b/i,
   /\bdual[\s._-]*audio\b/i,
   /\bmulti[\s._-]*audio\b/i,
@@ -86,10 +88,104 @@ const DUBBED_HINTS: RegExp[] = [
   /\bdub\.(?:mp4|mkv|avi|webm)\b/i,
 ];
 
+export type DubbedRuleMode = "contains" | "regex";
+
+export type DubbedRuleDto = {
+  pattern: string;
+  mode: DubbedRuleMode;
+  enabled?: boolean;
+};
+
+export const LIBRARY_SETTINGS_ROW_ID = "default";
+const MAX_DUBBED_PATTERN_LENGTH = 200;
+
+type CompiledUserRule = { kind: "contains"; needle: string } | { kind: "regex"; re: RegExp };
+
+let userCompiledRules: CompiledUserRule[] = [];
+
+export function normalizePathForDubbedMatch(filePath: string): string {
+  return filePath.replace(/[/\\]+/g, "/").toLowerCase();
+}
+
+/** Test-only: clear user rules without touching DB. */
+export function resetUserDubbedRulesForTests(): void {
+  userCompiledRules = [];
+}
+
+export function validateAndNormalizeDubbedRules(raw: unknown): { ok: true; rules: DubbedRuleDto[] } | { ok: false; error: string } {
+  if (!Array.isArray(raw)) return { ok: false, error: "dubbedRules must be an array" };
+  const rules: DubbedRuleDto[] = [];
+  for (let i = 0; i < raw.length; i++) {
+    const row = raw[i];
+    if (row === null || typeof row !== "object") return { ok: false, error: `Rule ${i + 1}: expected object` };
+    const rec = row as Record<string, unknown>;
+    const pattern = typeof rec.pattern === "string" ? rec.pattern : "";
+    const mode = rec.mode === "regex" || rec.mode === "contains" ? rec.mode : null;
+    const enabled = rec.enabled === undefined ? true : Boolean(rec.enabled);
+    if (!mode) return { ok: false, error: `Rule ${i + 1}: mode must be "contains" or "regex"` };
+    const trimmed = pattern.trim();
+    if (enabled && trimmed.length === 0) return { ok: false, error: `Rule ${i + 1}: pattern cannot be empty when enabled` };
+    if (trimmed.length > MAX_DUBBED_PATTERN_LENGTH) {
+      return { ok: false, error: `Rule ${i + 1}: pattern exceeds ${MAX_DUBBED_PATTERN_LENGTH} characters` };
+    }
+    rules.push({ pattern: trimmed, mode, enabled });
+  }
+  return { ok: true, rules };
+}
+
+export function compileDubbedRulesToCache(rules: DubbedRuleDto[]): { ok: true } | { ok: false; error: string } {
+  const next: CompiledUserRule[] = [];
+  for (let i = 0; i < rules.length; i++) {
+    const r = rules[i];
+    if (r.enabled === false) continue;
+    const p = r.pattern.trim();
+    if (!p) continue;
+    if (r.mode === "contains") {
+      next.push({ kind: "contains", needle: normalizePathForDubbedMatch(p) });
+      continue;
+    }
+    try {
+      next.push({ kind: "regex", re: new RegExp(p, "i") });
+    } catch {
+      return { ok: false, error: `Rule ${i + 1}: invalid regular expression` };
+    }
+  }
+  userCompiledRules = next;
+  return { ok: true };
+}
+
+/** Load settings row from DB and refresh in-memory user dubbed rules. Safe if row missing (uses []). */
+export async function refreshUserDubbedRules(prisma: PrismaClient): Promise<void> {
+  const row = await prisma.librarySettings.findUnique({
+    where: { id: LIBRARY_SETTINGS_ROW_ID },
+    select: { dubbedRules: true },
+  });
+  const raw = row?.dubbedRules ?? [];
+  const validated = validateAndNormalizeDubbedRules(raw);
+  if (!validated.ok) {
+    userCompiledRules = [];
+    return;
+  }
+  const compiled = compileDubbedRulesToCache(validated.rules);
+  if (!compiled.ok) userCompiledRules = [];
+}
+
+export function matchesUserDubbedRules(normPath: string): boolean {
+  for (const rule of userCompiledRules) {
+    if (rule.kind === "contains") {
+      if (normPath.includes(rule.needle)) return true;
+    } else if (rule.re.test(normPath)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function isDubbedFromPath(filePath: string): boolean {
   if (!filePath) return false;
-  const norm = filePath.replace(/[/\\]+/g, "/").toLowerCase();
-  return DUBBED_HINTS.some((re) => re.test(norm));
+  const norm = normalizePathForDubbedMatch(filePath);
+  if (BUILTIN_DUBBED_REGEXES.some((re) => re.test(norm))) return true;
+  return matchesUserDubbedRules(norm);
 }
 
 export function isVideoFile(name: string): boolean {

@@ -13,6 +13,12 @@ model LibraryPath {
   createdAt DateTime @default(now())
 }
 
+/// Singleton row: use id `"default"` for library-wide UI settings.
+model LibrarySettings {
+  id          String @id
+  dubbedRules Json   @default("[]")
+}
+
 model Category {
   id     String          @id @default(cuid())
   name   String
