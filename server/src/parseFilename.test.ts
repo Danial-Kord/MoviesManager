@@ -14,16 +14,6 @@ test.afterEach(() => {
   resetUserDubbedRulesForTests();
 });
 
-test("parseVideoFile: BRRip 720p without year — title stops before release tags", () => {
-  const r = parseVideoFile("D:/films/Mulan.I.BRRip.720p-GLORY.mkv");
-  assert.ok(r);
-  assert.equal(r.kind, "movie");
-  if (r.kind === "movie") {
-    assert.equal(r.displayName.trim(), "Mulan I");
-    assert.equal(r.year, "");
-  }
-});
-
 test("parseVideoFile: movie without episode token", () => {
   const r = parseVideoFile("D:/films/Some.Movie.2020.1080p.mkv");
   assert.ok(r);
@@ -32,6 +22,48 @@ test("parseVideoFile: movie without episode token", () => {
     assert.match(r.displayName, /Some Movie/i);
     assert.equal(r.year, "2020");
     assert.equal(r.dubbed, false);
+  }
+});
+
+test("parseVideoFile: bracket tags and BR-Rip stripped", () => {
+  const r = parseVideoFile(
+    "D:/Despicable Me 2 Mini Movie - Puppy (2013) [BR-Rip 720p] - [www.minitoons.ir].mkv"
+  );
+  assert.ok(r);
+  assert.equal(r.kind, "movie");
+  if (r.kind === "movie") {
+    assert.equal(r.displayName, "Despicable Me 2 Mini Movie Puppy");
+    assert.equal(r.year, "2013");
+  }
+});
+
+test("parseVideoFile: release tags stripped, no false year from 720p", () => {
+  const r = parseVideoFile("D:/films/Mulan I BRRip 720p-GLORY.mkv");
+  assert.ok(r);
+  assert.equal(r.kind, "movie");
+  if (r.kind === "movie") {
+    assert.equal(r.displayName, "Mulan I");
+    assert.equal(r.year, "");
+  }
+});
+
+test("parseVideoFile: dotted release title stops before BRRip", () => {
+  const r = parseVideoFile("D:/films/Mulan.I.BRRip.720p.mkv");
+  assert.ok(r);
+  assert.equal(r.kind, "movie");
+  if (r.kind === "movie") {
+    assert.equal(r.displayName, "Mulan I");
+    assert.equal(r.year, "");
+  }
+});
+
+test("parseVideoFile: dual calendar years picks theatrical year before release", () => {
+  const r = parseVideoFile("1917.2019.BRRip.1080p.mkv");
+  assert.ok(r);
+  assert.equal(r.kind, "movie");
+  if (r.kind === "movie") {
+    assert.equal(r.year, "2019");
+    assert.equal(r.displayName, "1917");
   }
 });
 

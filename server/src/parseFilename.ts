@@ -1,75 +1,72 @@
 /**
- * Port of com.company.Sorting stringConditions + findName + getYear.
+ * Filename parsing: movie display titles, years, episodes, dubbed hints.
  */
 import type { PrismaClient } from "@prisma/client";
 
-/** Tokens that mark end of human title (release / tech). Longest matched first via sort. */
-const TITLE_CUT_TOKENS: string[] = [
-  "1080p",
-  "720p",
-  "480p",
-  "2160p",
-  "576p",
-  "540p",
-  "web-dl",
-  "mpeg2",
-  "brrip",
-  "bdrip",
-  "dvdrip",
-  "webrip",
-  "webdl",
-  "bluray",
-  "hdcam",
-  "hdrip",
-  "hdtv",
-  "x265",
-  "x264",
-  "hevc",
-  "h265",
-  "h264",
-  "avc",
-  "ddp5.1",
-  "dd5.1",
-  ".mpeg2",
-  ".mkv",
-  ".mp4",
-  ".mpeg",
-  ".avi",
-  ".mpg",
-  ".webm",
-  ".m4v",
-  "1080",
-  "720",
-  "256",
-  "264",
-  "255",
-  "480",
-  "4k",
-  "web",
+/** Cut movie title before these (case-insensitive). Earliest match wins. */
+const MOVIE_RELEASE_MARKERS: readonly RegExp[] = [
+  /\b(?:br[\s.-]?rip|brrip|bdrip|bluray|web[\s.-]?dl|webrip|dvdrip|hdrip|hdtv|hdcam|webhd|camrip|tsrip|hdts)\b/gi,
+  /\b(?:480|720|1080|2160|3840|4320)p\b/gi,
+  /\b(?:x264|x265|h\.?264|h\.?265|hevc|av1)\b/gi,
+  /\b(?:aac|ac3|dts|eac3|truehd|atmos)\b/gi,
+  /\b(?:proper|repack|remux)\b/gi,
 ];
 
-TITLE_CUT_TOKENS.sort((a, b) => b.length - a.length);
-
-function findCutIndex(name: string): number {
-  let f = name.length;
-  const lower = name.toLowerCase();
-  for (let i = 2; i < name.length; i++) {
-    const sliceFrom2 = lower.substring(2, i);
-    for (const cond of TITLE_CUT_TOKENS) {
-      if (sliceFrom2.endsWith(cond)) {
-        f = i - cond.length;
-        return f;
-      }
-    }
+/**
+ * Strip bracket/brace tags ([720p], [www.site.ir], {imdb-id}) and trailing orphan dashes
+ * so titles like `Foo (2013) [BR-Rip 720p] - [url]` parse as `Foo (2013)`.
+ */
+export function normalizeMovieFilenameStem(rawBase: string): string {
+  let s = rawBase.trim();
+  let prev = "";
+  while (s !== prev) {
+    prev = s;
+    s = s.replace(/\[[^\]]*\]/g, " ").replace(/\{[^}]*\}/g, " ");
   }
-  return f;
+  s = s.replace(/\s+/g, " ").trim();
+  for (;;) {
+    const next = s.replace(/\s+-\s*$/g, "").trim();
+    if (next === s) break;
+    s = next;
+  }
+  return s;
 }
 
-/** First plausible release year (19xx / 20xx) not embedded in longer digit runs (e.g. not from 720p). */
+function movieStemFromVideoFileName(fileName: string): string {
+  const nameOnly = fileName.replace(/.*[/\\]/, "");
+  const base = nameOnly.replace(/\.[^.]+$/i, "");
+  return normalizeMovieFilenameStem(base);
+}
+
+/** Index of the earliest release/technical marker, or full length if none. */
+export function earliestReleaseCutIndex(base: string): number {
+  let cut = base.length;
+  for (const re of MOVIE_RELEASE_MARKERS) {
+    const flags = re.global ? re.flags : `${re.flags}g`;
+    const r = new RegExp(re.source, flags);
+    let m: RegExpExecArray | null;
+    while ((m = r.exec(base)) !== null) {
+      if (m.index < cut) cut = m.index;
+    }
+  }
+  return cut;
+}
+
+/**
+ * Calendar year from filename: isolated 4-digit 1900–2099 before release tags only.
+ * Uses the last match in that segment (handles `1917.2019.BRRip…` → 2019).
+ * Does not treat digits inside `720p` as a year.
+ */
 export function getYearFromName(fileName: string): string {
-  const re = /(?<![0-9])(19\d{2}|20\d{2})(?![0-9])/;
-  const m = re.exec(fileName);
-  return m ? m[1] : "";
+  const base = movieStemFromVideoFileName(fileName);
+  const cut = earliestReleaseCutIndex(base);
+  const segment = base.slice(0, cut);
+  const matches = [...segment.matchAll(/\b(19\d{2}|20\d{2})\b/g)];
+  if (matches.length === 0) return "";
+  const last = matches[matches.length - 1][1];
+  const y = parseInt(last, 10);
+  if (y < 1900 || y > 2099) return "";
+  return last;
 }
 
 const VIDEO_EXTS = new Set([
@@ -206,19 +203,28 @@ export function isVideoFile(name: string): boolean {
 export function findDisplayNameFromFileName(fileName: string): string | null {
   if (!isVideoFile(fileName)) return null;
   const nameOnly = fileName.replace(/.*[/\\]/, "");
-  const cut = findCutIndex(nameOnly);
-  const temp1 = nameOnly.substring(0, cut);
+  const base = movieStemFromVideoFileName(fileName);
+  const cut = earliestReleaseCutIndex(base);
+  let core = base.slice(0, cut).trim();
+  if (!core) core = base.trim();
+
+  const year = getYearFromName(fileName);
+
   let temp = "";
-  for (let i = 0; i < temp1.length; i++) {
-    if (i === temp1.length - 1) break;
-    const c = temp1[i];
+  for (let i = 0; i < core.length; i++) {
+    const c = core[i];
     if (c === "." || c === "-" || c === "_" || c === ")" || c === "(" || c === "*") {
       temp += " ";
     } else {
       temp += c;
     }
   }
-  return temp.trim() || nameOnly;
+  const coreNorm = temp.replace(/\s+/g, " ").trim();
+  if (!coreNorm) return nameOnly.replace(/\.[^.]+$/i, "").trim() || nameOnly;
+
+  let display = stripTrailingYear(coreNorm, year).trim();
+  if (!display) display = coreNorm;
+  return display.trim() || nameOnly;
 }
 
 export type ParsedVideoMovie = { kind: "movie"; displayName: string; year: string; dubbed: boolean };

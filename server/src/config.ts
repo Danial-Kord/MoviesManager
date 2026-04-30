@@ -52,3 +52,6 @@ export const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 export const OLLAMA_URL = process.env.OLLAMA_URL ?? "http://127.0.0.1:11434";
 /** Model must be pulled locally: `ollama pull llama3.2` (or your preferred multilingual instruct model). */
 export const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "llama3.2";
+
+/** When true, library scan calls Ollama once per movie file to refine `{displayName,year}` from messy filenames (slow). */
+export const OLLAMA_TITLE_PARSE = /^1|true|yes$/i.test(process.env.OLLAMA_TITLE_PARSE ?? "");

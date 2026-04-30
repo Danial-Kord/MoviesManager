@@ -1,6 +1,7 @@
 import type { Dirent } from "fs";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
+import { maybeRefineParsedMovieFromFilename } from "./ollamaFilenameTitle.js";
 import { isVideoFile, parseVideoFile, type ParsedVideoFile } from "./parseFilename.js";
 
 export interface ScannedFile {
@@ -26,11 +27,12 @@ export async function collectVideoFiles(
     } else if (e.isFile() && isVideoFile(e.name)) {
       const parsed = parseVideoFile(full);
       if (!parsed) continue;
+      const refined = await maybeRefineParsedMovieFromFilename(full, parsed);
       const folderPath = join(rootDir);
       acc.push({
         filePath: full,
         folderPath,
-        parsed,
+        parsed: refined,
       });
     }
   }
