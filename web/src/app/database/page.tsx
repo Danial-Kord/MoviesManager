@@ -11,6 +11,13 @@ type MovieDbRow = {
   id: string;
   name: string;
   year: string | null;
+  mediaKind: string;
+  seriesId: string | null;
+  seasonNumber: number | null;
+  episodeNumber: number | null;
+  episodeTitle: string | null;
+  dubbed: boolean;
+  series: { id: string; title: string } | null;
   filePath: string;
   folderPath: string;
   imdbScore: string | null;
@@ -24,6 +31,9 @@ type MovieDbRow = {
   duration: string | null;
   numberOfVotes: string | null;
   tmdbId: number | null;
+  tmdbSearchJson?: unknown;
+  tmdbDetailsJson?: unknown;
+  tmdbCreditsJson?: unknown;
   show: boolean;
   isFavorite: boolean;
   enrichmentState: string;
@@ -42,6 +52,15 @@ async function loadRows(): Promise<{ total: number; items: MovieDbRow[] } | null
   }
 }
 
+function jsonStoredHint(value: unknown): string | null {
+  if (value == null) return null;
+  try {
+    return `${JSON.stringify(value).length} chars`;
+  } catch {
+    return "stored";
+  }
+}
+
 function TextCell({ value }: { value: string | null | undefined }) {
   const t = value ?? "";
   return (
@@ -55,6 +74,13 @@ const COLUMNS = [
   "id",
   "name",
   "year",
+  "mediaKind",
+  "seriesId",
+  "seriesTitle",
+  "seasonNumber",
+  "episodeNumber",
+  "episodeTitle",
+  "dubbed",
   "filePath",
   "folderPath",
   "imdbScore",
@@ -63,6 +89,9 @@ const COLUMNS = [
   "genre",
   "duration",
   "tmdbId",
+  "tmdbSearchRaw",
+  "tmdbDetailsRaw",
+  "tmdbCreditsRaw",
   "show",
   "isFavorite",
   "enrichmentState",
@@ -133,6 +162,13 @@ export default async function DatabasePage() {
                   <TextCell value={row.id} />
                   <TextCell value={row.name} />
                   <TextCell value={row.year} />
+                  <TextCell value={row.mediaKind} />
+                  <TextCell value={row.seriesId} />
+                  <TextCell value={row.series?.title ?? null} />
+                  <TextCell value={row.seasonNumber != null ? String(row.seasonNumber) : null} />
+                  <TextCell value={row.episodeNumber != null ? String(row.episodeNumber) : null} />
+                  <TextCell value={row.episodeTitle} />
+                  <TextCell value={row.dubbed ? "true" : "false"} />
                   <TextCell value={row.filePath} />
                   <TextCell value={row.folderPath} />
                   <TextCell value={row.imdbScore} />
@@ -141,6 +177,9 @@ export default async function DatabasePage() {
                   <TextCell value={row.genre} />
                   <TextCell value={row.duration} />
                   <TextCell value={row.tmdbId != null ? String(row.tmdbId) : null} />
+                  <TextCell value={jsonStoredHint(row.tmdbSearchJson)} />
+                  <TextCell value={jsonStoredHint(row.tmdbDetailsJson)} />
+                  <TextCell value={jsonStoredHint(row.tmdbCreditsJson)} />
                   <TextCell value={row.show ? "true" : "false"} />
                   <TextCell value={row.isFavorite ? "true" : "false"} />
                   <TextCell value={row.enrichmentState} />

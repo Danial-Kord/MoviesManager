@@ -15,7 +15,30 @@ export type MovieListItem = {
   actors: string | null;
   duration: string | null;
   categories: { category: { id: string; name: string } }[];
+  mediaKind?: string;
+  dubbed?: boolean;
 };
+
+export type BrowseSeriesItem = {
+  kind: "series";
+  id: string;
+  title: string;
+  year: string | null;
+  imagePath: string | null;
+  episodeCount: number;
+  imdbRating: string | null;
+  isFavorite: boolean;
+  summary: string | null;
+  genre: string | null;
+  updatedAt: string;
+};
+
+export type BrowseMovieItem = MovieListItem & {
+  kind: "movie";
+  updatedAt: string;
+};
+
+export type BrowseItem = BrowseSeriesItem | BrowseMovieItem;
 
 export async function fetchMovies(params: URLSearchParams) {
   const r = await fetch(`${BASE}/api/movies?` + params.toString(), { cache: "no-store" });
@@ -25,6 +48,17 @@ export async function fetchMovies(params: URLSearchParams) {
     page: number;
     pageSize: number;
     items: MovieListItem[];
+  }>;
+}
+
+export async function fetchLibraryBrowse(params: URLSearchParams) {
+  const r = await fetch(`${BASE}/api/library/browse?` + params.toString(), { cache: "no-store" });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json() as Promise<{
+    total: number;
+    page: number;
+    pageSize: number;
+    items: BrowseItem[];
   }>;
 }
 
@@ -40,13 +74,53 @@ export async function enrichBulk(limit = 30) {
   });
 }
 
+/** Must match server `RESET_DATABASE_CONFIRM` — type this phrase to enable erase. */
+export const RESET_DATABASE_CONFIRM_PHRASE = "RESET_LIBRARY_DATABASE";
+
+export async function fetchDatabaseInfo() {
+  const r = await fetch(`${BASE}/api/database/info`, { cache: "no-store" });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json() as Promise<{ databaseFile: string; dataDir: string; imagesDir: string }>;
+}
+
+export async function resetLibraryDatabase(): Promise<void> {
+  const r = await fetch(`${BASE}/api/database/reset`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ confirm: RESET_DATABASE_CONFIRM_PHRASE }),
+  });
+  if (!r.ok) {
+    let msg = await r.text();
+    try {
+      const j = JSON.parse(msg) as { error?: string };
+      if (j.error) msg = j.error;
+    } catch {
+      /* raw */
+    }
+    throw new Error(msg || r.statusText);
+  }
+}
+
 export function posterUrlForMovieId(id: string) {
   return `${BASE}/api/poster/${id}`;
+}
+
+export function posterUrlForSeriesId(id: string) {
+  return `${BASE}/api/poster/series/${id}`;
 }
 
 /** PATCH movie fields (favorite, visibility, …). */
 export async function patchMovie(id: string, body: { isFavorite?: boolean; show?: boolean }) {
   const r = await fetch(`${BASE}/api/movies/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+export async function patchSeries(id: string, body: { isFavorite?: boolean; show?: boolean }) {
+  const r = await fetch(`${BASE}/api/series/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

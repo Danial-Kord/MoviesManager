@@ -30,7 +30,44 @@ model MovieCategory {
   @@id([movieId, categoryId])
 }
 
-/// Mirrors com.company.Movie; paths are host absolute paths.
+/// TV show container; episodes are Movie rows with mediaKind = episode.
+model TvSeries {
+  id              String   @id @default(cuid())
+  /// Canonical match key: normalized title only (year omitted), so split folders merge under one series.
+  normalizedKey   String   @unique
+  title           String
+  year            String?
+
+  tmdbTvId        Int?
+  imdbScore       String?
+  imdbRating      String?
+  summary         String?
+  fullSummary     String?
+  actors          String?
+  directors       String?
+  genre           String?
+  imagePath       String?
+  duration        String?
+  numberOfVotes   String?
+
+  /// Full TMDb JSON per HTTP response (search page, merged details+append_to_response, credits endpoint).
+  tmdbSearchJson   Json?
+  tmdbDetailsJson  Json?
+  tmdbCreditsJson  Json?
+
+  show            Boolean @default(true)
+  isFavorite      Boolean @default(false)
+  enrichmentState String  @default("none")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  episodes Movie[]
+
+  @@index([title])
+}
+
+/// Video file: standalone movie or one episode of a TvSeries.
 model Movie {
   id     String @id @default(cuid())
   name   String
@@ -38,6 +75,19 @@ model Movie {
 
   filePath   String @unique
   folderPath String
+
+  /// movie | episode
+  mediaKind String @default("movie")
+
+  seriesId String?
+  series   TvSeries? @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  seasonNumber  Int?
+  episodeNumber Int?
+  episodeTitle  String?
+
+  /// True when path/filename suggests a dubbed release (heuristic).
+  dubbed          Boolean @default(false)
 
   imdbScore   String?
   imdbRating  String?
@@ -49,6 +99,11 @@ model Movie {
   imagePath   String?
   duration    String?
   numberOfVotes String?
+
+  /// Full TMDb JSON per HTTP response (search page, merged details+append_to_response, credits endpoint).
+  tmdbSearchJson   Json?
+  tmdbDetailsJson  Json?
+  tmdbCreditsJson  Json?
 
   tmdbId   Int?
   show     Boolean @default(true)
@@ -65,4 +120,6 @@ model Movie {
   @@index([year])
   @@index([show])
   @@index([isFavorite])
+  @@index([seriesId])
+  @@index([mediaKind])
 }

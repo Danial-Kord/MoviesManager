@@ -1,18 +1,25 @@
 import cors from "cors";
 import express from "express";
+import { spawnSync } from "child_process";
 import { createReadStream, stat as statCb } from "fs";
-import { dirname, extname, resolve } from "path";
-import { stat } from "fs/promises";
+import { dirname, extname, join, resolve } from "path";
+import { stat, unlink } from "fs/promises";
 import { pipeline } from "stream/promises";
 import { promisify } from "util";
 import { lookup } from "mime-types";
-import { API_HOST, API_PORT, TMDB_API_KEY } from "./config.js";
+import { fileURLToPath } from "url";
+import { API_HOST, API_PORT, DATA_DIR, IMAGES_DIR, TMDB_API_KEY, getSqliteDatabaseFilePath } from "./config.js";
 import { prisma } from "./prisma.js";
 import { collectVideoFiles, pathExists } from "./scan.js";
-import { downloadPosterToImagesDir, enrichWithTmdb } from "./tmdb.js";
+import { downloadPosterToImagesDir, enrichTvSeriesWithTmdb, enrichWithTmdb } from "./tmdb.js";
+import { omitTmdbFetchSnapshots } from "./omitTmdbPayload.js";
 import { openFileWithDefaultApp } from "./openLocal.js";
+import { isDubbedFromPath } from "./parseFilename.js";
+import { parseLocaleFromRequest, resolveSummaryForLocale } from "./summaryLocale.js";
 
 const statAsync = promisify(statCb);
+
+const RESET_DATABASE_CONFIRM = "RESET_LIBRARY_DATABASE";
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -20,6 +27,69 @@ app.use(express.json({ limit: "50mb" }));
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, tmdb: Boolean(TMDB_API_KEY) });
+});
+
+app.get("/api/database/info", (_req, res) => {
+  try {
+    const databaseFile = getSqliteDatabaseFilePath();
+    res.json({ databaseFile, dataDir: DATA_DIR, imagesDir: IMAGES_DIR });
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+app.post("/api/database/reset", async (req, res) => {
+  const { confirm } = req.body as { confirm?: string };
+  if (confirm !== RESET_DATABASE_CONFIRM) {
+    res.status(400).json({
+      error: `Send JSON body { "confirm": "${RESET_DATABASE_CONFIRM}" } to erase the library database.`,
+    });
+    return;
+  }
+
+  const dbPath = getSqliteDatabaseFilePath();
+  const serverRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+  try {
+    await prisma.$disconnect();
+  } catch {
+    /* ignore */
+  }
+
+  for (const suf of ["", "-wal", "-shm"] as const) {
+    try {
+      await unlink(dbPath + suf);
+    } catch {
+      /* missing */
+    }
+  }
+
+  const push = spawnSync("npx", ["prisma", "db", "push"], {
+    cwd: serverRoot,
+    shell: true,
+    encoding: "utf-8",
+    env: { ...process.env },
+  });
+
+  if (push.status !== 0) {
+    try {
+      await prisma.$connect();
+    } catch {
+      /* ignore */
+    }
+    const msg = [push.stderr, push.stdout].filter(Boolean).join("\n").trim() || "prisma db push failed";
+    res.status(500).json({ error: msg });
+    return;
+  }
+
+  try {
+    await prisma.$connect();
+  } catch (e) {
+    res.status(500).json({ error: `Database recreated but reconnect failed: ${(e as Error).message}` });
+    return;
+  }
+
+  res.json({ ok: true, databaseFile: dbPath });
 });
 
 // --- library paths
@@ -61,29 +131,97 @@ app.delete("/api/paths/:id", async (req, res) => {
 // --- scan
 app.post("/api/scan", async (_req, res) => {
   const paths = await prisma.libraryPath.findMany();
-  const discovered: { filePath: string; folderPath: string; name: string; year: string }[] = [];
+  const discovered: import("./scan.js").ScannedFile[] = [];
   for (const row of paths) {
     if (await pathExists(row.path)) {
-      const files = await collectVideoFiles(row.path);
-      discovered.push(...files);
+      const batch = await collectVideoFiles(row.path);
+      discovered.push(...batch);
     }
   }
-  let created = 0;
+  let moviesUpserted = 0;
+  let episodesUpserted = 0;
+  const { normalizeSeriesKey } = await import("./parseFilename.js");
   for (const f of discovered) {
-    const r = await prisma.movie.upsert({
-      where: { filePath: f.filePath },
-      create: {
-        name: f.name,
-        year: f.year,
-        filePath: f.filePath,
-        folderPath: f.folderPath,
-        enrichmentState: "none",
-      },
-      update: { name: f.name, year: f.year, folderPath: f.folderPath },
-    });
-    if (r) created++;
+    if (f.parsed.kind === "movie") {
+      await prisma.movie.upsert({
+        where: { filePath: f.filePath },
+        create: {
+          name: f.parsed.displayName,
+          year: f.parsed.year || null,
+          filePath: f.filePath,
+          folderPath: f.folderPath,
+          mediaKind: "movie",
+          enrichmentState: "none",
+          dubbed: f.parsed.dubbed,
+        },
+        update: {
+          name: f.parsed.displayName,
+          year: f.parsed.year || null,
+          folderPath: f.folderPath,
+          mediaKind: "movie",
+          seriesId: null,
+          seasonNumber: null,
+          episodeNumber: null,
+          episodeTitle: null,
+          dubbed: f.parsed.dubbed,
+        },
+      });
+      moviesUpserted++;
+    } else {
+      const key = normalizeSeriesKey(f.parsed.seriesTitle, f.parsed.year);
+      const series = await prisma.tvSeries.upsert({
+        where: { normalizedKey: key },
+        create: {
+          normalizedKey: key,
+          title: f.parsed.seriesTitle,
+          year: f.parsed.year || null,
+        },
+        update: {
+          title: f.parsed.seriesTitle,
+          ...(f.parsed.year ? { year: f.parsed.year } : {}),
+        },
+      });
+      await prisma.movie.upsert({
+        where: { filePath: f.filePath },
+        create: {
+          name: f.parsed.displayNameForRow,
+          year: f.parsed.year || null,
+          filePath: f.filePath,
+          folderPath: f.folderPath,
+          mediaKind: "episode",
+          seriesId: series.id,
+          seasonNumber: f.parsed.season,
+          episodeNumber: f.parsed.episode,
+          episodeTitle: f.parsed.episodeTitle,
+          enrichmentState: "none",
+          dubbed: f.parsed.dubbed,
+        },
+        update: {
+          name: f.parsed.displayNameForRow,
+          year: f.parsed.year || null,
+          folderPath: f.folderPath,
+          mediaKind: "episode",
+          seriesId: series.id,
+          seasonNumber: f.parsed.season,
+          episodeNumber: f.parsed.episode,
+          episodeTitle: f.parsed.episodeTitle,
+          dubbed: f.parsed.dubbed,
+        },
+      });
+      episodesUpserted++;
+    }
   }
-  res.json({ scanned: discovered.length, upserted: created });
+  res.json({
+    scanned: discovered.length,
+    moviesUpserted,
+    episodesUpserted,
+    seriesOrphansRemoved: (
+      await prisma.tvSeries.deleteMany({
+        where: { episodes: { none: {} } },
+      })
+    ).count,
+    seriesDistinct: await prisma.tvSeries.count(),
+  });
 });
 
 // --- list movies
@@ -92,6 +230,10 @@ app.get("/api/movies", async (req, res) => {
   const page = Math.max(1, parseInt(q.page ?? "1", 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(q.pageSize ?? "24", 10) || 24));
   const where: import("@prisma/client").Prisma.MovieWhereInput = {};
+
+  if (q.includeEpisodes !== "1") {
+    where.mediaKind = "movie";
+  }
 
   if (q.filter === "favorites") where.isFavorite = true;
   if (q.filter === "scored") {
@@ -144,7 +286,309 @@ app.get("/api/movies", async (req, res) => {
       },
     }),
   ]);
-  res.json({ total, page, pageSize, items: rows });
+  res.json({ total, page, pageSize, items: rows.map((row) => omitTmdbFetchSnapshots(row)) });
+});
+
+app.get("/api/library/browse", async (req, res) => {
+  const q = (req.query as Record<string, string | undefined>) || {};
+  const page = Math.max(1, parseInt(q.page ?? "1", 10) || 1);
+  const pageSize = Math.min(100, Math.max(1, parseInt(q.pageSize ?? "24", 10) || 24));
+  const skip = (page - 1) * pageSize;
+  const sort = q.sort ?? "none";
+
+  const seriesWhere: import("@prisma/client").Prisma.TvSeriesWhereInput = {};
+  const movieWhere: import("@prisma/client").Prisma.MovieWhereInput = { mediaKind: "movie" };
+
+  if (q.filter === "favorites") {
+    seriesWhere.isFavorite = true;
+    movieWhere.isFavorite = true;
+  }
+  if (q.filter === "scored") {
+    seriesWhere.AND = [
+      { imdbRating: { not: null } },
+      { imdbRating: { not: "" } },
+    ];
+    movieWhere.AND = [
+      { imdbRating: { not: null } },
+      { imdbRating: { not: "" } },
+    ];
+  }
+  if (q.filter === "hidden") {
+    seriesWhere.show = false;
+    movieWhere.show = false;
+  }
+  if (q.filter === "visible") {
+    seriesWhere.show = true;
+    movieWhere.show = true;
+  }
+  if (q.show === "1") {
+    seriesWhere.show = true;
+    movieWhere.show = true;
+  }
+  if (q.show === "0") {
+    seriesWhere.show = false;
+    movieWhere.show = false;
+  }
+
+  if (q.q && q.q.trim()) {
+    const qq = q.q.trim();
+    seriesWhere.title = { contains: qq };
+    movieWhere.name = { contains: qq };
+  }
+  if (q.genre && q.genre !== "all") {
+    seriesWhere.genre = { contains: q.genre };
+    movieWhere.genre = { contains: q.genre };
+  }
+  if (q.folder && q.folder !== "all") {
+    movieWhere.folderPath = { contains: q.folder };
+  }
+  if (q.yearFrom || q.yearTo) {
+    seriesWhere.year = {};
+    movieWhere.year = {};
+    if (q.yearFrom) {
+      (seriesWhere.year as { gte?: string }).gte = q.yearFrom;
+      (movieWhere.year as { gte?: string }).gte = q.yearFrom;
+    }
+    if (q.yearTo) {
+      (seriesWhere.year as { lte?: string }).lte = q.yearTo;
+      (movieWhere.year as { lte?: string }).lte = q.yearTo;
+    }
+  }
+  if (q.categoryId) {
+    movieWhere.categories = { some: { categoryId: q.categoryId } };
+  }
+
+  const browseKindRaw = (q.browseKind ?? "").toLowerCase();
+  const browseKind = browseKindRaw === "movies" || browseKindRaw === "series" ? browseKindRaw : "all";
+
+  type CardStub =
+    | {
+        cardKind: "series";
+        id: string;
+        updatedAt: Date;
+        title: string;
+        year: string | null;
+        imdbRating: string | null;
+        numberOfVotes: string | null;
+      }
+    | {
+        cardKind: "movie";
+        id: string;
+        updatedAt: Date;
+        name: string;
+        year: string | null;
+        imdbRating: string | null;
+        numberOfVotes: string | null;
+      };
+
+  const [seriesList, movieList] = await Promise.all([
+    browseKind === "movies"
+      ? Promise.resolve(
+          [] as Array<{
+            id: string;
+            updatedAt: Date;
+            title: string;
+            year: string | null;
+            imdbRating: string | null;
+            numberOfVotes: string | null;
+          }>
+        )
+      : prisma.tvSeries.findMany({
+          where: seriesWhere,
+          select: {
+            id: true,
+            updatedAt: true,
+            title: true,
+            year: true,
+            imdbRating: true,
+            numberOfVotes: true,
+          },
+        }),
+    browseKind === "series"
+      ? Promise.resolve(
+          [] as Array<{
+            id: string;
+            updatedAt: Date;
+            name: string;
+            year: string | null;
+            imdbRating: string | null;
+            numberOfVotes: string | null;
+          }>
+        )
+      : prisma.movie.findMany({
+          where: movieWhere,
+          select: {
+            id: true,
+            updatedAt: true,
+            name: true,
+            year: true,
+            imdbRating: true,
+            numberOfVotes: true,
+          },
+        }),
+  ]);
+
+  const merged: CardStub[] = [
+    ...seriesList.map((s) => ({ cardKind: "series" as const, ...s })),
+    ...movieList.map((m) => ({ cardKind: "movie" as const, ...m })),
+  ];
+
+  merged.sort((a, b) => {
+    if (sort === "name") {
+      const an = a.cardKind === "series" ? a.title : a.name;
+      const bn = b.cardKind === "series" ? b.title : b.name;
+      return an.localeCompare(bn);
+    }
+    if (sort === "year") {
+      const ay = (a.year || "").slice(0, 4);
+      const by = (b.year || "").slice(0, 4);
+      return by.localeCompare(ay);
+    }
+    if (sort === "score") {
+      const as = parseFloat(a.imdbRating || "0");
+      const bs = parseFloat(b.imdbRating || "0");
+      return bs - as;
+    }
+    if (sort === "votes") {
+      const av = parseInt(a.numberOfVotes || "0", 10);
+      const bv = parseInt(b.numberOfVotes || "0", 10);
+      return bv - av;
+    }
+    return b.updatedAt.getTime() - a.updatedAt.getTime();
+  });
+
+  const total = merged.length;
+  const slice = merged.slice(skip, skip + pageSize);
+
+  const hydrated = await Promise.all(
+    slice.map(async (row) => {
+      if (row.cardKind === "series") {
+        const s = await prisma.tvSeries.findUnique({
+          where: { id: row.id },
+          include: { _count: { select: { episodes: true } } },
+        });
+        if (!s) return null;
+        return {
+          kind: "series" as const,
+          id: s.id,
+          title: s.title,
+          year: s.year,
+          imagePath: s.imagePath,
+          episodeCount: s._count.episodes,
+          imdbRating: s.imdbRating,
+          isFavorite: s.isFavorite,
+          summary: s.summary,
+          genre: s.genre,
+          updatedAt: s.updatedAt.toISOString(),
+        };
+      }
+      const m = await prisma.movie.findUnique({
+        where: { id: row.id },
+        include: { categories: { include: { category: true } } },
+      });
+      if (!m) return null;
+      const lite = omitTmdbFetchSnapshots(m as unknown as Record<string, unknown>);
+      return {
+        kind: "movie" as const,
+        ...lite,
+        updatedAt: m.updatedAt.toISOString(),
+      };
+    })
+  );
+
+  const items = hydrated.filter(Boolean);
+  res.json({ total, page, pageSize, items });
+});
+
+app.get("/api/series/:id", async (req, res) => {
+  const s = await prisma.tvSeries.findUnique({
+    where: { id: req.params.id },
+    include: {
+      episodes: {
+        orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }],
+      },
+    },
+  });
+  if (!s) {
+    res.status(404).json({ error: "not found" });
+    return;
+  }
+  const slimEpisodes = s.episodes.map((ep) => omitTmdbFetchSnapshots(ep as unknown as Record<string, unknown>));
+  const slimSeries = omitTmdbFetchSnapshots(s as unknown as Record<string, unknown>);
+  const locale = parseLocaleFromRequest(req);
+  let summary = slimSeries.summary as string | null;
+  if (locale === "fa") {
+    summary = await resolveSummaryForLocale({
+      locale,
+      summary: s.summary,
+      tmdbId: s.tmdbTvId,
+      tmdbKind: "tv",
+    });
+  }
+  res.json({ ...slimSeries, summary, episodes: slimEpisodes });
+});
+
+app.patch("/api/series/:id", async (req, res) => {
+  const { isFavorite, show } = req.body as { isFavorite?: boolean; show?: boolean };
+  const data: import("@prisma/client").Prisma.TvSeriesUpdateInput = {};
+  if (typeof isFavorite === "boolean") data.isFavorite = isFavorite;
+  if (typeof show === "boolean") data.show = show;
+  try {
+    const s = await prisma.tvSeries.update({
+      where: { id: req.params.id },
+      data,
+    });
+    res.json(s);
+  } catch {
+    res.status(404).json({ error: "not found" });
+  }
+});
+
+app.post("/api/series/:id/enrich", async (req, res) => {
+  if (!TMDB_API_KEY) {
+    res.status(400).json({ error: "TMDB_API_KEY not set" });
+    return;
+  }
+  const s = await prisma.tvSeries.findUnique({ where: { id: req.params.id } });
+  if (!s) {
+    res.status(404).json({ error: "not found" });
+    return;
+  }
+  try {
+    const t = await enrichTvSeriesWithTmdb(s.title, s.year ?? "");
+    if (!t) {
+      res.status(400).json({ error: "no tmdb result" });
+      return;
+    }
+    let imagePath: string | null = s.imagePath;
+    if (t.posterPath) {
+      imagePath = await downloadPosterToImagesDir(t.posterPath, s.title);
+    }
+    const updated = await prisma.tvSeries.update({
+      where: { id: s.id },
+      data: {
+        title: t.title,
+        year: t.year,
+        summary: t.summary,
+        imdbRating: t.imdbRating,
+        imdbScore: t.imdbScore,
+        numberOfVotes: t.numberOfVotes,
+        duration: t.duration,
+        genre: t.genre,
+        actors: t.actors,
+        directors: t.directors,
+        tmdbTvId: t.tmdbTvId,
+        imagePath: imagePath ?? s.imagePath,
+        enrichmentState: t.enrichmentState,
+        tmdbSearchJson: t.searchJson,
+        tmdbDetailsJson: t.detailsJson,
+        tmdbCreditsJson: t.creditsJson,
+      },
+    });
+    res.json(updated);
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
 });
 
 /** Full table dump for local inspection (no pagination). Register before /api/movies/:id. */
@@ -153,6 +597,7 @@ app.get("/api/movies/all-rows", async (_req, res) => {
     orderBy: [{ updatedAt: "desc" }],
     include: {
       categories: { include: { category: true } },
+      series: true,
     },
   });
   res.json({ total: rows.length, items: rows });
@@ -161,13 +606,24 @@ app.get("/api/movies/all-rows", async (_req, res) => {
 app.get("/api/movies/:id", async (req, res) => {
   const m = await prisma.movie.findUnique({
     where: { id: req.params.id },
-    include: { categories: { include: { category: true } } },
+    include: { categories: { include: { category: true } }, series: true },
   });
   if (!m) {
     res.status(404).json({ error: "not found" });
     return;
   }
-  res.json(m);
+  const locale = parseLocaleFromRequest(req);
+  if (locale !== "fa") {
+    res.json(m);
+    return;
+  }
+  const summary = await resolveSummaryForLocale({
+    locale,
+    summary: m.summary,
+    tmdbId: m.tmdbId,
+    tmdbKind: "movie",
+  });
+  res.json({ ...m, summary });
 });
 
 app.patch("/api/movies/:id", async (req, res) => {
@@ -234,7 +690,50 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
   }
   const m = await prisma.movie.findUnique({ where: { id: req.params.id } });
   if (!m) {
-    res.status(404).end();
+    res.status(404).json({ error: "not found" });
+    return;
+  }
+  if (m.mediaKind === "episode" && m.seriesId) {
+    const series = await prisma.tvSeries.findUnique({ where: { id: m.seriesId } });
+    if (!series) {
+      res.status(404).json({ error: "series missing" });
+      return;
+    }
+    try {
+      const t = await enrichTvSeriesWithTmdb(series.title, series.year ?? "");
+      if (!t) {
+        res.status(400).json({ error: "no tmdb result" });
+        return;
+      }
+      let imagePath: string | null = series.imagePath;
+      if (t.posterPath) {
+        imagePath = await downloadPosterToImagesDir(t.posterPath, series.title);
+      }
+      const updated = await prisma.tvSeries.update({
+        where: { id: series.id },
+        data: {
+          title: t.title,
+          year: t.year,
+          summary: t.summary,
+          imdbRating: t.imdbRating,
+          imdbScore: t.imdbScore,
+          numberOfVotes: t.numberOfVotes,
+          duration: t.duration,
+          genre: t.genre,
+          actors: t.actors,
+          directors: t.directors,
+          tmdbTvId: t.tmdbTvId,
+          imagePath: imagePath ?? series.imagePath,
+          enrichmentState: t.enrichmentState,
+          tmdbSearchJson: t.searchJson,
+          tmdbDetailsJson: t.detailsJson,
+          tmdbCreditsJson: t.creditsJson,
+        },
+      });
+      res.json(updated);
+    } catch (e: unknown) {
+      res.status(500).json({ error: (e as Error).message });
+    }
     return;
   }
   try {
@@ -263,6 +762,9 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
         tmdbId: t.tmdbId,
         imagePath: imagePath ?? m.imagePath,
         enrichmentState: t.enrichmentState,
+        tmdbSearchJson: t.searchJson,
+        tmdbDetailsJson: t.detailsJson,
+        tmdbCreditsJson: t.creditsJson,
       },
     });
     res.json(updated);
@@ -279,16 +781,64 @@ app.post("/api/enrich-bulk", async (req, res) => {
   }
   const { limit: lim } = (req.body as { limit?: number }) || {};
   const take = Math.min(200, lim ?? 50);
-  const movies = await prisma.movie.findMany({
+  const half = Math.max(1, Math.floor(take / 2));
+
+  const results: { id: string; kind: "series" | "movie"; ok: boolean; error?: string }[] = [];
+
+  const seriesBatch = await prisma.tvSeries.findMany({
     where: { OR: [{ enrichmentState: "none" }, { enrichmentState: "partial" }] },
-    take,
+    take: half,
   });
-  const results: { id: string; ok: boolean; error?: string }[] = [];
-  for (const m of movies) {
+  for (const s of seriesBatch) {
+    try {
+      const t = await enrichTvSeriesWithTmdb(s.title, s.year ?? "");
+      if (!t) {
+        results.push({ id: s.id, kind: "series", ok: false, error: "no match" });
+        continue;
+      }
+      let imagePath: string | null = s.imagePath;
+      if (t.posterPath) {
+        imagePath = await downloadPosterToImagesDir(t.posterPath, s.title);
+      }
+      await prisma.tvSeries.update({
+        where: { id: s.id },
+        data: {
+          title: t.title,
+          year: t.year,
+          summary: t.summary,
+          imdbRating: t.imdbRating,
+          imdbScore: t.imdbScore,
+          numberOfVotes: t.numberOfVotes,
+          duration: t.duration,
+          genre: t.genre,
+          actors: t.actors,
+          directors: t.directors,
+          tmdbTvId: t.tmdbTvId,
+          imagePath: imagePath ?? s.imagePath,
+          enrichmentState: t.enrichmentState,
+          tmdbSearchJson: t.searchJson,
+          tmdbDetailsJson: t.detailsJson,
+          tmdbCreditsJson: t.creditsJson,
+        },
+      });
+      results.push({ id: s.id, kind: "series", ok: true });
+    } catch (e: unknown) {
+      results.push({ id: s.id, kind: "series", ok: false, error: (e as Error).message });
+    }
+  }
+
+  const movieBatch = await prisma.movie.findMany({
+    where: {
+      mediaKind: "movie",
+      OR: [{ enrichmentState: "none" }, { enrichmentState: "partial" }],
+    },
+    take: take - seriesBatch.length,
+  });
+  for (const m of movieBatch) {
     try {
       const t = await enrichWithTmdb(m.name, m.year ?? "");
       if (!t) {
-        results.push({ id: m.id, ok: false, error: "no match" });
+        results.push({ id: m.id, kind: "movie", ok: false, error: "no match" });
         continue;
       }
       let imagePath: string | null = m.imagePath;
@@ -311,11 +861,14 @@ app.post("/api/enrich-bulk", async (req, res) => {
           tmdbId: t.tmdbId,
           imagePath: imagePath ?? m.imagePath,
           enrichmentState: t.enrichmentState,
+          tmdbSearchJson: t.searchJson,
+          tmdbDetailsJson: t.detailsJson,
+          tmdbCreditsJson: t.creditsJson,
         },
       });
-      results.push({ id: m.id, ok: true });
+      results.push({ id: m.id, kind: "movie", ok: true });
     } catch (e: unknown) {
-      results.push({ id: m.id, ok: false, error: (e as Error).message });
+      results.push({ id: m.id, kind: "movie", ok: false, error: (e as Error).message });
     }
   }
   res.json({ processed: results.length, results });
@@ -356,6 +909,7 @@ app.post("/api/import/legacy-json", async (req, res) => {
         year,
         filePath: path,
         folderPath,
+        mediaKind: "movie",
         imdbScore: (raw.IMDBscore ?? raw.imdbScore) as string | undefined,
         imdbRating: (raw.IMDBrating ?? raw.imdbRating) as string | undefined,
         summary: (raw.summery ?? raw.summary) as string | undefined,
@@ -369,8 +923,19 @@ app.post("/api/import/legacy-json", async (req, res) => {
         show: raw.show !== false,
         isFavorite: Boolean(raw.favoriteMovie),
         enrichmentState: raw.isUpdated2 ? "full" : raw.isUpdatedFromNet ? "partial" : "none",
+        dubbed: isDubbedFromPath(path),
       },
-      update: { name, year, folderPath },
+      update: {
+        name,
+        year,
+        folderPath,
+        mediaKind: "movie",
+        seriesId: null,
+        seasonNumber: null,
+        episodeNumber: null,
+        episodeTitle: null,
+        dubbed: isDubbedFromPath(path),
+      },
     });
     n++;
   }
@@ -418,6 +983,29 @@ app.get("/api/stream/:id", async (req, res) => {
     await pipeline(createReadStream(filePath), res);
   } catch {
     res.status(500).end();
+  }
+});
+
+// serve series poster (local path)
+app.get("/api/poster/series/:seriesId", async (req, res) => {
+  const s = await prisma.tvSeries.findUnique({ where: { id: req.params.seriesId } });
+  if (!s?.imagePath) {
+    res.status(404).end();
+    return;
+  }
+  const filePath = s.imagePath;
+  try {
+    const st = await statAsync(filePath);
+    if (!st.isFile()) {
+      res.status(404).end();
+      return;
+    }
+    const mime = (lookup(extname(filePath)) as string) || "image/jpeg";
+    res.setHeader("Content-Type", mime);
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    await pipeline(createReadStream(filePath), res);
+  } catch {
+    res.status(404).end();
   }
 });
 

@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { createWriteStream } from "fs";
 import { join } from "path";
 import { pipeline } from "stream/promises";
@@ -6,6 +7,29 @@ import { TMDB_API_KEY, TMDB_IMAGE_BASE, IMAGES_DIR } from "./config.js";
 import { mkdir } from "fs/promises";
 
 const BASE = "https://api.themoviedb.org/3";
+
+/** Bundled sub-resources merged into the details JSON by TMDb (`append_to_response`). */
+function appendToResponseQuery(parts: readonly string[]): string {
+  return parts.map((p) => encodeURIComponent(p)).join(",");
+}
+
+const MOVIE_APPEND_PARTS = [
+  "alternative_titles",
+  "credits",
+  "external_ids",
+  "images",
+  "keywords",
+  "recommendations",
+  "similar",
+  "videos",
+] as const;
+
+const TV_APPEND_PARTS = MOVIE_APPEND_PARTS;
+
+/** Clone API payloads for Prisma Json columns (lossless vs references). */
+export function tmdbResponseToJson(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
 
 async function fetchJson(url: string): Promise<unknown> {
   const res = await fetch(url, {
@@ -46,11 +70,11 @@ function directorsFromCredits(c: Record<string, unknown>): string | null {
   return names.length ? names.join(", ") : null;
 }
 
-function castNames(c: Record<string, unknown>, n: number): string | null {
+function castNames(c: Record<string, unknown>): string | null {
   const cast = c.cast;
   if (!Array.isArray(cast)) return null;
   const names: string[] = [];
-  for (const item of cast.slice(0, n)) {
+  for (const item of cast) {
     const p = item as { name?: string };
     if (p.name) names.push(p.name);
   }
@@ -71,6 +95,9 @@ export interface TmdbEnrichment {
   directors: string;
   posterPath: string | null;
   enrichmentState: "full";
+  searchJson: Prisma.InputJsonValue;
+  detailsJson: Prisma.InputJsonValue;
+  creditsJson: Prisma.InputJsonValue;
 }
 
 export async function enrichWithTmdb(
@@ -91,11 +118,9 @@ export async function enrichWithTmdb(
   if (id < 0) return null;
 
   const details = (await fetchJson(
-    `${BASE}/movie/${id}?api_key=${key}`
+    `${BASE}/movie/${id}?api_key=${key}&append_to_response=${appendToResponseQuery(MOVIE_APPEND_PARTS)}`
   )) as Record<string, unknown>;
-  const credits = (await fetchJson(
-    `${BASE}/movie/${id}/credits?api_key=${key}`
-  )) as Record<string, unknown>;
+  const credits = (await fetchJson(`${BASE}/movie/${id}/credits?api_key=${key}`)) as Record<string, unknown>;
 
   const rel = (details.release_date as string) || "";
   const y = rel.length >= 4 ? rel.slice(0, 4) : year;
@@ -121,10 +146,98 @@ export async function enrichWithTmdb(
     numberOfVotes: votes,
     duration: runtime,
     genre: joinGenres(details) || "",
-    actors: castNames(credits, 5) || "",
+    actors: castNames(credits) || "",
     directors: directorsFromCredits(credits) || "",
     posterPath: poster ? `${TMDB_IMAGE_BASE}${poster}` : null,
     enrichmentState: "full",
+    searchJson: tmdbResponseToJson(search),
+    detailsJson: tmdbResponseToJson(details),
+    creditsJson: tmdbResponseToJson(credits),
+  };
+}
+
+export interface TmdbTvEnrichment {
+  tmdbTvId: number;
+  title: string;
+  year: string;
+  summary: string;
+  imdbRating: string;
+  imdbScore: string;
+  numberOfVotes: string;
+  duration: string;
+  genre: string;
+  actors: string;
+  directors: string;
+  posterPath: string | null;
+  enrichmentState: "full";
+  searchJson: Prisma.InputJsonValue;
+  detailsJson: Prisma.InputJsonValue;
+  creditsJson: Prisma.InputJsonValue;
+}
+
+function creatorsFromTv(details: Record<string, unknown>): string | null {
+  const cb = details.created_by;
+  if (!Array.isArray(cb)) return null;
+  const names = cb.map((x) => (x as { name?: string }).name).filter(Boolean) as string[];
+  return names.length ? names.join(", ") : null;
+}
+
+export async function enrichTvSeriesWithTmdb(
+  title: string,
+  year: string
+): Promise<TmdbTvEnrichment | null> {
+  if (!TMDB_API_KEY) {
+    throw new Error("Set TMDB_API_KEY in the server environment or .env");
+  }
+  const key = encodeURIComponent(TMDB_API_KEY);
+  const q = encodeURIComponent(title);
+  let searchUrl = `${BASE}/search/tv?api_key=${key}&query=${q}`;
+  if (year && /^\d{4}$/.test(year)) {
+    searchUrl += `&first_air_date_year=${year}`;
+  }
+  const search = (await fetchJson(searchUrl)) as Record<string, unknown>;
+  const id = firstIdInResults(search);
+  if (id < 0) return null;
+
+  const details = (await fetchJson(
+    `${BASE}/tv/${id}?api_key=${key}&append_to_response=${appendToResponseQuery(TV_APPEND_PARTS)}`
+  )) as Record<string, unknown>;
+  const credits = (await fetchJson(`${BASE}/tv/${id}/credits?api_key=${key}`)) as Record<string, unknown>;
+
+  const fa = (details.first_air_date as string) || "";
+  const y = fa.length >= 4 ? fa.slice(0, 4) : year;
+  const va = details.vote_average;
+  const voteAvg = typeof va === "number" ? String(va) : "0";
+  const vc = details.vote_count;
+  const votes = typeof vc === "number" ? String(vc) : "";
+  const er = details.episode_run_time;
+  let runtime = "";
+  if (Array.isArray(er) && er.length && typeof er[0] === "number") {
+    runtime = `~${er[0]} min/ep`;
+  }
+  const overview = (details.overview as string) || "";
+  const tvTitle = (details.name as string) || title;
+  const poster = details.poster_path as string | null;
+  const creators = creatorsFromTv(details);
+  const directors = creators || directorsFromCredits(credits) || "";
+
+  return {
+    tmdbTvId: id,
+    title: tvTitle,
+    year: y,
+    summary: overview,
+    imdbRating: voteAvg,
+    imdbScore: voteAvg,
+    numberOfVotes: votes,
+    duration: runtime,
+    genre: joinGenres(details) || "",
+    actors: castNames(credits) || "",
+    directors,
+    posterPath: poster ? `${TMDB_IMAGE_BASE}${poster}` : null,
+    enrichmentState: "full",
+    searchJson: tmdbResponseToJson(search),
+    detailsJson: tmdbResponseToJson(details),
+    creditsJson: tmdbResponseToJson(credits),
   };
 }
 

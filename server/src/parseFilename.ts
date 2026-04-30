@@ -74,6 +74,24 @@ const VIDEO_EXTS = new Set([
   ".m4v",
 ]);
 
+/** Path/filename hints for a dubbed release (also checks parent folders). */
+const DUBBED_HINTS: RegExp[] = [
+  /\bdubbed\b/i,
+  /\bdual[\s._-]*audio\b/i,
+  /\bmulti[\s._-]*audio\b/i,
+  /\b2[\s._-]*audio\b/i,
+  /\b(hindi|telugu|tamil|malayalam|kannada|bengali|marathi|gujarati|urdu|chinese|mandarin|cantonese|spanish|french|german|italian|portuguese|russian|korean|japanese|vietnamese|thai|polish|turkish|arabic)[\s._-]*dub(?:bed)?\b/i,
+  /\b(?:eng|english)[\s._-]*dub(?:bed)?\b/i,
+  /[\s._-]dub[\s._-]/i,
+  /\bdub\.(?:mp4|mkv|avi|webm)\b/i,
+];
+
+export function isDubbedFromPath(filePath: string): boolean {
+  if (!filePath) return false;
+  const norm = filePath.replace(/[/\\]+/g, "/").toLowerCase();
+  return DUBBED_HINTS.some((re) => re.test(norm));
+}
+
 export function isVideoFile(name: string): boolean {
   const lower = name.toLowerCase();
   for (const ext of VIDEO_EXTS) {
@@ -98,4 +116,103 @@ export function findDisplayNameFromFileName(fileName: string): string | null {
     }
   }
   return temp.trim() || nameOnly;
+}
+
+export type ParsedVideoMovie = { kind: "movie"; displayName: string; year: string; dubbed: boolean };
+export type ParsedVideoEpisode = {
+  kind: "episode";
+  seriesTitle: string;
+  year: string;
+  season: number;
+  episode: number;
+  episodeTitle: string | null;
+  displayNameForRow: string;
+  dubbed: boolean;
+};
+export type ParsedVideoFile = ParsedVideoMovie | ParsedVideoEpisode;
+
+function normalizeDotsUnderscores(s: string): string {
+  return s
+    .replace(/[._*]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function stripTrailingYear(title: string, year: string): string {
+  if (!year || !/^\d{4}$/.test(year)) return title;
+  const re = new RegExp(`[\\s.(\\[]${year}[\\s.)\\]]*$`, "i");
+  return title.replace(re, "").trim();
+}
+
+/** Stable key for TvSeries upsert: normalized title only (year omitted).
+ * Different folders/releases often infer different years per file; including year split one show into several rows. */
+export function normalizeSeriesKey(seriesTitle: string, _year: string): string {
+  const t = normalizeDotsUnderscores(seriesTitle)
+    .toLowerCase()
+    .replace(/[^\w\s\-'.]/g, "")
+    .slice(0, 240);
+  return t;
+}
+
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+/** Try common TV release patterns (episode detection runs before movie title parsing). */
+const EPISODE_PATTERNS: RegExp[] = [
+  /\b[Ss](\d{1,2})[Ee](\d{1,4})\b/,
+  /\.[Ss](\d{1,2})[Ee](\d{1,4})\./,
+  /\b(\d{1,2})[xX](\d{1,4})\b/,
+  /[Ss]eason\s*0*(\d{1,2})\s*[\s._-]*[Ee]p(?:isode)?\s*0*(\d{1,4})\b/i,
+];
+
+export function parseVideoFile(filePath: string): ParsedVideoFile | null {
+  if (!isVideoFile(filePath)) return null;
+  const nameOnly = filePath.replace(/.*[/\\]/, "");
+  const base = nameOnly.replace(/\.[^.]+$/i, "");
+  const dubbed = isDubbedFromPath(filePath);
+
+  for (const re of EPISODE_PATTERNS) {
+    const m = base.match(re);
+    if (!m) continue;
+    const season = parseInt(m[1], 10);
+    const episode = parseInt(m[2], 10);
+    if (season < 0 || season > 99 || episode < 0 || episode > 9999) continue;
+
+    const idx = m.index ?? 0;
+    let before = base.slice(0, idx).trim();
+    let after = base.slice(idx + m[0].length).trim();
+    after = after.replace(/^[\s.\-_–—]+/, "").trim();
+
+    let episodeTitle: string | null = null;
+    if (after.length > 1) {
+      const cleaned = normalizeDotsUnderscores(after);
+      episodeTitle = cleaned || null;
+    }
+
+    let seriesRaw = before.replace(/[\s.\-_]+$/g, "").trim().replace(/^[\s.\-_]+/, "").trim();
+    let seriesTitle = normalizeDotsUnderscores(seriesRaw);
+    if (!seriesTitle) seriesTitle = "Unknown Series";
+
+    let year = getYearFromName(nameOnly) || getYearFromName(seriesTitle);
+    seriesTitle = stripTrailingYear(seriesTitle, year).trim();
+
+    const displayNameForRow = `${seriesTitle} S${pad2(season)}E${pad2(episode)}${episodeTitle ? ` — ${episodeTitle}` : ""}`;
+
+    return {
+      kind: "episode",
+      seriesTitle,
+      year,
+      season,
+      episode,
+      episodeTitle,
+      displayNameForRow,
+      dubbed,
+    };
+  }
+
+  const displayName = findDisplayNameFromFileName(filePath);
+  if (!displayName) return null;
+  const year = getYearFromName(nameOnly);
+  return { kind: "movie", displayName, year, dubbed };
 }

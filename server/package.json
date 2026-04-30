@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "db:generate": "prisma generate",
-    "db:push": "node scripts/db-push.mjs"
+    "db:push": "node scripts/db-push.mjs",
+    "test": "tsx --test src/parseFilename.test.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.3.0",

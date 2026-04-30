@@ -1,13 +1,12 @@
 import type { Dirent } from "fs";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
-import { findDisplayNameFromFileName, getYearFromName, isVideoFile } from "./parseFilename.js";
+import { isVideoFile, parseVideoFile, type ParsedVideoFile } from "./parseFilename.js";
 
 export interface ScannedFile {
   filePath: string;
   folderPath: string;
-  name: string;
-  year: string;
+  parsed: ParsedVideoFile;
 }
 
 export async function collectVideoFiles(
@@ -25,15 +24,13 @@ export async function collectVideoFiles(
     if (e.isDirectory()) {
       await collectVideoFiles(full, acc);
     } else if (e.isFile() && isVideoFile(e.name)) {
-      const name = findDisplayNameFromFileName(e.name);
-      if (!name) continue;
-      const year = getYearFromName(e.name) || "";
+      const parsed = parseVideoFile(full);
+      if (!parsed) continue;
       const folderPath = join(rootDir);
       acc.push({
         filePath: full,
         folderPath,
-        name,
-        year,
+        parsed,
       });
     }
   }
