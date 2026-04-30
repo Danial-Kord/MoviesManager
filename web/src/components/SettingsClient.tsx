@@ -163,7 +163,7 @@ export function SettingsClient() {
           <InfoTile title="Categories">
             <p>
               On a <strong className="font-semibold text-imdb-text">movie</strong> detail page you can assign <strong className="font-semibold text-imdb-text">categories</strong>{" "}
-              (tags). Use these together with the <strong className="font-semibold text-imdb-text">Genre</strong> filter on Home (TMDb genre text appears after enrichment).
+              (tags). The <strong className="font-semibold text-imdb-text">Genre</strong> filter on Home is a dropdown built from genres already stored on your titles (usually after TMDb enrichment).
             </p>
           </InfoTile>
           <InfoTile title="Home filters &amp; enrichment">

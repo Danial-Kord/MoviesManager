@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   enrichBulk,
   fetchLibraryBrowse,
+  fetchLibraryGenres,
   patchMovie,
   patchSeries,
   type BrowseItem,
@@ -42,6 +43,7 @@ export function HomeClient() {
   const [filter, setFilter] = useState<"all" | "favorites" | "scored" | "hidden" | "visible">("visible");
   const [browseKind, setBrowseKind] = useState<"all" | "movies" | "series">("all");
   const [genre, setGenre] = useState("");
+  const [genreOptions, setGenreOptions] = useState<string[]>([]);
   const [folder, setFolder] = useState("");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
@@ -64,6 +66,26 @@ export function HomeClient() {
       cancelled = true;
     };
   }, []);
+
+  const refreshGenres = useCallback(async () => {
+    try {
+      const { genres } = await fetchLibraryGenres();
+      setGenreOptions(genres);
+    } catch {
+      /* offline or API error — keep prior options */
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshGenres();
+  }, [refreshGenres]);
+
+  const genreChoices = useMemo(() => {
+    if (genre && !genreOptions.includes(genre)) {
+      return [...genreOptions, genre].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+    }
+    return genreOptions;
+  }, [genre, genreOptions]);
 
   const load = useCallback(
     async (pageOverride?: number) => {
@@ -112,6 +134,7 @@ export function HomeClient() {
       const r = await scanLibrary();
       if (!r.ok) throw new Error(await r.text());
       setPage(1);
+      await refreshGenres();
       await load(1);
     } catch (e) {
       setErr((e as Error).message);
@@ -125,6 +148,7 @@ export function HomeClient() {
     try {
       const r = await enrichBulk(40);
       if (!r.ok) throw new Error(await r.text());
+      await refreshGenres();
       await load();
     } catch (e) {
       setErr((e as Error).message);
@@ -320,11 +344,21 @@ export function HomeClient() {
             </div>
             <div>
               <label className="mb-1 block text-[12px] font-medium text-imdb-muted">{t("genreLabel")}</label>
-              <input
-                className="w-32 rounded-imdb border border-imdb-border bg-imdb-elevated px-3 py-2 text-[14px] text-imdb-text outline-none focus:border-imdb-focus focus:ring-2 focus:ring-imdb-focus/25"
+              <select
+                className="block min-w-[11rem] max-w-[16rem] rounded-imdb border border-imdb-border bg-imdb-elevated px-3 py-2 text-[14px] text-imdb-text outline-none focus:border-imdb-focus focus:ring-2 focus:ring-imdb-focus/25"
                 value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-              />
+                onChange={(e) => {
+                  setGenre(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">{t("genreAll")}</option>
+                {genreChoices.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block text-[12px] font-medium text-imdb-muted">{t("folderLabel")}</label>

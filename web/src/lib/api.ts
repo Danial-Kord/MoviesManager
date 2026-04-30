@@ -66,6 +66,12 @@ export async function fetchLibraryBrowse(params: URLSearchParams) {
   }>;
 }
 
+export async function fetchLibraryGenres() {
+  const r = await fetch(`${BASE}/api/library/genres`, { cache: "no-store" });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json() as Promise<{ genres: string[] }>;
+}
+
 export type DuplicateGroupKind = "title_year" | "tmdb_id" | "episode_slot";
 
 export type DuplicateLibraryItem = {

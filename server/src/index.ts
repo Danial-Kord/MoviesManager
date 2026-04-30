@@ -298,6 +298,36 @@ app.get("/api/movies", async (req, res) => {
   });
 });
 
+/** Distinct genre names from stored TMDb strings (comma-separated), for Home filter dropdown. */
+app.get("/api/library/genres", async (_req, res) => {
+  try {
+    const [movieRows, seriesRows] = await Promise.all([
+      prisma.movie.findMany({
+        where: { genre: { not: null } },
+        select: { genre: true },
+      }),
+      prisma.tvSeries.findMany({
+        where: { genre: { not: null } },
+        select: { genre: true },
+      }),
+    ]);
+    const names = new Set<string>();
+    const ingest = (g: string | null | undefined) => {
+      if (!g) return;
+      for (const part of g.split(",")) {
+        const trimmed = part.trim();
+        if (trimmed) names.add(trimmed);
+      }
+    };
+    for (const r of movieRows) ingest(r.genre);
+    for (const r of seriesRows) ingest(r.genre);
+    const genres = [...names].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+    res.json({ genres });
+  } catch (e: unknown) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
 app.get("/api/library/browse", async (req, res) => {
   const q = (req.query as Record<string, string | undefined>) || {};
   const page = Math.max(1, parseInt(q.page ?? "1", 10) || 1);
