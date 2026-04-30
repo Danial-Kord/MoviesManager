@@ -14,6 +14,16 @@ test.afterEach(() => {
   resetUserDubbedRulesForTests();
 });
 
+test("parseVideoFile: BRRip 720p without year — title stops before release tags", () => {
+  const r = parseVideoFile("D:/films/Mulan.I.BRRip.720p-GLORY.mkv");
+  assert.ok(r);
+  assert.equal(r.kind, "movie");
+  if (r.kind === "movie") {
+    assert.equal(r.displayName.trim(), "Mulan I");
+    assert.equal(r.year, "");
+  }
+});
+
 test("parseVideoFile: movie without episode token", () => {
   const r = parseVideoFile("D:/films/Some.Movie.2020.1080p.mkv");
   assert.ok(r);

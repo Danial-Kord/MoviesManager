@@ -3,66 +3,73 @@
  */
 import type { PrismaClient } from "@prisma/client";
 
-const STRING_CONDITIONS: string[] = [
+/** Tokens that mark end of human title (release / tech). Longest matched first via sort. */
+const TITLE_CUT_TOKENS: string[] = [
+  "1080p",
+  "720p",
+  "480p",
+  "2160p",
+  "576p",
+  "540p",
+  "web-dl",
+  "mpeg2",
+  "brrip",
+  "bdrip",
+  "dvdrip",
+  "webrip",
+  "webdl",
+  "bluray",
+  "hdcam",
+  "hdrip",
+  "hdtv",
+  "x265",
+  "x264",
+  "hevc",
+  "h265",
+  "h264",
+  "avc",
+  "ddp5.1",
+  "dd5.1",
+  ".mpeg2",
+  ".mkv",
+  ".mp4",
+  ".mpeg",
+  ".avi",
+  ".mpg",
+  ".webm",
+  ".m4v",
+  "1080",
+  "720",
   "256",
   "264",
   "255",
   "480",
-  "20",
-  "19",
-  "21",
-  "22",
-  "1080",
-  "720",
-  ".mkv",
-  ".mp4",
-  ".mpeg",
-  ".mpeg2",
-  "bluray",
-  "hdrip",
-  "hdcam",
-  "hdtv",
   "4k",
   "web",
-  ".avi",
 ];
+
+TITLE_CUT_TOKENS.sort((a, b) => b.length - a.length);
 
 function findCutIndex(name: string): number {
   let f = name.length;
+  const lower = name.toLowerCase();
   for (let i = 2; i < name.length; i++) {
-    let flag = false;
-    if (i > 0) {
-      const temp = name.toLowerCase();
-      for (const cond of STRING_CONDITIONS) {
-        if (temp.substring(2, i).endsWith(cond)) {
-          f = i - cond.length;
-          flag = true;
-          break;
-        }
+    const sliceFrom2 = lower.substring(2, i);
+    for (const cond of TITLE_CUT_TOKENS) {
+      if (sliceFrom2.endsWith(cond)) {
+        f = i - cond.length;
+        return f;
       }
     }
-    if (flag) break;
   }
   return f;
 }
 
+/** First plausible release year (19xx / 20xx) not embedded in longer digit runs (e.g. not from 720p). */
 export function getYearFromName(fileName: string): string {
-  if (
-    !fileName.includes("20") &&
-    !fileName.includes("19") &&
-    !fileName.includes("21") &&
-    !fileName.includes("22")
-  ) {
-    return "";
-  }
-  const temp = fileName;
-  for (let i = 2; i < fileName.length && i + 2 < fileName.length; i++) {
-    const q = fileName[i - 1] + fileName[i];
-    if (q === "20" || q === "19" || q === "21" || q === "22") {
-      return q + fileName[i + 1] + fileName[i + 2];
-    }
-  }
-  return "";
+  const re = /(?<![0-9])(19\d{2}|20\d{2})(?![0-9])/;
+  const m = re.exec(fileName);
+  return m ? m[1] : "";
 }
 
 const VIDEO_EXTS = new Set([
