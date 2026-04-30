@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SeriesSeasonsTabs } from "@/components/SeriesSeasonsTabs";
 import { SeriesDetailPoster } from "@/components/SeriesDetailPoster";
+import { CreditAvatarStrip } from "@/components/CreditAvatarStrip";
 import { formatScore } from "@/lib/formatScore";
+import type { CreditPerson } from "@/lib/api";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { getMessages, interpolate } from "@/lib/i18n/messages";
 
@@ -25,6 +27,10 @@ type TvSeriesDetail = {
   imdbRating: string | null;
   genre: string | null;
   imagePath: string | null;
+  directors?: string | null;
+  actors?: string | null;
+  creditsCast?: CreditPerson[];
+  creditsDirectors?: CreditPerson[];
   episodes: EpisodeRow[];
 };
 
@@ -72,6 +78,9 @@ export default async function SeriesPage({ params }: { params: Promise<{ id: str
       ? interpolate(t.diskEpisodeLineSingular, { seasons: seasons.length, episodes: s.episodes.length })
       : interpolate(t.diskEpisodesLine, { seasons: seasons.length, episodes: s.episodes.length });
 
+  const hasCreditTiles =
+    (s.creditsDirectors?.length ?? 0) > 0 || (s.creditsCast?.length ?? 0) > 0;
+
   const tabs = seasons.map((season) => ({
     id: season === null ? "unknown" : String(season),
     title: season === null ? t.seasonUnknown : season === 0 ? t.specials : `${t.seasonPrefix}${season}`,
@@ -108,6 +117,27 @@ export default async function SeriesPage({ params }: { params: Promise<{ id: str
               <p className="mt-6 text-[16px] leading-relaxed text-imdb-text" dir={locale === "fa" ? "rtl" : "ltr"}>
                 {s.summary}
               </p>
+            )}
+            {hasCreditTiles ? (
+              <>
+                <CreditAvatarStrip title={t.directorsStrip} people={s.creditsDirectors ?? []} />
+                <CreditAvatarStrip title={t.castStrip} people={s.creditsCast ?? []} showCharacter />
+              </>
+            ) : (
+              <>
+                {s.directors && (
+                  <p className="mt-5 text-[14px] leading-relaxed text-imdb-text">
+                    <span className="text-imdb-muted">{t.directors} </span>
+                    {s.directors}
+                  </p>
+                )}
+                {s.actors && (
+                  <p className="mt-2 text-[14px] leading-relaxed text-imdb-text">
+                    <span className="text-imdb-muted">{t.cast} </span>
+                    {s.actors}
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>

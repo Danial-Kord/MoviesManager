@@ -79,6 +79,8 @@ export const messagesEn = {
   dubbedNo: "No",
   directors: "Directors:",
   cast: "Cast:",
+  directorsStrip: "Directors",
+  castStrip: "Cast",
 
   hideBlacklist: "Hide (blacklist)",
   unhide: "Unhide",
@@ -108,12 +110,17 @@ export const messagesEn = {
 
   needsRenameTitle: "Needs rename",
   needsRenameIntro:
-    "These titles had no TMDb match during enrichment. Rename files or folders on disk, rescan, then run Enrich again. Use Resolved after you have fixed the naming so they count in duplicate detection again.",
+    "These titles had no TMDb match during enrichment. Rename the video file below (same folder on disk), rescan if needed, then run Enrich again. Use Resolved after you have fixed the naming so they count in duplicate detection again.",
   needsRenameSeries: "TV series",
   needsRenameMovies: "Movies",
   needsRenameResolved: "Resolved",
   needsRenameEmpty: "Nothing here yet — run enrichment, or every title matched.",
   needsRenameEpisodesHint: "{n} episodes · sample paths:",
+
+  renameFileLabel: "New filename",
+  renameFileApply: "Rename on disk",
+  renameFileHint:
+    "Only the file name changes (same folder). Parsed title/episode info updates from the new name; TMDb metadata is cleared so you can enrich again.",
 } as const;
 
 export const messagesFa = {
@@ -191,6 +198,8 @@ export const messagesFa = {
   dubbedNo: "خیر",
   directors: "کارگردان:",
   cast: "بازیگران:",
+  directorsStrip: "کارگردان",
+  castStrip: "بازیگران",
 
   hideBlacklist: "مخفی (لیست سیاه)",
   unhide: "نمایش",
@@ -220,12 +229,17 @@ export const messagesFa = {
 
   needsRenameTitle: "نیاز به تغییر نام",
   needsRenameIntro:
-    "این عناوین در غنی‌سازی TMDb نتیجه‌ای نداشتند. پوشه یا نام فایل را روی دیسک اصلاح کنید، دوباره اسکن و سپس غنی‌سازی را اجرا کنید. پس از اصلاح، «حل شد» را بزنید تا دوباره در تکراری‌ها لحاظ شوند.",
+    "این عناوین در غنی‌سازی TMDb نتیجه‌ای نداشتند. نام فایل را در همین صفحه (همان پوشه روی دیسک) عوض کنید؛ در صورت نیاز دوباره اسکن کنید و غنی‌سازی را اجرا کنید. پس از اصلاح، «حل شد» را بزنید تا در تکراری‌ها لحاظ شوند.",
   needsRenameSeries: "سریال تلویزیونی",
   needsRenameMovies: "فیلم‌ها",
   needsRenameResolved: "حل شد",
   needsRenameEmpty: "موردی نیست — هنوز غنی‌سازی نشده یا همه مطابقت داشتند.",
   needsRenameEpisodesHint: "{n} قسمت · نمونه مسیرها:",
+
+  renameFileLabel: "نام جدید فایل",
+  renameFileApply: "تغییر نام روی دیسک",
+  renameFileHint:
+    "فقط نام فایل عوض می‌شود (همان پوشه). عنوان/قسمت از نام جدید استخراج می‌شود؛ دادهٔ TMDb پاک می‌شود تا دوباره غنی‌سازی کنید.",
 } as const;
 
 export type MessageKey = keyof typeof messagesEn;

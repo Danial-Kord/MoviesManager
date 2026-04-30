@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MovieDetailActions } from "@/components/MovieDetailActions";
 import { MovieImage } from "@/components/MovieImage";
+import { RenameMovieFileForm, videoBasenameFromPath } from "@/components/RenameMovieFileForm";
+import { CreditAvatarStrip } from "@/components/CreditAvatarStrip";
 import { PlayLocalButton } from "@/components/PlayLocalButton";
+import type { CreditPerson } from "@/lib/api";
 import { formatScore } from "@/lib/formatScore";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { getMessages } from "@/lib/i18n/messages";
@@ -27,6 +30,8 @@ type Movie = {
   episodeTitle: string | null;
   series: { id: string; title: string } | null;
   dubbed: boolean;
+  creditsCast?: CreditPerson[];
+  creditsDirectors?: CreditPerson[];
 };
 
 async function getMovie(id: string, locale: string): Promise<Movie | null> {
@@ -51,6 +56,9 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
     m.seasonNumber != null && m.episodeNumber != null
       ? `S${String(m.seasonNumber).padStart(2, "0")}E${String(m.episodeNumber).padStart(2, "0")}`
       : null;
+
+  const hasCreditTiles =
+    (m.creditsDirectors?.length ?? 0) > 0 || (m.creditsCast?.length ?? 0) > 0;
 
   return (
     <div className="min-h-[70vh] bg-imdb-canvas px-4 py-8 font-imdb md:px-8">
@@ -98,6 +106,11 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
             <p className="mt-2 break-all text-[12px] text-imdb-subtle">
               {t.fileLabel} {m.filePath}
             </p>
+            <RenameMovieFileForm
+              movieId={m.id}
+              initialFileName={videoBasenameFromPath(m.filePath)}
+              refreshAfterRename
+            />
             <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px]">
               <span className="text-imdb-muted">{t.dubbedLabel}</span>
               {m.dubbed ? (
@@ -108,17 +121,26 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
                 <span className="text-imdb-muted">{t.dubbedNo}</span>
               )}
             </div>
-            {m.directors && (
-              <p className="mt-5 text-[14px] leading-relaxed text-imdb-text">
-                <span className="text-imdb-muted">{t.directors} </span>
-                {m.directors}
-              </p>
-            )}
-            {m.actors && (
-              <p className="mt-2 text-[14px] leading-relaxed text-imdb-text">
-                <span className="text-imdb-muted">{t.cast} </span>
-                {m.actors}
-              </p>
+            {hasCreditTiles ? (
+              <>
+                <CreditAvatarStrip title={t.directorsStrip} people={m.creditsDirectors ?? []} />
+                <CreditAvatarStrip title={t.castStrip} people={m.creditsCast ?? []} showCharacter />
+              </>
+            ) : (
+              <>
+                {m.directors && (
+                  <p className="mt-5 text-[14px] leading-relaxed text-imdb-text">
+                    <span className="text-imdb-muted">{t.directors} </span>
+                    {m.directors}
+                  </p>
+                )}
+                {m.actors && (
+                  <p className="mt-2 text-[14px] leading-relaxed text-imdb-text">
+                    <span className="text-imdb-muted">{t.cast} </span>
+                    {m.actors}
+                  </p>
+                )}
+              </>
             )}
             {m.summary && (
               <p className="mt-6 text-[16px] leading-relaxed text-imdb-text" dir={locale === "fa" ? "rtl" : "ltr"}>

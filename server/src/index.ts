@@ -14,11 +14,82 @@ import { collectVideoFiles, pathExists } from "./scan.js";
 import { enrichTvSeriesWithTmdb, enrichWithTmdb, fetchPosterForStorage } from "./tmdb.js";
 import { findLibraryDuplicates } from "./duplicates.js";
 import { omitTmdbFetchSnapshots, stripMovieRowForApi } from "./omitTmdbPayload.js";
+import { renameMovieVideoOnDisk } from "./renameMovieFile.js";
+import { syncTitleCreditsFromTmdb, toCreditPersonDto } from "./creditsSync.js";
 import { openFileWithDefaultApp } from "./openLocal.js";
 import { isDubbedFromPath } from "./parseFilename.js";
 import { parseLocaleFromRequest, resolveSummaryForLocale } from "./summaryLocale.js";
 
 const statAsync = promisify(statCb);
+
+function jsonRecord(v: unknown): Record<string, unknown> {
+  return JSON.parse(JSON.stringify(v ?? {})) as Record<string, unknown>;
+}
+
+async function syncCreditsSafe(opts: {
+  movieId?: string;
+  tvSeriesId?: string;
+  credits: Record<string, unknown>;
+  tvDetails?: Record<string, unknown> | null;
+}) {
+  try {
+    await syncTitleCreditsFromTmdb(prisma, opts);
+  } catch (e) {
+    console.warn("[credits sync]", (e as Error).message);
+  }
+}
+
+async function creditsPayloadForMovie(movieId: string): Promise<{
+  cast: ReturnType<typeof toCreditPersonDto>[];
+  directors: ReturnType<typeof toCreditPersonDto>[];
+}> {
+  const [castRows, directorRows] = await Promise.all([
+    prisma.titleCredit.findMany({
+      where: { movieId, creditKind: "cast" },
+      orderBy: { sortOrder: "asc" },
+      include: {
+        person: { select: { tmdbPersonId: true, name: true, profileImagePath: true, profileBytes: true } },
+      },
+    }),
+    prisma.titleCredit.findMany({
+      where: { movieId, creditKind: "director" },
+      orderBy: { sortOrder: "asc" },
+      include: {
+        person: { select: { tmdbPersonId: true, name: true, profileImagePath: true, profileBytes: true } },
+      },
+    }),
+  ]);
+  return {
+    cast: castRows.map((r) => toCreditPersonDto(r.person, r.character)),
+    directors: directorRows.map((r) => toCreditPersonDto(r.person, null)),
+  };
+}
+
+async function creditsPayloadForSeries(tvSeriesId: string): Promise<{
+  cast: ReturnType<typeof toCreditPersonDto>[];
+  directors: ReturnType<typeof toCreditPersonDto>[];
+}> {
+  const [castRows, directorRows] = await Promise.all([
+    prisma.titleCredit.findMany({
+      where: { tvSeriesId, creditKind: "cast" },
+      orderBy: { sortOrder: "asc" },
+      include: {
+        person: { select: { tmdbPersonId: true, name: true, profileImagePath: true, profileBytes: true } },
+      },
+    }),
+    prisma.titleCredit.findMany({
+      where: { tvSeriesId, creditKind: "director" },
+      orderBy: { sortOrder: "asc" },
+      include: {
+        person: { select: { tmdbPersonId: true, name: true, profileImagePath: true, profileBytes: true } },
+      },
+    }),
+  ]);
+  return {
+    cast: castRows.map((r) => toCreditPersonDto(r.person, r.character)),
+    directors: directorRows.map((r) => toCreditPersonDto(r.person, null)),
+  };
+}
 
 const RESET_DATABASE_CONFIRM = "RESET_LIBRARY_DATABASE";
 
@@ -616,6 +687,11 @@ app.get("/api/series/:id", async (req, res) => {
   }
   const slimEpisodes = s.episodes.map((ep) => omitTmdbFetchSnapshots(ep as unknown as Record<string, unknown>));
   const slimSeries = omitTmdbFetchSnapshots(s as unknown as Record<string, unknown>);
+  const extras = await creditsPayloadForSeries(s.id);
+  const creditBlocks =
+    extras.cast.length > 0 || extras.directors.length > 0
+      ? { creditsCast: extras.cast, creditsDirectors: extras.directors }
+      : {};
   const locale = parseLocaleFromRequest(req);
   let summary = slimSeries.summary as string | null;
   if (locale === "fa") {
@@ -626,7 +702,7 @@ app.get("/api/series/:id", async (req, res) => {
       tmdbKind: "tv",
     });
   }
-  res.json({ ...slimSeries, summary, episodes: slimEpisodes });
+  res.json({ ...slimSeries, ...creditBlocks, summary, episodes: slimEpisodes });
 });
 
 app.patch("/api/series/:id", async (req, res) => {
@@ -700,6 +776,11 @@ app.post("/api/series/:id/enrich", async (req, res) => {
         needsRename: false,
       },
     });
+    await syncCreditsSafe({
+      tvSeriesId: updated.id,
+      credits: jsonRecord(t.creditsJson),
+      tvDetails: jsonRecord(t.detailsJson),
+    });
     res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });
@@ -730,9 +811,15 @@ app.get("/api/movies/:id", async (req, res) => {
     res.status(404).json({ error: "not found" });
     return;
   }
+  const extras = await creditsPayloadForMovie(m.id);
+  const creditBlocks =
+    extras.cast.length > 0 || extras.directors.length > 0
+      ? { creditsCast: extras.cast, creditsDirectors: extras.directors }
+      : {};
   const locale = parseLocaleFromRequest(req);
+  const base = stripMovieRowForApi(m as unknown as Record<string, unknown>);
   if (locale !== "fa") {
-    res.json(stripMovieRowForApi(m as unknown as Record<string, unknown>));
+    res.json({ ...base, ...creditBlocks });
     return;
   }
   const summary = await resolveSummaryForLocale({
@@ -741,7 +828,7 @@ app.get("/api/movies/:id", async (req, res) => {
     tmdbId: m.tmdbId,
     tmdbKind: "movie",
   });
-  res.json({ ...stripMovieRowForApi(m as unknown as Record<string, unknown>), summary });
+  res.json({ ...base, ...creditBlocks, summary });
 });
 
 app.patch("/api/movies/:id", async (req, res) => {
@@ -775,6 +862,30 @@ app.patch("/api/movies/:id", async (req, res) => {
   });
   res.json(omitTmdbFetchSnapshots(m as unknown as Record<string, unknown>));
 });
+
+/** Rename video file on disk (same folder only); refreshes parsed metadata like scan. */
+app.post("/api/movies/:id/rename-file", async (req, res) => {
+  const { fileName } = req.body as { fileName?: string };
+  if (!fileName || typeof fileName !== "string") {
+    res.status(400).json({ error: "Send JSON { \"fileName\": \"New.Title.mkv\" } (basename only)." });
+    return;
+  }
+  try {
+    await renameMovieVideoOnDisk(prisma, req.params.id, fileName);
+    const m = await prisma.movie.findUnique({
+      where: { id: req.params.id },
+      include: { categories: { include: { category: true } }, series: true },
+    });
+    if (!m) {
+      res.status(404).json({ error: "not found" });
+      return;
+    }
+    res.json(stripMovieRowForApi(m as unknown as Record<string, unknown>));
+  } catch (e: unknown) {
+    res.status(400).json({ error: (e as Error).message });
+  }
+});
+
 app.post("/api/movies/:id/play-local", async (req, res) => {
   const m = await prisma.movie.findUnique({ where: { id: req.params.id } });
   if (!m) {
@@ -857,6 +968,11 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
           needsRename: false,
         },
       });
+      await syncCreditsSafe({
+        tvSeriesId: updated.id,
+        credits: jsonRecord(t.creditsJson),
+        tvDetails: jsonRecord(t.detailsJson),
+      });
       res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
     } catch (e: unknown) {
       res.status(500).json({ error: (e as Error).message });
@@ -902,6 +1018,10 @@ app.post("/api/movies/:id/enrich", async (req, res) => {
         tmdbCreditsJson: t.creditsJson,
         needsRename: false,
       },
+    });
+    await syncCreditsSafe({
+      movieId: updated.id,
+      credits: jsonRecord(t.creditsJson),
     });
     res.json(omitTmdbFetchSnapshots(updated as unknown as Record<string, unknown>));
   } catch (e: unknown) {
@@ -969,6 +1089,11 @@ app.post("/api/enrich-bulk", async (req, res) => {
           needsRename: false,
         },
       });
+      await syncCreditsSafe({
+        tvSeriesId: s.id,
+        credits: jsonRecord(t.creditsJson),
+        tvDetails: jsonRecord(t.detailsJson),
+      });
       results.push({ id: s.id, kind: "series", ok: true });
     } catch (e: unknown) {
       results.push({ id: s.id, kind: "series", ok: false, error: (e as Error).message });
@@ -1023,6 +1148,10 @@ app.post("/api/enrich-bulk", async (req, res) => {
           tmdbCreditsJson: t.creditsJson,
           needsRename: false,
         },
+      });
+      await syncCreditsSafe({
+        movieId: m.id,
+        credits: jsonRecord(t.creditsJson),
       });
       results.push({ id: m.id, kind: "movie", ok: true });
     } catch (e: unknown) {
@@ -1167,6 +1296,47 @@ function posterMimeFromBytes(buf: Buffer): string {
   }
   return "image/jpeg";
 }
+
+app.get("/api/person-photo/:tmdbPersonId", async (req, res) => {
+  const id = parseInt(req.params.tmdbPersonId, 10);
+  if (!Number.isFinite(id)) {
+    res.status(400).end();
+    return;
+  }
+  const p = await prisma.person.findUnique({
+    where: { tmdbPersonId: id },
+    select: { profileImagePath: true, profileBytes: true },
+  });
+  if (!p) {
+    res.status(404).end();
+    return;
+  }
+  if (p.profileBytes != null && p.profileBytes.byteLength > 0) {
+    const buf = Buffer.from(p.profileBytes);
+    res.setHeader("Content-Type", posterMimeFromBytes(buf));
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.send(buf);
+    return;
+  }
+  if (!p.profileImagePath) {
+    res.status(404).end();
+    return;
+  }
+  const filePath = p.profileImagePath;
+  try {
+    const st = await statAsync(filePath);
+    if (!st.isFile()) {
+      res.status(404).end();
+      return;
+    }
+    const mime = (lookup(extname(filePath)) as string) || "image/jpeg";
+    res.setHeader("Content-Type", mime);
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    await pipeline(createReadStream(filePath), res);
+  } catch {
+    res.status(404).end();
+  }
+});
 
 // serve series poster — DB bytes first, then disk
 app.get("/api/poster/series/:seriesId", async (req, res) => {

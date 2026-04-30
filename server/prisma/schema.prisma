@@ -21,6 +21,38 @@ model Category {
   @@unique([name])
 }
 
+/// TMDb person; profile image cached for cast/director UI.
+model Person {
+  id               String @id @default(cuid())
+  tmdbPersonId     Int    @unique
+  name             String
+  profileImagePath String?
+  profileBytes     Bytes?
+
+  credits TitleCredit[]
+
+  @@index([name])
+}
+
+/// Cast or director credit on a movie or TV series (from TMDb enrichment).
+model TitleCredit {
+  id         String @id @default(cuid())
+  movieId    String?
+  tvSeriesId String?
+  personId   String
+  /// cast | director
+  creditKind String
+  sortOrder  Int    @default(0)
+  character  String?
+
+  movie    Movie?    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  tvSeries TvSeries? @relation(fields: [tvSeriesId], references: [id], onDelete: Cascade)
+  person   Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([movieId, creditKind, sortOrder])
+  @@index([tvSeriesId, creditKind, sortOrder])
+}
+
 model MovieCategory {
   movieId    String
   categoryId String
@@ -66,6 +98,8 @@ model TvSeries {
   updatedAt DateTime @updatedAt
 
   episodes Movie[]
+
+  titleCredits TitleCredit[]
 
   @@index([title])
 }
@@ -121,6 +155,8 @@ model Movie {
   updatedAt DateTime @updatedAt
 
   categories MovieCategory[]
+
+  titleCredits TitleCredit[]
 
   @@index([name])
   @@index([year])

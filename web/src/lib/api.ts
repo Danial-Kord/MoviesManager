@@ -175,6 +175,36 @@ export function posterUrlForSeriesId(id: string) {
   return `${BASE}/api/poster/series/${id}`;
 }
 
+export type CreditPerson = {
+  tmdbPersonId: number;
+  name: string;
+  character: string | null;
+  photoAvailable: boolean;
+};
+
+export function personPhotoUrl(tmdbPersonId: number): string {
+  return `${BASE}/api/person-photo/${tmdbPersonId}`;
+}
+
+export async function renameMovieFile(movieId: string, fileName: string): Promise<Record<string, unknown>> {
+  const r = await fetch(`${BASE}/api/movies/${movieId}/rename-file`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fileName }),
+  });
+  if (!r.ok) {
+    let msg = await r.text();
+    try {
+      const j = JSON.parse(msg) as { error?: string };
+      if (j.error) msg = j.error;
+    } catch {
+      /* raw */
+    }
+    throw new Error(msg || r.statusText);
+  }
+  return r.json() as Promise<Record<string, unknown>>;
+}
+
 /** PATCH movie fields (favorite, visibility, needsRename, …). */
 export async function patchMovie(id: string, body: { isFavorite?: boolean; show?: boolean; needsRename?: boolean }) {
   const r = await fetch(`${BASE}/api/movies/${id}`, {

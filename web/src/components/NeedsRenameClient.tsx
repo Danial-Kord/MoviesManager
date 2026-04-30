@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { IconRename } from "@/components/icons";
+import { RenameMovieFileForm, videoBasenameFromPath } from "@/components/RenameMovieFileForm";
 import {
   fetchLibraryNeedsRename,
   patchMovie,
@@ -130,6 +131,12 @@ export function NeedsRenameClient() {
                         <Link href={"/movie/" + ep.id} className="mt-1 inline-block text-[11px] font-semibold text-imdb-gold hover:underline">
                           {t("duplicatesOpen")}
                         </Link>
+                        <RenameMovieFileForm
+                          compact
+                          movieId={ep.id}
+                          initialFileName={videoBasenameFromPath(ep.filePath)}
+                          onRenamed={() => void load()}
+                        />
                       </li>
                     ))}
                   </ul>
@@ -158,6 +165,12 @@ export function NeedsRenameClient() {
                   <p className="mt-1 truncate text-[11px] text-imdb-dim" title={m.folderPath}>
                     {m.folderPath}
                   </p>
+                  <RenameMovieFileForm
+                    compact
+                    movieId={m.id}
+                    initialFileName={videoBasenameFromPath(m.filePath)}
+                    onRenamed={() => void load()}
+                  />
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
