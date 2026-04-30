@@ -5,11 +5,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import { renameMovieFile } from "@/lib/api";
 import { useLocale } from "@/lib/i18n/context";
 
-export function videoBasenameFromPath(filePath: string): string {
-  const i = Math.max(filePath.lastIndexOf("/"), filePath.lastIndexOf("\\"));
-  return i >= 0 ? filePath.slice(i + 1) : filePath;
-}
-
 export function RenameMovieFileForm({
   movieId,
   initialFileName,

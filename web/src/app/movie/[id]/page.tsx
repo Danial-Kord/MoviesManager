@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MovieDetailActions } from "@/components/MovieDetailActions";
 import { MovieImage } from "@/components/MovieImage";
-import { RenameMovieFileForm, videoBasenameFromPath } from "@/components/RenameMovieFileForm";
+import { RenameMovieFileForm } from "@/components/RenameMovieFileForm";
+import { videoBasenameFromPath } from "@/lib/videoBasenameFromPath";
 import { CreditAvatarStrip } from "@/components/CreditAvatarStrip";
 import { PlayLocalButton } from "@/components/PlayLocalButton";
 import type { CreditPerson } from "@/lib/api";
@@ -121,6 +122,11 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
                 <span className="text-imdb-muted">{t.dubbedNo}</span>
               )}
             </div>
+            {m.summary && (
+              <p className="mt-6 text-[16px] leading-relaxed text-imdb-text" dir={locale === "fa" ? "rtl" : "ltr"}>
+                {m.summary}
+              </p>
+            )}
             {hasCreditTiles ? (
               <>
                 <CreditAvatarStrip title={t.directorsStrip} people={m.creditsDirectors ?? []} />
@@ -141,11 +147,6 @@ export default async function MoviePage({ params }: { params: Promise<{ id: stri
                   </p>
                 )}
               </>
-            )}
-            {m.summary && (
-              <p className="mt-6 text-[16px] leading-relaxed text-imdb-text" dir={locale === "fa" ? "rtl" : "ltr"}>
-                {m.summary}
-              </p>
             )}
             <div className="mt-8 flex flex-wrap gap-3">
               <PlayLocalButton movieId={m.id}>{t.heroPlay}</PlayLocalButton>

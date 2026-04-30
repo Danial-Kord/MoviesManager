@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { IconRename } from "@/components/icons";
-import { RenameMovieFileForm, videoBasenameFromPath } from "@/components/RenameMovieFileForm";
+import { RenameMovieFileForm } from "@/components/RenameMovieFileForm";
+import { videoBasenameFromPath } from "@/lib/videoBasenameFromPath";
 import {
   fetchLibraryNeedsRename,
   patchMovie,
